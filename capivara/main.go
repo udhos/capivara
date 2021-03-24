@@ -9,82 +9,13 @@ import (
 	"unicode"
 )
 
-type pieceColor uint8
-
-const (
-	colorWhite pieceColor = iota
-	colorBlack
-)
-
-type piece uint8
 type location uint8
-
-const (
-	pieceNone piece = iota
-	whiteKing
-	whiteQueen
-	whiteRook
-	whiteBishop
-	whiteKnight
-	whitePawn
-)
-
-const (
-	blackKing piece = iota + whiteKing + 8
-	blackQueen
-	blackRook
-	blackBishop
-	blackKnight
-	blackPawn
-)
-
 type colorFlag uint32
 
 const (
 	lostCastlingLeft colorFlag = 1 << iota
 	lostCastlingRight
 )
-
-// pieceColor: 0=white 1=black
-func (p piece) color() pieceColor {
-	return pieceColor(p >> 3)
-}
-
-func (p piece) kind() piece {
-	return piece(p & 7)
-}
-
-func (p piece) kindLetter() string {
-	switch p.kind() {
-	case whiteKing:
-		return "K"
-	case whiteQueen:
-		return "Q"
-	case whiteRook:
-		return "R"
-	case whiteBishop:
-		return "B"
-	case whiteKnight:
-		return "N"
-	case whitePawn:
-		return "p"
-	}
-	return "?"
-}
-
-func (p piece) show() {
-	if p == pieceNone {
-		fmt.Print("  ")
-		return
-	}
-	color := p.color()
-	if color == colorWhite {
-		fmt.Print("*")
-	} else {
-		fmt.Print(".")
-	}
-	fmt.Print(p.kindLetter())
-}
 
 type board struct {
 	king   [2]int // king location
@@ -180,9 +111,6 @@ func (g *gameState) load(filename string) {
 }
 
 func main() {
-	fmt.Println("whitePawn:", whitePawn, " color:", whitePawn.color())
-	fmt.Println("blackPawn:", blackPawn, " color:", blackPawn.color())
-
 	game_loop()
 }
 
@@ -222,6 +150,6 @@ LOOP:
 			continue
 		}
 
-		fmt.Println("bad command: %s", cmd)
+		fmt.Printf("bad command: %s\n", cmd)
 	}
 }
