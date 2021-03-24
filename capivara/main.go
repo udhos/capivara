@@ -144,10 +144,10 @@ func (g *gameState) load(filename string) {
 }
 
 func main() {
-	game_loop()
+	gameLoop()
 }
 
-func game_loop() {
+func gameLoop() {
 
 	game := gameState{}
 
