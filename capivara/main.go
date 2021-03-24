@@ -177,7 +177,7 @@ LOOP:
 
 		for _, cmd := range tableCmd {
 			if strings.HasPrefix(cmd.name, cmdPrefix) {
-				cmd.call(&game, tokens)
+				cmd.call(tableCmd, &game, tokens)
 				continue LOOP
 			}
 		}
@@ -186,15 +186,32 @@ LOOP:
 	}
 }
 
-var tableCmd = []struct {
+type command struct {
 	name string
-	call func(game *gameState, tokens []string)
-}{
-	{"load", cmdLoad},
-	{"move", cmdMove},
+	call func(cmds []command, game *gameState, tokens []string)
 }
 
-func cmdLoad(game *gameState, tokens []string) {
+var tableCmd = []command{
+	{"clear", cmdClear},
+	{"help", cmdHelp},
+	{"load", cmdLoad},
+	{"move", cmdMove},
+	{"switch", cmdSwitch},
+}
+
+func cmdClear(cmds []command, game *gameState, tokens []string) {
+	*game = gameState{}
+}
+
+func cmdHelp(cmds []command, game *gameState, tokens []string) {
+	fmt.Print("available commands:")
+	for _, cmd := range cmds {
+		fmt.Printf(" %s", cmd.name)
+	}
+	fmt.Println()
+}
+
+func cmdLoad(cmds []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("usage: load filename\n")
 		return
@@ -202,7 +219,7 @@ func cmdLoad(game *gameState, tokens []string) {
 	game.load(tokens[1])
 }
 
-func cmdMove(game *gameState, tokens []string) {
+func cmdMove(cmds []command, game *gameState, tokens []string) {
 	if len(tokens) < 3 {
 		fmt.Printf("usage: move from to\n")
 		return
@@ -237,4 +254,8 @@ func cmdMove(game *gameState, tokens []string) {
 	p := game.root.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
 
 	game.root.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
+}
+
+func cmdSwitch(cmds []command, game *gameState, tokens []string) {
+	game.root.turn = 1 - game.root.turn
 }
