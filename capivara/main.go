@@ -44,14 +44,44 @@ func (g gameState) show() {
 	fmt.Println()
 }
 
-func (g *gameState) load(filename string) {
-	fmt.Printf("loading: %s\n", filename)
+const builtinBoard = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |.R|.N|.B|.Q|.K|.B|.N|.R|  8
+   -------------------------
+7  |.p|.p|.p|.p|.p|.p|.p|.p|  7
+   -------------------------
+6  |  |  |  |  |  |  |  |  |  6
+   -------------------------
+5  |  |  |  |  |  |  |  |  |  5
+   -------------------------
+4  |  |  |  |  |  |  |  |  |  4
+   -------------------------
+3  |  |  |  |  |  |  |  |  |  3
+   -------------------------
+2  |*p|*p|*p|*p|*p|*p|*p|*p|  2
+   -------------------------
+1  |*R|*N|*B|*Q|*K|*B|*N|*R|  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+func (g *gameState) loadFromString(s string) {
+	g.loadFromReader(strings.NewReader(s))
+}
+
+func (g *gameState) loadFromFile(filename string) {
+	fmt.Printf("loadFromFile: %s\n", filename)
 	input, errOpen := os.Open(filename)
 	if errOpen != nil {
-		fmt.Printf("load: %s: %v\n", filename, errOpen)
+		fmt.Printf("loadFromFile: %s: %v\n", filename, errOpen)
 		return
 	}
 	defer input.Close()
+	g.loadFromReader(input)
+}
+
+func (g *gameState) loadFromReader(input io.Reader) {
 
 	reader := bufio.NewReader(input)
 
@@ -116,7 +146,7 @@ func gameLoop() {
 
 	game := newGame()
 
-	game.load("board.txt")
+	game.loadFromString(builtinBoard)
 
 LOOP:
 	for {
@@ -183,7 +213,7 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("usage: load filename\n")
 		return
 	}
-	game.load(tokens[1])
+	game.loadFromFile(tokens[1])
 }
 
 func cmdMove(cmds []command, game *gameState, tokens []string) {
