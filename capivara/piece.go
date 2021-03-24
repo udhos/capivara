@@ -6,6 +6,13 @@ import (
 
 type pieceColor uint8
 
+func (p pieceColor) name() string {
+	if p == colorWhite {
+		return "white"
+	}
+	return "black"
+}
+
 const (
 	colorWhite pieceColor = iota
 	colorBlack
@@ -57,6 +64,32 @@ func (p piece) kindLetter() string {
 		return "p"
 	}
 	return "?"
+}
+
+func (p piece) materialValue() int {
+	switch p {
+	case whiteQueen:
+		return 900
+	case whiteRook:
+		return 500
+	case whiteBishop:
+		return 300
+	case whiteKnight:
+		return 300
+	case whitePawn:
+		return 100
+	case blackQueen:
+		return -900
+	case blackRook:
+		return -500
+	case blackBishop:
+		return -300
+	case blackKnight:
+		return -300
+	case blackPawn:
+		return -100
+	}
+	return 0
 }
 
 func (p piece) show() {

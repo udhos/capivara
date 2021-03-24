@@ -18,15 +18,30 @@ const (
 )
 
 type board struct {
-	king   [2]int // king location
-	square [64]piece
-	flags  [2]colorFlag
+	king          [2]location // king location
+	square        [64]piece
+	flags         [2]colorFlag
+	turn          pieceColor
+	materialValue [2]int
 }
 
 func (b *board) addPiece(i, j location, p piece) {
 	loc := i*8 + j
 	//fmt.Printf("addPiece: %dx%d=%d color=%d kind=%s\n", i, j, loc, p.color(), p.kindLetter())
 	b.square[loc] = p
+
+	// record king position
+	if p.kind() == whiteKing {
+		b.king[p.color()] = loc
+	}
+
+	b.materialValue[p.color()] += p.materialValue()
+}
+
+func (b board) getMaterialValue() float32 {
+	wh := float32(b.materialValue[0])
+	bl := float32(b.materialValue[1])
+	return (wh + bl) / 100
 }
 
 type gameState struct {
@@ -48,6 +63,10 @@ func (g gameState) show() {
 		fmt.Println("   -------------------------")
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
+	fmt.Printf("turn: %s\n", g.root.turn.name())
+	fmt.Printf("material: %v\n", g.root.getMaterialValue())
+	fmt.Printf("white king: %dx%d material=%d\n", g.root.king[0]/8, g.root.king[0]%8, g.root.materialValue[0])
+	fmt.Printf("black king: %dx%d material=%d\n", g.root.king[1]/8, g.root.king[1]%8, g.root.materialValue[1])
 }
 
 func (g *gameState) load(filename string) {
