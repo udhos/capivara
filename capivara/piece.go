@@ -7,7 +7,8 @@ import (
 type pieceColor uint8
 
 func (p pieceColor) name() string {
-	if p == colorWhite {
+	switch p {
+	case colorWhite:
 		return "white"
 	}
 	return "black"
