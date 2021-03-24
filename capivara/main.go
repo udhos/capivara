@@ -26,6 +26,9 @@ type board struct {
 }
 
 func (b *board) addPiece(i, j location, p piece) {
+
+	b.delPiece(i, j)
+
 	loc := i*8 + j
 	//fmt.Printf("addPiece: %dx%d=%d color=%d kind=%s\n", i, j, loc, p.color(), p.kindLetter())
 	b.square[loc] = p
@@ -35,7 +38,18 @@ func (b *board) addPiece(i, j location, p piece) {
 		b.king[p.color()] = loc
 	}
 
-	b.materialValue[p.color()] += p.materialValue()
+	b.materialValue[p.color()] += p.materialValue() // piece material value enters board
+}
+
+func (b *board) delPiece(i, j location) piece {
+	loc := i*8 + j
+	p := b.square[loc]
+
+	b.materialValue[p.color()] -= p.materialValue() // piece material value leaves board
+
+	b.square[loc] = pieceNone
+
+	return p
 }
 
 func (b board) getMaterialValue() float32 {
@@ -159,16 +173,68 @@ LOOP:
 		if len(tokens) < 1 {
 			continue
 		}
-		cmd := tokens[0]
-		if strings.HasPrefix("load", cmd) {
-			if len(tokens) < 2 {
-				fmt.Printf("usage: load filename\n")
-				continue
+		cmdPrefix := tokens[0]
+
+		for _, cmd := range tableCmd {
+			if strings.HasPrefix(cmd.name, cmdPrefix) {
+				cmd.call(&game, tokens)
+				continue LOOP
 			}
-			game.load(tokens[1])
-			continue
 		}
 
-		fmt.Printf("bad command: %s\n", cmd)
+		fmt.Printf("bad command: %s\n", cmdPrefix)
 	}
+}
+
+var tableCmd = []struct {
+	name string
+	call func(game *gameState, tokens []string)
+}{
+	{"load", cmdLoad},
+	{"move", cmdMove},
+}
+
+func cmdLoad(game *gameState, tokens []string) {
+	if len(tokens) < 2 {
+		fmt.Printf("usage: load filename\n")
+		return
+	}
+	game.load(tokens[1])
+}
+
+func cmdMove(game *gameState, tokens []string) {
+	if len(tokens) < 3 {
+		fmt.Printf("usage: move from to\n")
+		return
+	}
+	from := strings.ToLower(tokens[1])
+	to := strings.ToLower(tokens[2])
+
+	// from
+	if len(from) != 2 {
+		fmt.Printf("bad source format: [%s]", from)
+		return
+	}
+	if from[0] < 'a' || from[0] > 'h' {
+		fmt.Printf("bad source column letter: [%s]", from)
+	}
+	if from[1] < '1' || from[1] > '8' {
+		fmt.Printf("bad source row digit: [%s]", from)
+	}
+
+	// to
+	if len(to) != 2 {
+		fmt.Printf("bad target format: [%s]", to)
+		return
+	}
+	if to[0] < 'a' || to[0] > 'h' {
+		fmt.Printf("bad target column letter: [%s]", to)
+	}
+	if to[1] < '1' || to[1] > '8' {
+		fmt.Printf("bad target row digit: [%s]", to)
+	}
+
+	p := game.root.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
+
+	game.root.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
 }
