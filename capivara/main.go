@@ -9,67 +9,23 @@ import (
 	"unicode"
 )
 
-type location uint8
-type colorFlag uint32
-
-const (
-	lostCastlingLeft colorFlag = 1 << iota
-	lostCastlingRight
-)
-
-type board struct {
-	king          [2]location // king location
-	square        [64]piece
-	flags         [2]colorFlag
-	turn          pieceColor
-	materialValue [2]int
-}
-
-func (b *board) addPiece(i, j location, p piece) {
-
-	b.delPiece(i, j)
-
-	loc := i*8 + j
-	//fmt.Printf("addPiece: %dx%d=%d color=%d kind=%s\n", i, j, loc, p.color(), p.kindLetter())
-	b.square[loc] = p
-
-	// record king position
-	if p.kind() == whiteKing {
-		b.king[p.color()] = loc
-	}
-
-	b.materialValue[p.color()] += p.materialValue() // piece material value enters board
-}
-
-func (b *board) delPiece(i, j location) piece {
-	loc := i*8 + j
-	p := b.square[loc]
-
-	b.materialValue[p.color()] -= p.materialValue() // piece material value leaves board
-
-	b.square[loc] = pieceNone
-
-	return p
-}
-
-func (b board) getMaterialValue() float32 {
-	wh := float32(b.materialValue[0])
-	bl := float32(b.materialValue[1])
-	return (wh + bl) / 100
-}
-
 type gameState struct {
-	root board
+	history []board
+}
+
+func newGame() gameState {
+	return gameState{history: []board{{}}}
 }
 
 func (g gameState) show() {
+	b := g.history[len(g.history)-1]
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Println("   -------------------------")
 	for row := 7; row >= 0; row-- {
 		fmt.Printf("%d  |", row+1)
 		for col := 0; col < 8; col++ {
 			loc := row*8 + col
-			piece := g.root.square[loc]
+			piece := b.square[loc]
 			piece.show()
 			fmt.Print("|")
 		}
@@ -77,10 +33,15 @@ func (g gameState) show() {
 		fmt.Println("   -------------------------")
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
-	fmt.Printf("turn: %s\n", g.root.turn.name())
-	fmt.Printf("material: %v\n", g.root.getMaterialValue())
-	fmt.Printf("white king: %dx%d material=%d\n", g.root.king[0]/8, g.root.king[0]%8, g.root.materialValue[0])
-	fmt.Printf("black king: %dx%d material=%d\n", g.root.king[1]/8, g.root.king[1]%8, g.root.materialValue[1])
+	fmt.Printf("turn: %s\n", b.turn.name())
+	fmt.Printf("material: %v\n", b.getMaterialValue())
+	fmt.Printf("white king: %dx%d material=%d\n", b.king[0]/8, b.king[0]%8, b.materialValue[0])
+	fmt.Printf("black king: %dx%d material=%d\n", b.king[1]/8, b.king[1]%8, b.materialValue[1])
+	fmt.Printf("history %d moves: ", len(g.history))
+	for _, m := range g.history {
+		fmt.Printf("(%s)", m.lastMove)
+	}
+	fmt.Println()
 }
 
 func (g *gameState) load(filename string) {
@@ -95,6 +56,8 @@ func (g *gameState) load(filename string) {
 	reader := bufio.NewReader(input)
 
 	var lineCount int
+
+	b := g.history[len(g.history)-1]
 
 	for {
 		lineCount++
@@ -127,19 +90,21 @@ func (g *gameState) load(filename string) {
 			case c == '.':
 				color = colorBlack
 			case c == 'p':
-				g.root.addPiece(location(row), location(col), piece(color<<3)+whitePawn)
+				b.addPiece(location(row), location(col), piece(color<<3)+whitePawn)
 			case c == 'R':
-				g.root.addPiece(location(row), location(col), piece(color<<3)+whiteRook)
+				b.addPiece(location(row), location(col), piece(color<<3)+whiteRook)
 			case c == 'N':
-				g.root.addPiece(location(row), location(col), piece(color<<3)+whiteKnight)
+				b.addPiece(location(row), location(col), piece(color<<3)+whiteKnight)
 			case c == 'B':
-				g.root.addPiece(location(row), location(col), piece(color<<3)+whiteBishop)
+				b.addPiece(location(row), location(col), piece(color<<3)+whiteBishop)
 			case c == 'Q':
-				g.root.addPiece(location(row), location(col), piece(color<<3)+whiteQueen)
+				b.addPiece(location(row), location(col), piece(color<<3)+whiteQueen)
 			case c == 'K':
-				g.root.addPiece(location(row), location(col), piece(color<<3)+whiteKing)
+				b.addPiece(location(row), location(col), piece(color<<3)+whiteKing)
 			}
 		}
+
+		g.history[len(g.history)-1] = b
 	}
 }
 
@@ -149,7 +114,7 @@ func main() {
 
 func gameLoop() {
 
-	game := gameState{}
+	game := newGame()
 
 	game.load("board.txt")
 
@@ -196,11 +161,13 @@ var tableCmd = []command{
 	{"help", cmdHelp},
 	{"load", cmdLoad},
 	{"move", cmdMove},
+	{"play", cmdPlay},
 	{"switch", cmdSwitch},
+	{"undo", cmdUndo},
 }
 
 func cmdClear(cmds []command, game *gameState, tokens []string) {
-	*game = gameState{}
+	*game = newGame()
 }
 
 func cmdHelp(cmds []command, game *gameState, tokens []string) {
@@ -251,11 +218,62 @@ func cmdMove(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("bad target row digit: [%s]", to)
 	}
 
-	p := game.root.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
+	b := game.history[len(game.history)-1]
+	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
+	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
+	game.history[len(game.history)-1] = b
+}
 
-	game.root.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
+func cmdPlay(cmds []command, game *gameState, tokens []string) {
+	if len(tokens) < 3 {
+		fmt.Printf("usage: play from to\n")
+		return
+	}
+	from := strings.ToLower(tokens[1])
+	to := strings.ToLower(tokens[2])
+
+	// from
+	if len(from) != 2 {
+		fmt.Printf("bad source format: [%s]", from)
+		return
+	}
+	if from[0] < 'a' || from[0] > 'h' {
+		fmt.Printf("bad source column letter: [%s]", from)
+	}
+	if from[1] < '1' || from[1] > '8' {
+		fmt.Printf("bad source row digit: [%s]", from)
+	}
+
+	// to
+	if len(to) != 2 {
+		fmt.Printf("bad target format: [%s]", to)
+		return
+	}
+	if to[0] < 'a' || to[0] > 'h' {
+		fmt.Printf("bad target column letter: [%s]", to)
+	}
+	if to[1] < '1' || to[1] > '8' {
+		fmt.Printf("bad target row digit: [%s]", to)
+	}
+
+	b := game.history[len(game.history)-1]
+	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
+	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
+	b.turn = 1 - b.turn                                           // switch color
+	b.lastMove = fmt.Sprintf("%s %s", from, to)                   // record move
+
+	game.history = append(game.history, b) // append to history
 }
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
-	game.root.turn = 1 - game.root.turn
+	b := game.history[len(game.history)-1]
+	b.turn = 1 - b.turn // switch color
+	game.history[len(game.history)-1] = b
+}
+
+func cmdUndo(cmds []command, game *gameState, tokens []string) {
+	if len(game.history) < 2 {
+		return
+	}
+	game.history = game.history[:len(game.history)-1]
 }
