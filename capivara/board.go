@@ -86,12 +86,15 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			dstP := b.square[dstLoc]
 			if dstP == pieceNone {
 				// position is free
-				child := b
-				pp := child.delPieceLoc(loc)                                           // take piece from board
-				child.addPieceLoc(dstLoc, pp)                                          // put piece on board
-				child.turn = colorInverse(b.turn)                                      // switch color
-				child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
-				children = append(children, child)                                     // append to children
+				/*
+					child := b
+					pp := child.delPieceLoc(loc)                                           // take piece from board
+					child.addPieceLoc(dstLoc, pp)                                          // put piece on board
+					child.turn = colorInverse(b.turn)                                      // switch color
+					child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
+					children = append(children, child)                                     // append to children
+				*/
+				children = b.recordMoveIfValid(children, loc, dstLoc)
 			}
 		}
 
@@ -105,15 +108,75 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			dstP := b.square[dstRowLoc]
 			if secondP == pieceNone && dstP == pieceNone {
 				// free to move
-				child := b
-				pp := child.delPieceLoc(loc)                                              // take piece from board
-				child.addPieceLoc(dstRowLoc, pp)                                          // put piece on board
-				child.turn = colorInverse(b.turn)                                         // switch color
-				child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstRowLoc)) // record move
-				children = append(children, child)                                        // append to children
+				/*
+					child := b
+					pp := child.delPieceLoc(loc)                                              // take piece from board
+					child.addPieceLoc(dstRowLoc, pp)                                          // put piece on board
+					child.turn = colorInverse(b.turn)                                         // switch color
+					child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstRowLoc)) // record move
+					children = append(children, child)                                        // append to children
+				*/
+				children = b.recordMoveIfValid(children, loc, dstRowLoc)
+			}
+		}
+
+		// capture left?
+		if j > 0 {
+			dstRow := i + location(signal)
+			dstLoc := dstRow*8 + j - 1
+			dstP := b.square[dstLoc]
+			if dstP != pieceNone && dstP.color() != color {
+				// free to capture
+				/*
+					child := b
+					pp := child.delPieceLoc(loc)                                           // take piece from board
+					child.addPieceLoc(dstLoc, pp)                                          // put piece on board
+					child.turn = colorInverse(b.turn)                                      // switch color
+					child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
+					children = append(children, child)                                     // append to children
+				*/
+				children = b.recordMoveIfValid(children, loc, dstLoc)
+			}
+		}
+
+		// capture right?
+		if j < 7 {
+			dstRow := i + location(signal)
+			dstLoc := dstRow*8 + j + 1
+			dstP := b.square[dstLoc]
+			if dstP != pieceNone && dstP.color() != color {
+				// free to capture
+				/*
+					child := b
+					pp := child.delPieceLoc(loc)                                           // take piece from board
+					child.addPieceLoc(dstLoc, pp)                                          // put piece on board
+					child.turn = colorInverse(b.turn)                                      // switch color
+					child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
+					children = append(children, child)                                     // append to children
+				*/
+				children = b.recordMoveIfValid(children, loc, dstLoc)
 			}
 		}
 	}
 
 	return children
+}
+
+func (b board) recordMoveIfValid(children []board, src, dst location) []board {
+	child := b                                                          // copy board
+	p := child.delPieceLoc(src)                                         // take piece from board
+	child.addPieceLoc(dst, p)                                           // put piece on board
+	child.turn = colorInverse(b.turn)                                   // switch color
+	child.lastMove = fmt.Sprintf("%s %s", locToStr(src), locToStr(dst)) // record move
+
+	if child.invalid() {
+		return children
+	}
+
+	children = append(children, child) // append to children
+	return children
+}
+
+func (b board) invalid() bool {
+	return false
 }
