@@ -256,57 +256,8 @@ func cmdMove(cmds []command, game *gameState, tokens []string) {
 func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	last := len(game.history) - 1
 	b := game.history[last]
-	rootNegamax(b, 2)
-}
-
-func rootNegamax(b board, depth int) float32 {
-	terminalNode := false // checkmate or draw?
-	if depth == 0 || terminalNode {
-		return b.getMaterialValue()
-	}
-	var max float32 = -1000.0
-
-	children := []board{}
-	children = b.generateChildren(children)
-	if len(children) == 0 {
-		fmt.Printf("rootNegamax: %s %s UGH NO CHILDREN CHECK-MATE?\n", b.turn.name(), b.lastMove)
-	}
-	for i, child := range children {
-		score := -negamax(child, depth-1)
-		fmt.Printf("rootNegamax: child: %d: %s %s = score=%v max=%v\n", i, child.turn.name(), child.lastMove, score, max)
-		if score > max {
-			max = score
-			fmt.Printf("rootNegamax: child: %d: %s %s = score=%v max=%v BEST\n", i, child.turn.name(), child.lastMove, score, max)
-		}
-	}
-	return max
-}
-
-func negamax(b board, depth int) float32 {
-	terminalNode := false // checkmate or draw?
-	if depth == 0 || terminalNode {
-		fmt.Printf("negamax: %s %s depth=%d value=%v MATERIAL\n", b.turn.name(), b.lastMove, depth, b.getMaterialValue())
-		return b.getMaterialValue()
-	}
-	var value float32 = -1000.0
-
-	children := []board{}
-	children = b.generateChildren(children)
-	if len(children) == 0 {
-		fmt.Printf("negamax: child: %s %s depth=%d value=%v UGH NO CHILDREN CHECK-MATE?\n", b.turn.name(), b.lastMove, depth, value)
-	}
-	for _, child := range children {
-		value = max(value, -negamax(child, depth-1))
-	}
-	fmt.Printf("negamax: child: %s %s depth=%d value=%v\n", b.turn.name(), b.lastMove, depth, value)
-	return value
-}
-
-func max(a, b float32) float32 {
-	if a > b {
-		return a
-	}
-	return b
+	score, move := rootNegamax(b, 2)
+	fmt.Printf("negamax: best score=%v move: %s\n", score, move)
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {
