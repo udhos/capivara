@@ -344,7 +344,7 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 	b := game.history[len(game.history)-1]                        // will update a copy
 	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
 	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
-	b.turn = 1 - b.turn                                           // switch color
+	b.turn = colorInverse(b.turn)                                 // switch color
 	b.lastMove = fmt.Sprintf("%s %s", from, to)                   // record move
 
 	game.history = append(game.history, b) // append to history
@@ -356,7 +356,7 @@ func cmdReset(cmds []command, game *gameState, tokens []string) {
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
 	b := &game.history[len(game.history)-1] // will update in place
-	b.turn = 1 - b.turn                     // switch color
+	b.turn = colorInverse(b.turn)           // switch color
 }
 
 func cmdUndo(cmds []command, game *gameState, tokens []string) {

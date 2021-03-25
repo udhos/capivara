@@ -84,7 +84,7 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 				child := b
 				pp := child.delPieceLoc(loc)                                           // take piece from board
 				child.addPieceLoc(dstLoc, pp)                                          // put piece on board
-				child.turn = 1 - b.turn                                                // switch color
+				child.turn = colorInverse(b.turn)                                      // switch color
 				child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
 				children = append(children, child)                                     // append to children
 			}
@@ -99,7 +99,7 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 				child := b
 				pp := child.delPieceLoc(loc)                                           // take piece from board
 				child.addPieceLoc(dstLoc, pp)                                          // put piece on board
-				child.turn = 1 - b.turn                                                // switch color
+				child.turn = colorInverse(b.turn)                                      // switch color
 				child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
 				children = append(children, child)                                     // append to children
 			}

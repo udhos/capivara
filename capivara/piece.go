@@ -114,3 +114,15 @@ func coordToStr(row, col location) string {
 func locToStr(loc location) string {
 	return coordToStr(loc/8, loc%8)
 }
+
+// white=0 -> signal=1
+// black=1 -> signal=-1
+func colorToSignal(color pieceColor) int {
+	return 1 - int(color)*2
+}
+
+// white=0 -> black=1
+// black=1 -> white=0
+func colorInverse(color pieceColor) pieceColor {
+	return 1 - color
+}
