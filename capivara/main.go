@@ -18,7 +18,7 @@ func newGame() gameState {
 }
 
 func (g gameState) show() {
-	b := g.history[len(g.history)-1]
+	b := g.history[len(g.history)-1] // read-only copy
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Println("   -------------------------")
 	for row := 7; row >= 0; row-- {
@@ -86,16 +86,15 @@ func (g *gameState) loadFromReader(input io.Reader) {
 	reader := bufio.NewReader(input)
 
 	var lineCount int
-	last := len(g.history) - 1
-
-	b := g.history[last]
+	b := board{} // new board
 
 	for {
 		lineCount++
 		line, errRead := reader.ReadString('\n')
 		switch errRead {
 		case io.EOF:
-			g.history[last] = b
+			fmt.Println("loadFromReader: resetting board")
+			g.history = []board{b} // replace board
 			return
 		case nil:
 		default:
@@ -213,7 +212,6 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("usage: load filename\n")
 		return
 	}
-	*game = newGame()
 	game.loadFromFile(tokens[1])
 }
 
@@ -249,10 +247,9 @@ func cmdMove(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("bad target row digit: [%s]", to)
 	}
 
-	b := game.history[len(game.history)-1]
+	b := &game.history[len(game.history)-1]                       // will update in-place
 	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
 	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
-	game.history[len(game.history)-1] = b
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {
@@ -287,7 +284,7 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("bad target row digit: [%s]", to)
 	}
 
-	b := game.history[len(game.history)-1]
+	b := game.history[len(game.history)-1]                        // will update a copy
 	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
 	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
 	b.turn = 1 - b.turn                                           // switch color
@@ -297,14 +294,12 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdReset(cmds []command, game *gameState, tokens []string) {
-	*game = newGame()
 	game.loadFromString(builtinBoard)
 }
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
-	b := game.history[len(game.history)-1]
-	b.turn = 1 - b.turn // switch color
-	game.history[len(game.history)-1] = b
+	b := &game.history[len(game.history)-1] // will update in place
+	b.turn = 1 - b.turn                     // switch color
 }
 
 func cmdUndo(cmds []command, game *gameState, tokens []string) {
