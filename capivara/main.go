@@ -86,14 +86,16 @@ func (g *gameState) loadFromReader(input io.Reader) {
 	reader := bufio.NewReader(input)
 
 	var lineCount int
+	last := len(g.history) - 1
 
-	b := g.history[len(g.history)-1]
+	b := g.history[last]
 
 	for {
 		lineCount++
 		line, errRead := reader.ReadString('\n')
 		switch errRead {
 		case io.EOF:
+			g.history[last] = b
 			return
 		case nil:
 		default:
@@ -133,8 +135,6 @@ func (g *gameState) loadFromReader(input io.Reader) {
 				b.addPiece(location(row), location(col), piece(color<<3)+whiteKing)
 			}
 		}
-
-		g.history[len(g.history)-1] = b
 	}
 }
 
@@ -145,7 +145,6 @@ func main() {
 func gameLoop() {
 
 	game := newGame()
-
 	game.loadFromString(builtinBoard)
 
 LOOP:
@@ -182,18 +181,20 @@ LOOP:
 }
 
 type command struct {
-	name string
-	call func(cmds []command, game *gameState, tokens []string)
+	name        string
+	call        func(cmds []command, game *gameState, tokens []string)
+	description string
 }
 
 var tableCmd = []command{
-	{"clear", cmdClear},
-	{"help", cmdHelp},
-	{"load", cmdLoad},
-	{"move", cmdMove},
-	{"play", cmdPlay},
-	{"switch", cmdSwitch},
-	{"undo", cmdUndo},
+	{"clear", cmdClear, "erase board"},
+	{"help", cmdHelp, "show help"},
+	{"load", cmdLoad, "load board from file"},
+	{"move", cmdMove, "change piece position"},
+	{"play", cmdPlay, "play move"},
+	{"reset", cmdReset, "reset board to initial position"},
+	{"switch", cmdSwitch, "switch turn"},
+	{"undo", cmdUndo, "undo last played move"},
 }
 
 func cmdClear(cmds []command, game *gameState, tokens []string) {
@@ -203,9 +204,8 @@ func cmdClear(cmds []command, game *gameState, tokens []string) {
 func cmdHelp(cmds []command, game *gameState, tokens []string) {
 	fmt.Print("available commands:")
 	for _, cmd := range cmds {
-		fmt.Printf(" %s", cmd.name)
+		fmt.Printf(" %s - %s\n", cmd.name, cmd.description)
 	}
-	fmt.Println()
 }
 
 func cmdLoad(cmds []command, game *gameState, tokens []string) {
@@ -213,6 +213,7 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("usage: load filename\n")
 		return
 	}
+	*game = newGame()
 	game.loadFromFile(tokens[1])
 }
 
@@ -293,6 +294,11 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 	b.lastMove = fmt.Sprintf("%s %s", from, to)                   // record move
 
 	game.history = append(game.history, b) // append to history
+}
+
+func cmdReset(cmds []command, game *gameState, tokens []string) {
+	*game = newGame()
+	game.loadFromString(builtinBoard)
 }
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
