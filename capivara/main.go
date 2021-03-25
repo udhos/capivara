@@ -35,8 +35,8 @@ func (g gameState) show() {
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Printf("turn: %s\n", b.turn.name())
 	fmt.Printf("material: %v\n", b.getMaterialValue())
-	fmt.Printf("white king: %dx%d material=%d\n", b.king[0]/8, b.king[0]%8, b.materialValue[0])
-	fmt.Printf("black king: %dx%d material=%d\n", b.king[1]/8, b.king[1]%8, b.materialValue[1])
+	fmt.Printf("white king: %s material=%d\n", locToStr(b.king[0]), b.materialValue[0])
+	fmt.Printf("black king: %s material=%d\n", locToStr(b.king[1]), b.materialValue[1])
 	fmt.Printf("history %d moves: ", len(g.history))
 	for _, m := range g.history {
 		fmt.Printf("(%s)", m.lastMove)
@@ -190,6 +190,7 @@ var tableCmd = []command{
 	{"help", cmdHelp, "show help"},
 	{"load", cmdLoad, "load board from file"},
 	{"move", cmdMove, "change piece position"},
+	{"negamax", cmdNegamax, "negamax search"},
 	{"play", cmdPlay, "play move"},
 	{"reset", cmdReset, "reset board to initial position"},
 	{"switch", cmdSwitch, "switch turn"},
@@ -250,6 +251,62 @@ func cmdMove(cmds []command, game *gameState, tokens []string) {
 	b := &game.history[len(game.history)-1]                       // will update in-place
 	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
 	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
+}
+
+func cmdNegamax(cmds []command, game *gameState, tokens []string) {
+	last := len(game.history) - 1
+	b := game.history[last]
+	rootNegamax(b, 2)
+}
+
+func rootNegamax(b board, depth int) float32 {
+	terminalNode := false // checkmate or draw?
+	if depth == 0 || terminalNode {
+		return b.getMaterialValue()
+	}
+	var max float32 = -1000.0
+
+	children := []board{}
+	children = b.generateChildren(children)
+	if len(children) == 0 {
+		fmt.Printf("rootNegamax: %s %s UGH NO CHILDREN CHECK-MATE?\n", b.turn.name(), b.lastMove)
+	}
+	for i, child := range children {
+		score := -negamax(child, depth-1)
+		fmt.Printf("rootNegamax: child: %d: %s %s = score=%v max=%v\n", i, child.turn.name(), child.lastMove, score, max)
+		if score > max {
+			max = score
+			fmt.Printf("rootNegamax: child: %d: %s %s = score=%v max=%v BEST\n", i, child.turn.name(), child.lastMove, score, max)
+		}
+	}
+	return max
+}
+
+func negamax(b board, depth int) float32 {
+	terminalNode := false // checkmate or draw?
+	if depth == 0 || terminalNode {
+		fmt.Printf("negamax: %s %s depth=%d value=%v MATERIAL\n", b.turn.name(), b.lastMove, depth, b.getMaterialValue())
+		return b.getMaterialValue()
+	}
+	var value float32 = -1000.0
+
+	children := []board{}
+	children = b.generateChildren(children)
+	if len(children) == 0 {
+		fmt.Printf("negamax: child: %s %s depth=%d value=%v UGH NO CHILDREN CHECK-MATE?\n", b.turn.name(), b.lastMove, depth, value)
+	}
+	for _, child := range children {
+		value = max(value, -negamax(child, depth-1))
+	}
+	fmt.Printf("negamax: child: %s %s depth=%d value=%v\n", b.turn.name(), b.lastMove, depth, value)
+	return value
+}
+
+func max(a, b float32) float32 {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {

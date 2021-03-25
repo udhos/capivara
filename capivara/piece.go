@@ -106,3 +106,11 @@ func (p piece) show() {
 	}
 	fmt.Print(p.kindLetter())
 }
+
+func coordToStr(row, col location) string {
+	return fmt.Sprintf("%c%d", col+'a', row+1)
+}
+
+func locToStr(loc location) string {
+	return coordToStr(loc/8, loc%8)
+}
