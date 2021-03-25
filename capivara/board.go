@@ -73,11 +73,16 @@ func (b board) generateChildren(children []board) []board {
 func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
 	//var n int
 	i, j := loc/8, loc%8
-	switch p {
-	case whitePawn:
-		// can move up?
-		if i < 7 {
-			dstLoc := (i+1)*8 + j
+	kind := p.kind()
+	color := p.color()
+	signal := colorToSignal(color)              // 0=>1 1=>-1
+	lastRow := location(7 - 7*int(color))       // 0=>7 1=>0
+	firstRow := location(7*int(color) + signal) // 0=>1 1=>6
+	switch kind {
+	case whitePawn: // white + black
+		// can move one up/down?
+		if i != lastRow {
+			dstLoc := (i+location(signal))*8 + j
 			dstP := b.square[dstLoc]
 			if dstP == pieceNone {
 				// position is free
@@ -89,19 +94,23 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 				children = append(children, child)                                     // append to children
 			}
 		}
-	case blackPawn:
-		// can move down?
-		if i > 0 {
-			dstLoc := (i-1)*8 + j
-			dstP := b.square[dstLoc]
-			if dstP == pieceNone {
-				// position is free
+
+		// can move two up/down?
+		if i == firstRow {
+			secondRow := firstRow + location(signal)
+			dstRow := secondRow + location(signal)
+			secondRowLoc := secondRow*8 + j
+			dstRowLoc := dstRow*8 + j
+			secondP := b.square[secondRowLoc]
+			dstP := b.square[dstRowLoc]
+			if secondP == pieceNone && dstP == pieceNone {
+				// free to move
 				child := b
-				pp := child.delPieceLoc(loc)                                           // take piece from board
-				child.addPieceLoc(dstLoc, pp)                                          // put piece on board
-				child.turn = colorInverse(b.turn)                                      // switch color
-				child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstLoc)) // record move
-				children = append(children, child)                                     // append to children
+				pp := child.delPieceLoc(loc)                                              // take piece from board
+				child.addPieceLoc(dstRowLoc, pp)                                          // put piece on board
+				child.turn = colorInverse(b.turn)                                         // switch color
+				child.lastMove = fmt.Sprintf("%s %s", locToStr(loc), locToStr(dstRowLoc)) // record move
+				children = append(children, child)                                        // append to children
 			}
 		}
 	}
