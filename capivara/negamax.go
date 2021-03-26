@@ -14,12 +14,12 @@ func relativeMaterial(b board) float32 {
 }
 
 func rootNegamax(b board, depth int) (float32, string) {
-	if depth == 0 {
-		return relativeMaterial(b), "move?"
+	if depth < 1 {
+		return relativeMaterial(b), "invalid-depth"
 	}
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
-		return relativeMaterial(b), "move?"
+		return relativeMaterial(b), "no-valid-move"
 	}
 
 	var max float32 = -1000.0

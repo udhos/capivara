@@ -56,7 +56,6 @@ func (b board) getMaterialValue() float32 {
 }
 
 func (b board) generateChildren(children []board) []board {
-	//var n int
 	for loc := location(0); loc < location(64); loc++ {
 		p := b.square[loc]
 		if p == pieceNone {
@@ -71,7 +70,6 @@ func (b board) generateChildren(children []board) []board {
 }
 
 func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
-	//var n int
 	i, j := loc/8, loc%8
 	kind := p.kind()
 	color := p.color()
@@ -178,5 +176,42 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 }
 
 func (b board) invalid() bool {
+	otherKingColor := colorInverse(b.turn)
+	otherKingLoc := b.king[otherKingColor]
+	otherKingPiece := b.square[otherKingLoc]
+
+	// any piece attacks other king?
+	for loc := location(0); loc < location(64); loc++ {
+		p := b.square[loc]
+		if p == pieceNone {
+			continue
+		}
+		if p.color() != b.turn {
+			continue
+		}
+		if b.pieceAttacks(p, loc, otherKingPiece, otherKingLoc) {
+			return true // other king is in check
+		}
+	}
+
+	return false
+}
+
+func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dstLoc location) bool {
+
+	srcRow, srcCol := srcLoc/8, srcLoc%8
+	dstRow, dstCol := dstLoc/8, dstLoc%8
+
+	srcKind := srcPiece.kind()
+	srcColor := srcPiece.color()
+	srcSignal := colorToSignal(srcColor) // 0=>1 1=>-1
+
+	switch srcKind {
+	case whitePawn: // white + black
+		if int(srcRow)+srcSignal == int(dstRow) {
+			return (dstCol == srcCol-1) || (dstCol == srcCol+1)
+		}
+	}
+
 	return false
 }

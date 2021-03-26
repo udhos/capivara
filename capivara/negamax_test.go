@@ -13,6 +13,28 @@ func TestB1(t *testing.T) {
 	}
 }
 
+func TestB2(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b2)
+	last := len(game.history) - 1
+	b := game.history[last]
+	score, move := rootNegamax(b, 2)
+	if score != -2.0 || move != "d4 e5" {
+		t.Errorf("score: %v move: %s (expected: score=-2.0 move: d4 e5)", score, move)
+	}
+}
+
+func TestB3(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b3)
+	last := len(game.history) - 1
+	b := game.history[last]
+	score, move := rootNegamax(b, 2)
+	if score != -4.0 || move != "no-valid-move" {
+		t.Errorf("score: %v move: %s (expected: score=-4.0 move: d2 e3)", score, move)
+	}
+}
+
 const b1 = `
     a  b  c  d  e  f  g  h
    -------------------------
@@ -31,6 +53,50 @@ const b1 = `
 2  |*p|  |  |*p|  |  |*p|  |  2
    -------------------------
 1  |  |  |  |  |*K|  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+const b2 = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |  |  |  |.K|  |  |  |  8
+   -------------------------
+7  |  |  |  |  |  |  |  |*p|  7
+   -------------------------
+6  |  |  |  |  |  |  |  |  |  6
+   -------------------------
+5  |  |  |  |  |.p|  |  |  |  5
+   -------------------------
+4  |  |  |  |*p|  |*K|  |  |  4
+   -------------------------
+3  |  |.R|  |  |  |  |  |  |  3
+   -------------------------
+2  |*p|  |  |  |  |  |  |  |  2
+   -------------------------
+1  |  |  |  |  |  |  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+const b3 = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |  |  |  |.K|  |  |  |  8
+   -------------------------
+7  |  |  |  |  |  |  |  |*p|  7
+   -------------------------
+6  |  |  |  |  |  |  |  |  |  6
+   -------------------------
+5  |  |  |  |  |.p|  |  |  |  5
+   -------------------------
+4  |  |  |  |  |  |*K|  |  |  4
+   -------------------------
+3  |  |.R|  |  |  |  |  |  |  3
+   -------------------------
+2  |*p|  |  |  |  |  |  |  |  2
+   -------------------------
+1  |  |  |  |  |  |  |  |  |  1
    -------------------------
     a  b  c  d  e  f  g  h
 `
