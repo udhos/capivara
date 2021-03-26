@@ -1,6 +1,6 @@
 package main
 
-type location uint8
+type location int8
 type colorFlag uint32
 
 const (
@@ -68,57 +68,60 @@ func (b board) generateChildren(children []board) []board {
 }
 
 func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
-	i, j := loc/8, loc%8
+	i, j := int(loc)/8, int(loc)%8
 	kind := p.kind()
 	color := p.color()
-	signal := colorToSignal(color)              // 0=>1 1=>-1
-	lastRow := location(7 - 7*int(color))       // 0=>7 1=>0
-	firstRow := location(7*int(color) + signal) // 0=>1 1=>6
+	signal := colorToSignal(color)    // 0=>1 1=>-1
+	lastRow := 7 - 7*int(color)       // 0=>7 1=>0
+	firstRow := 7*int(color) + signal // 0=>1 1=>6
 	switch kind {
 	case whitePawn: // white + black
 		// can move one up/down?
-		if i != lastRow {
-			dstLoc := (i+location(signal))*8 + j
-			dstP := b.square[dstLoc]
-			if dstP == pieceNone {
-				// position is free
-				children = b.recordMoveIfValid(children, loc, dstLoc)
+		{
+			dstRow := i + signal
+			if dstRow != lastRow {
+				dstLoc := dstRow*8 + j
+				dstP := b.square[dstLoc]
+				if dstP == pieceNone {
+					// position is free
+					children = b.recordMoveIfValid(children, loc, location(dstLoc))
+				}
 			}
 		}
 
 		// can move two up/down?
 		if i == firstRow {
-			secondRow := firstRow + location(signal)
-			dstRow := secondRow + location(signal)
+			secondRow := firstRow + signal
+			dstRow := secondRow + signal
 			secondRowLoc := secondRow*8 + j
 			dstRowLoc := dstRow*8 + j
 			secondP := b.square[secondRowLoc]
 			dstP := b.square[dstRowLoc]
 			if secondP == pieceNone && dstP == pieceNone {
 				// free to move
-				children = b.recordMoveIfValid(children, loc, dstRowLoc)
+				children = b.recordMoveIfValid(children, loc, location(dstRowLoc))
 			}
 		}
 
 		// capture left?
 		if j > 0 && i > 0 && i < 7 {
-			dstRow := i + location(signal)
+			dstRow := i + signal
 			dstLoc := dstRow*8 + j - 1
 			dstP := b.square[dstLoc]
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
-				children = b.recordMoveIfValid(children, loc, dstLoc)
+				children = b.recordMoveIfValid(children, loc, location(dstLoc))
 			}
 		}
 
 		// capture right?
 		if j < 7 && i > 0 && i < 7 {
-			dstRow := i + location(signal)
+			dstRow := i + signal
 			dstLoc := dstRow*8 + j + 1
 			dstP := b.square[dstLoc]
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
-				children = b.recordMoveIfValid(children, loc, dstLoc)
+				children = b.recordMoveIfValid(children, loc, location(dstLoc))
 			}
 		}
 	}
