@@ -135,7 +135,7 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 	child.turn = colorInverse(b.turn)                                   // switch color
 	child.lastMove = fmt.Sprintf("%s %s", locToStr(src), locToStr(dst)) // record move
 
-	if child.invalid() {
+	if child.otherKingInCheck() {
 		return children
 	}
 
@@ -143,7 +143,7 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 	return children
 }
 
-func (b board) invalid() bool {
+func (b board) otherKingInCheck() bool {
 	otherKingColor := colorInverse(b.turn)
 	otherKingLoc := b.king[otherKingColor]
 	otherKingPiece := b.square[otherKingLoc]
@@ -159,6 +159,27 @@ func (b board) invalid() bool {
 		}
 		if b.pieceAttacks(p, loc, otherKingPiece, otherKingLoc) {
 			return true // other king is in check
+		}
+	}
+
+	return false
+}
+
+func (b board) kingInCheck() bool {
+	kingLoc := b.king[b.turn]
+	kingPiece := b.square[kingLoc]
+
+	// any piece attacks king?
+	for loc := location(0); loc < location(64); loc++ {
+		p := b.square[loc]
+		if p == pieceNone {
+			continue
+		}
+		if p.color() == b.turn {
+			continue
+		}
+		if b.pieceAttacks(p, loc, kingPiece, kingLoc) {
+			return true // king is in check
 		}
 	}
 

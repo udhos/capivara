@@ -13,16 +13,21 @@ func relativeMaterial(b board) float32 {
 	return float32(colorToSignal(b.turn)) * b.getMaterialValue()
 }
 
+const negamaxMin = -1000.0
+
 func rootNegamax(b board, depth int) (float32, string) {
 	if depth < 1 {
 		return relativeMaterial(b), "invalid-depth"
 	}
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
+		if b.kingInCheck() {
+			return negamaxMin * float32(colorToSignal(b.turn)), "checkmated"
+		}
 		return relativeMaterial(b), "no-valid-move"
 	}
 
-	var max float32 = -1000.0
+	var max float32 = negamaxMin
 	var best string
 
 	for _, child := range children {
@@ -46,7 +51,7 @@ func negamax(b board, depth int) float32 {
 		return relativeMaterial(b)
 	}
 
-	var max float32 = -1000.0
+	var max float32 = negamaxMin
 
 	for _, child := range children {
 		score := -negamax(child, depth-1)

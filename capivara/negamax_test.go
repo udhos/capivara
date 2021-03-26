@@ -30,8 +30,8 @@ func TestB3(t *testing.T) {
 	last := len(game.history) - 1
 	b := game.history[last]
 	score, move := rootNegamax(b, 2)
-	if score != -4.0 || move != "no-valid-move" {
-		t.Errorf("score: %v move: %s (expected: score=-4.0 move: d2 e3)", score, move)
+	if score != -1000.0 || move != "checkmated" {
+		t.Errorf("score: %v move: %s (expected: score=-1000.0 move: checkmated)", score, move)
 	}
 }
 
