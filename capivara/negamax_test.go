@@ -38,6 +38,19 @@ func TestB3(t *testing.T) {
 	}
 }
 
+func TestB4(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b4)
+	last := len(game.history) - 1
+	b := game.history[last]
+	b.turn = colorInverse(b.turn)
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 2, []string{})
+	if score != 3.0 || move != "e5d4" {
+		t.Errorf("score: %v move: %s (expected: score=3.0 move: e5d4)", score, move)
+	}
+}
+
 const b1 = `
     a  b  c  d  e  f  g  h
    -------------------------
@@ -100,6 +113,28 @@ const b3 = `
 2  |*p|  |  |  |  |  |  |  |  2
    -------------------------
 1  |  |  |  |  |  |  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+const b4 = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |  |  |  |.K|  |  |  |  8
+   -------------------------
+7  |  |  |  |  |  |  |  |.p|  7
+   -------------------------
+6  |  |  |  |  |  |  |  |  |  6
+   -------------------------
+5  |  |  |  |  |.p|  |  |  |  5
+   -------------------------
+4  |  |  |  |*p|  |  |  |  |  4
+   -------------------------
+3  |  |  |  |  |  |  |  |  |  3
+   -------------------------
+2  |.p|  |  |  |  |  |  |  |  2
+   -------------------------
+1  |  |  |  |  |*K|  |  |  |  1
    -------------------------
     a  b  c  d  e  f  g  h
 `
