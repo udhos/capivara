@@ -149,10 +149,10 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 	child.lastMove = moveToStr(src, dst) // record move
 
 	if child.otherKingInCheck() {
-		return children
+		return children // drop invalid move
 	}
 
-	children = append(children, child) // append to children
+	children = append(children, child) // append valid move to children
 	return children
 }
 

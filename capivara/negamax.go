@@ -25,9 +25,6 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string) (float32
 	}
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
-		if b.otherKingInCheck() {
-			return negamaxMin * float32(colorToSignal(b.turn)), "checkmate", path // checkmate
-		}
 		if b.kingInCheck() {
 			return negamaxMin, "checkmated", path // checkmated
 		}
@@ -59,13 +56,10 @@ func negamax(nega *negamaxState, b board, depth int, path []string) (float32, []
 
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
-		if b.otherKingInCheck() {
-			return negamaxMin * float32(colorToSignal(b.turn)), path // checkmate
-		}
 		if b.kingInCheck() {
 			return negamaxMin, path // checkmated
 		}
-		return relativeMaterial(b), path // draw
+		return 0, path // draw
 	}
 
 	var max float32 = negamaxMin
@@ -75,7 +69,6 @@ func negamax(nega *negamaxState, b board, depth int, path []string) (float32, []
 		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove))
 		score = -score
 		nega.nodes += len(children)
-		//fmt.Printf("negamax: depth=%d score=%v move: %s\n", depth, score, child.lastMove)
 		if score >= max {
 			max = score
 			bestPath = childPath

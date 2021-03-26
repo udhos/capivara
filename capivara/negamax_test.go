@@ -9,8 +9,8 @@ func TestB1(t *testing.T) {
 	b := game.history[last]
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 2, []string{})
-	if score != 3.0 || move != "d2e3" {
-		t.Errorf("score: %v move: %s (expected: score=3.0 move: d2e3)", score, move)
+	if score != 0.0 || move != "d3e4" {
+		t.Errorf("score: %v move: %s (expected: score=0.0 move: d3e4)", score, move)
 	}
 }
 
@@ -21,8 +21,8 @@ func TestB2(t *testing.T) {
 	b := game.history[last]
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 2, []string{})
-	if score != -2.0 || move != "d4e5" {
-		t.Errorf("score: %v move: %s (expected: score=-2.0 move: d4e5)", score, move)
+	if score != 0.0 || move != "d4e5" {
+		t.Errorf("score: %v move: %s (expected: score=0.0 move: d4e5)", score, move)
 	}
 }
 
@@ -46,8 +46,21 @@ func TestB4(t *testing.T) {
 	b.turn = colorBlack
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 2, []string{})
-	if score != 3.0 || move != "e5d4" {
-		t.Errorf("score: %v move: %s (expected: score=3.0 move: e5d4)", score, move)
+	if move != "e6e5" {
+		t.Errorf("score: %v move: %s (expected: move: e6e5)", score, move)
+	}
+}
+
+func TestB4Depth6(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b4)
+	last := len(game.history) - 1
+	b := game.history[last]
+	b.turn = colorBlack
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 6, []string{})
+	if move != "e6d5" {
+		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, move)
 	}
 }
 
@@ -74,11 +87,11 @@ const b1 = `
    -------------------------
 5  |  |  |  |  |  |  |  |  |  5
    -------------------------
-4  |  |  |  |  |  |  |  |  |  4
+4  |  |  |  |  |.p|  |  |  |  4
    -------------------------
-3  |  |  |  |  |.p|  |  |  |  3
+3  |  |  |  |*p|  |  |  |  |  3
    -------------------------
-2  |*p|  |  |*p|  |  |*p|  |  2
+2  |  |  |  |  |  |  |  |  |  2
    -------------------------
 1  |  |  |  |  |*K|  |  |  |  1
    -------------------------
@@ -136,11 +149,11 @@ const b4 = `
    -------------------------
 7  |  |  |  |  |  |  |  |.p|  7
    -------------------------
-6  |  |  |  |  |  |  |  |  |  6
+6  |  |  |  |  |.p|  |  |  |  6
    -------------------------
-5  |  |  |  |  |.p|  |  |  |  5
+5  |  |  |  |*p|  |  |  |  |  5
    -------------------------
-4  |  |  |  |*p|  |  |  |  |  4
+4  |  |  |  |  |  |  |  |  |  4
    -------------------------
 3  |  |  |  |  |  |  |  |  |  3
    -------------------------
