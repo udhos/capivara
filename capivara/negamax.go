@@ -13,7 +13,10 @@ func relativeMaterial(b board) float32 {
 	return float32(colorToSignal(b.turn)) * b.getMaterialValue()
 }
 
-const negamaxMin = -1000.0
+const (
+	negamaxMin = -1000.0
+	negamaxMax = 1000.0
+)
 
 type negamaxState struct {
 	nodes int
@@ -22,6 +25,9 @@ type negamaxState struct {
 func rootNegamax(nega *negamaxState, b board, depth int, path []string) (float32, string, []string) {
 	if depth < 1 {
 		return relativeMaterial(b), "invalid-depth", path
+	}
+	if b.otherKingInCheck() {
+		return negamaxMax, "checkmate", nil
 	}
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
