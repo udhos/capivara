@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type location int8
 type colorFlag uint32
 
@@ -79,7 +81,9 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		// can move one up/down?
 		{
 			dstRow := i + signal
-			if dstRow != lastRow {
+			if dstRow == lastRow {
+				fmt.Println("generateChildrenPiece: FIXME up/down pawn promotion")
+			} else {
 				dstLoc := dstRow*8 + j
 				dstP := b.square[dstLoc]
 				if dstP == pieceNone {
@@ -110,7 +114,11 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			dstP := b.square[dstLoc]
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
-				children = b.recordMoveIfValid(children, loc, location(dstLoc))
+				if dstRow == lastRow {
+					fmt.Println("generateChildrenPiece: FIXME capture left pawn promotion")
+				} else {
+					children = b.recordMoveIfValid(children, loc, location(dstLoc))
+				}
 			}
 		}
 
@@ -121,7 +129,11 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			dstP := b.square[dstLoc]
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
-				children = b.recordMoveIfValid(children, loc, location(dstLoc))
+				if dstRow == lastRow {
+					fmt.Println("generateChildrenPiece: FIXME capture right pawn promotion")
+				} else {
+					children = b.recordMoveIfValid(children, loc, location(dstLoc))
+				}
 			}
 		}
 	}
