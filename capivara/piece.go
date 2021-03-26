@@ -115,6 +115,10 @@ func locToStr(loc location) string {
 	return coordToStr(loc/8, loc%8)
 }
 
+func moveToStr(src, dst location) string {
+	return fmt.Sprintf("%s%s", locToStr(src), locToStr(dst))
+}
+
 // white=0 -> signal=1
 // black=1 -> signal=-1
 func colorToSignal(color pieceColor) int {

@@ -15,50 +15,65 @@ func relativeMaterial(b board) float32 {
 
 const negamaxMin = -1000.0
 
-func rootNegamax(b board, depth int) (float32, string) {
+type negamaxState struct {
+	nodes int
+}
+
+func rootNegamax(nega *negamaxState, b board, depth int, path []string) (float32, string, []string) {
 	if depth < 1 {
-		return relativeMaterial(b), "invalid-depth"
+		return relativeMaterial(b), "invalid-depth", path
 	}
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
 		if b.kingInCheck() {
-			return negamaxMin * float32(colorToSignal(b.turn)), "checkmated"
+			return negamaxMin * float32(colorToSignal(b.turn)), "checkmated", path
 		}
-		return relativeMaterial(b), "no-valid-move"
+		return 0, "draw", path
 	}
 
 	var max float32 = negamaxMin
 	var best string
+	var bestPath []string
 
 	for _, child := range children {
-		score := -negamax(child, depth-1)
-		fmt.Printf("rootNegamax: depth=%d score=%v move: %s\n", depth, score, child.lastMove)
+		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove))
+		score = -score
+		nega.nodes += len(children)
+		fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, nega.nodes, score, child.lastMove, childPath)
 		if score > max {
 			max = score
 			best = child.lastMove
+			bestPath = childPath
 		}
 	}
-	return max, best
+	return max, best, bestPath
 }
 
-func negamax(b board, depth int) float32 {
-	if depth == 0 {
-		return relativeMaterial(b)
+func negamax(nega *negamaxState, b board, depth int, path []string) (float32, []string) {
+	if depth < 1 {
+		return relativeMaterial(b), path
 	}
 
 	children := b.generateChildren([]board{})
 	if len(children) == 0 {
-		return relativeMaterial(b)
+		if b.kingInCheck() {
+			return negamaxMin * float32(colorToSignal(b.turn)), path // checkmated
+		}
+		return relativeMaterial(b), path // draw
 	}
 
 	var max float32 = negamaxMin
+	var bestPath []string
 
 	for _, child := range children {
-		score := -negamax(child, depth-1)
+		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove))
+		score = -score
+		nega.nodes += len(children)
 		//fmt.Printf("negamax: depth=%d score=%v move: %s\n", depth, score, child.lastMove)
 		if score > max {
 			max = score
+			bestPath = childPath
 		}
 	}
-	return max
+	return max, bestPath
 }

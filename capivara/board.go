@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type location uint8
 type colorFlag uint32
 
@@ -103,7 +101,7 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		}
 
 		// capture left?
-		if j > 0 {
+		if j > 0 && i > 0 && i < 7 {
 			dstRow := i + location(signal)
 			dstLoc := dstRow*8 + j - 1
 			dstP := b.square[dstLoc]
@@ -114,7 +112,7 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		}
 
 		// capture right?
-		if j < 7 {
+		if j < 7 && i > 0 && i < 7 {
 			dstRow := i + location(signal)
 			dstLoc := dstRow*8 + j + 1
 			dstP := b.square[dstLoc]
@@ -129,11 +127,11 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 }
 
 func (b board) recordMoveIfValid(children []board, src, dst location) []board {
-	child := b                                                          // copy board
-	p := child.delPieceLoc(src)                                         // take piece from board
-	child.addPieceLoc(dst, p)                                           // put piece on board
-	child.turn = colorInverse(b.turn)                                   // switch color
-	child.lastMove = fmt.Sprintf("%s %s", locToStr(src), locToStr(dst)) // record move
+	child := b                           // copy board
+	p := child.delPieceLoc(src)          // take piece from board
+	child.addPieceLoc(dst, p)            // put piece on board
+	child.turn = colorInverse(b.turn)    // switch color
+	child.lastMove = moveToStr(src, dst) // record move
 
 	if child.otherKingInCheck() {
 		return children

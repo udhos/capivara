@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -254,10 +255,19 @@ func cmdMove(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdNegamax(cmds []command, game *gameState, tokens []string) {
+	depth := 4
+	if len(tokens) > 1 {
+		d, errConv := strconv.Atoi(tokens[1])
+		if errConv == nil {
+			depth = d
+		}
+	}
+	fmt.Printf("negamax depth=%d\n", depth)
 	last := len(game.history) - 1
 	b := game.history[last]
-	score, move := rootNegamax(b, 2)
-	fmt.Printf("negamax: best score=%v move: %s\n", score, move)
+	nega := negamaxState{}
+	score, move, path := rootNegamax(&nega, b, depth, make([]string, 0, 20))
+	fmt.Printf("negamax: nodes=%d best score=%v move: %s path: %s\n", nega.nodes, score, move, path)
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {

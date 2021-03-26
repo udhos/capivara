@@ -7,9 +7,10 @@ func TestB1(t *testing.T) {
 	game.loadFromString(b1)
 	last := len(game.history) - 1
 	b := game.history[last]
-	score, move := rootNegamax(b, 2)
-	if score != 3.0 || move != "d2 e3" {
-		t.Errorf("score: %v move: %s (expected: score=3.0 move: d2 e3)", score, move)
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 2, []string{})
+	if score != 3.0 || move != "d2e3" {
+		t.Errorf("score: %v move: %s (expected: score=3.0 move: d2e3)", score, move)
 	}
 }
 
@@ -18,9 +19,10 @@ func TestB2(t *testing.T) {
 	game.loadFromString(b2)
 	last := len(game.history) - 1
 	b := game.history[last]
-	score, move := rootNegamax(b, 2)
-	if score != -2.0 || move != "d4 e5" {
-		t.Errorf("score: %v move: %s (expected: score=-2.0 move: d4 e5)", score, move)
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 2, []string{})
+	if score != -2.0 || move != "d4e5" {
+		t.Errorf("score: %v move: %s (expected: score=-2.0 move: d4e5)", score, move)
 	}
 }
 
@@ -29,7 +31,8 @@ func TestB3(t *testing.T) {
 	game.loadFromString(b3)
 	last := len(game.history) - 1
 	b := game.history[last]
-	score, move := rootNegamax(b, 2)
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 2, []string{})
 	if score != -1000.0 || move != "checkmated" {
 		t.Errorf("score: %v move: %s (expected: score=-1000.0 move: checkmated)", score, move)
 	}
