@@ -40,7 +40,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string) (float32
 		score = -score
 		nega.nodes += len(children)
 		fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, nega.nodes, score, child.lastMove, childPath)
-		if score > max {
+		if score >= max {
 			max = score
 			best = child.lastMove
 			bestPath = childPath
@@ -70,7 +70,7 @@ func negamax(nega *negamaxState, b board, depth int, path []string) (float32, []
 		score = -score
 		nega.nodes += len(children)
 		//fmt.Printf("negamax: depth=%d score=%v move: %s\n", depth, score, child.lastMove)
-		if score > max {
+		if score >= max {
 			max = score
 			bestPath = childPath
 		}
