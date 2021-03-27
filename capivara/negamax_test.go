@@ -46,8 +46,8 @@ func TestB4(t *testing.T) {
 	b.turn = colorBlack
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 2, []string{})
-	if move != "e6e5" {
-		t.Errorf("score: %v move: %s (expected: move: e6e5)", score, move)
+	if move != "e6d5" {
+		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, move)
 	}
 }
 
@@ -85,6 +85,18 @@ func TestB6(t *testing.T) {
 	score, _, _ := rootNegamax(&nega, b, 2, []string{})
 	if score != 1000 {
 		t.Errorf("score: %v (expected: score=1000.0)", score)
+	}
+}
+
+func TestB7(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b7)
+	last := len(game.history) - 1
+	b := game.history[last]
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 4, []string{})
+	if move != "g6g7" {
+		t.Errorf("score: %v (expected: move g6g7)", score)
 	}
 }
 
@@ -159,7 +171,7 @@ const b4 = `
    -------------------------
 8  |  |  |  |  |.K|  |  |  |  8
    -------------------------
-7  |  |  |  |  |  |  |  |.p|  7
+7  |  |  |  |  |  |  |  |  |  7
    -------------------------
 6  |  |  |  |  |.p|  |  |  |  6
    -------------------------
@@ -169,7 +181,7 @@ const b4 = `
    -------------------------
 3  |  |  |  |  |  |  |  |  |  3
    -------------------------
-2  |.p|  |  |  |  |  |  |  |  2
+2  |  |  |  |  |  |  |  |  |  2
    -------------------------
 1  |  |  |  |  |*K|  |  |  |  1
    -------------------------
@@ -212,6 +224,28 @@ const b6 = `
 4  |  |  |*p|  |  |  |  |  |  4
    -------------------------
 3  |  |  |  |  |  |  |  |  |  3
+   -------------------------
+2  |  |  |  |  |  |  |  |  |  2
+   -------------------------
+1  |  |  |  |  |*K|  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+const b7 = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |  |  |  |.K|  |  |  |  8
+   -------------------------
+7  |  |  |  |  |  |  |  |  |  7
+   -------------------------
+6  |  |  |  |  |  |  |*p|  |  6
+   -------------------------
+5  |  |  |  |  |  |  |  |*p|  5
+   -------------------------
+4  |  |  |.p|  |  |  |  |  |  4
+   -------------------------
+3  |  |.p|  |  |  |  |  |  |  3
    -------------------------
 2  |  |  |  |  |  |  |  |  |  2
    -------------------------

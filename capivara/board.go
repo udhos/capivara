@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type location int8
 type colorFlag uint32
 
@@ -81,13 +79,16 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		// can move one up/down?
 		{
 			dstRow := i + signal
-			if dstRow == lastRow {
-				fmt.Println("generateChildrenPiece: FIXME up/down pawn promotion")
-			} else {
-				dstLoc := dstRow*8 + j
-				dstP := b.square[dstLoc]
-				if dstP == pieceNone {
-					// position is free
+			dstLoc := dstRow*8 + j
+			dstP := b.square[dstLoc]
+			if dstP == pieceNone {
+				// position is free
+				if dstRow == lastRow {
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
+				} else {
 					children = b.recordMoveIfValid(children, loc, location(dstLoc))
 				}
 			}
@@ -115,7 +116,10 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
 				if dstRow == lastRow {
-					fmt.Println("generateChildrenPiece: FIXME capture left pawn promotion")
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
 					children = b.recordMoveIfValid(children, loc, location(dstLoc))
 				}
@@ -130,7 +134,10 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
 				if dstRow == lastRow {
-					fmt.Println("generateChildrenPiece: FIXME capture right pawn promotion")
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
+					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
 					children = b.recordMoveIfValid(children, loc, location(dstLoc))
 				}
@@ -145,6 +152,21 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 	child := b                           // copy board
 	p := child.delPieceLoc(src)          // take piece from board
 	child.addPieceLoc(dst, p)            // put piece on board
+	child.turn = colorInverse(b.turn)    // switch color
+	child.lastMove = moveToStr(src, dst) // record move
+
+	if child.otherKingInCheck() {
+		return children // drop invalid move
+	}
+
+	children = append(children, child) // append valid move to children
+	return children
+}
+
+func (b board) recordPromotionIfValid(children []board, src, dst location, p piece) []board {
+	child := b                           // copy board
+	child.delPieceLoc(src)               // take pawn from board
+	child.addPieceLoc(dst, p)            // put new piece on board
 	child.turn = colorInverse(b.turn)    // switch color
 	child.lastMove = moveToStr(src, dst) // record move
 
