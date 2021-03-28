@@ -272,7 +272,53 @@ func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dst
 		if int(srcRow)+srcSignal == int(dstRow) {
 			return (dstCol == srcCol-1) || (dstCol == srcCol+1)
 		}
+	case whiteQueen: // white + black
+		if b.slidingAttack(srcLoc, dstLoc, 0, 1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 1, 1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 1, 0) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 1, -1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 0, -1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, -1, -1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, -1, 0) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, -1, 1) {
+			return true
+		}
 	}
 
+	return false
+}
+
+func (b board) slidingAttack(src, target, incRow, incCol location) bool {
+	dstRow := src / 8
+	dstCol := src % 8
+	for {
+		dstRow += incRow
+		dstCol += incCol
+		if dstRow < 0 || dstRow > 7 || dstCol < 0 || dstCol > 7 {
+			break // out of board
+		}
+		dstLoc := dstRow*8 + dstCol
+		if dstLoc == target {
+			return true // found
+		}
+		dstP := b.square[dstLoc]
+		if dstP != pieceNone {
+			break // blocked by some piece
+		}
+	}
 	return false
 }
