@@ -143,6 +143,43 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 				}
 			}
 		}
+
+	case whiteQueen: // white + black
+		children = b.generateSliding(children, loc, 0, 1)
+		children = b.generateSliding(children, loc, 1, 1)
+		children = b.generateSliding(children, loc, 1, 0)
+		children = b.generateSliding(children, loc, 1, -1)
+		children = b.generateSliding(children, loc, 0, -1)
+		children = b.generateSliding(children, loc, -1, -1)
+		children = b.generateSliding(children, loc, -1, 0)
+		children = b.generateSliding(children, loc, -1, 1)
+	}
+
+	return children
+}
+
+func (b board) generateSliding(children []board, src, incRow, incCol location) []board {
+	dstRow := src / 8
+	dstCol := src % 8
+	for {
+		dstRow += incRow
+		dstCol += incCol
+		if dstRow < 0 || dstRow > 7 || dstCol < 0 || dstCol > 7 {
+			break // out of board
+		}
+		dstLoc := dstRow*8 + dstCol
+		dstP := b.square[dstLoc]
+		if dstP == pieceNone {
+			// empty square
+			children = b.recordMoveIfValid(children, src, dstLoc)
+			continue
+		}
+		if dstP.color() == b.turn {
+			break // blocked by same color piece
+		}
+		// capture opponent piece
+		children = b.recordMoveIfValid(children, src, dstLoc)
+		break
 	}
 
 	return children

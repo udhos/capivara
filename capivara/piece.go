@@ -69,26 +69,28 @@ func (p piece) kindLetter() string {
 
 func (p piece) materialValue() int {
 	switch p {
-	case whiteQueen:
-		return 900
+	case pieceNone:
+		return 0
+	case whitePawn:
+		return 100
+	case blackPawn:
+		return -100
 	case whiteRook:
 		return 500
 	case whiteBishop:
 		return 300
 	case whiteKnight:
 		return 300
-	case whitePawn:
-		return 100
-	case blackQueen:
-		return -900
 	case blackRook:
 		return -500
 	case blackBishop:
 		return -300
 	case blackKnight:
 		return -300
-	case blackPawn:
-		return -100
+	case whiteQueen:
+		return 900
+	case blackQueen:
+		return -900
 	}
 	return 0
 }
