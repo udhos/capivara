@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // negamax needs a relative material score.
 //
@@ -38,21 +41,46 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string) (float32
 	}
 
 	var max float32 = negamaxMin
-	var best string
-	var bestPath []string
+	/*
+		var best string
+		var bestPath []string
+	*/
+
+	var negaChildren []negaChild
 
 	for _, child := range children {
 		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove))
 		score = -score
 		nega.nodes += len(children)
-		fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, nega.nodes, score, child.lastMove, childPath)
-		if score >= max {
-			max = score
-			best = child.lastMove
-			bestPath = childPath
-		}
+		//fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, nega.nodes, score, child.lastMove, childPath)
+		negaChildren = append(negaChildren, negaChild{b: child, score: score, path: childPath})
+		/*
+			if score >= max {
+				max = score
+				best = child.lastMove
+				bestPath = childPath
+			}
+		*/
 	}
-	return max, best, bestPath
+
+	sort.SliceStable(negaChildren, func(i, j int) bool { return len(negaChildren[i].path) < len(negaChildren[j].path) })
+	sort.SliceStable(negaChildren, func(i, j int) bool { return negaChildren[i].score > negaChildren[j].score })
+
+	for _, c := range negaChildren {
+		fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, nega.nodes, c.score, c.b.lastMove, c.path)
+	}
+
+	if negaChildren[0].score > max {
+		max = negaChildren[0].score
+	}
+
+	return max, negaChildren[0].b.lastMove, negaChildren[0].path
+}
+
+type negaChild struct {
+	b     board
+	score float32
+	path  []string
 }
 
 func negamax(nega *negamaxState, b board, depth int, path []string) (float32, []string) {
