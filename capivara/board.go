@@ -153,6 +153,18 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		children = b.generateSliding(children, loc, -1, -1)
 		children = b.generateSliding(children, loc, -1, 0)
 		children = b.generateSliding(children, loc, -1, 1)
+
+	case whiteRook: // white + black
+		children = b.generateSliding(children, loc, 0, 1)
+		children = b.generateSliding(children, loc, 1, 0)
+		children = b.generateSliding(children, loc, 0, -1)
+		children = b.generateSliding(children, loc, -1, 0)
+
+	case whiteBishop: // white + black
+		children = b.generateSliding(children, loc, 1, 1)
+		children = b.generateSliding(children, loc, 1, -1)
+		children = b.generateSliding(children, loc, -1, -1)
+		children = b.generateSliding(children, loc, -1, 1)
 	}
 
 	return children
@@ -272,6 +284,7 @@ func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dst
 		if int(srcRow)+srcSignal == int(dstRow) {
 			return (dstCol == srcCol-1) || (dstCol == srcCol+1)
 		}
+
 	case whiteQueen: // white + black
 		if b.slidingAttack(srcLoc, dstLoc, 0, 1) {
 			return true
@@ -297,6 +310,35 @@ func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dst
 		if b.slidingAttack(srcLoc, dstLoc, -1, 1) {
 			return true
 		}
+
+	case whiteRook: // white + black
+		if b.slidingAttack(srcLoc, dstLoc, 0, 1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 1, 0) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 0, -1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, -1, 0) {
+			return true
+		}
+
+	case whiteBishop: // white + black
+		if b.slidingAttack(srcLoc, dstLoc, 1, 1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, 1, -1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, -1, -1) {
+			return true
+		}
+		if b.slidingAttack(srcLoc, dstLoc, -1, 1) {
+			return true
+		}
+
 	}
 
 	return false

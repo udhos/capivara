@@ -21,8 +21,8 @@ func TestB2(t *testing.T) {
 	b := game.history[last]
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 2, []string{})
-	if score != 0.0 || move != "d4e5" {
-		t.Errorf("score: %v move: %s (expected: score=0.0 move: d4e5)", score, move)
+	if move != "d4e5" {
+		t.Errorf("score: %v move: %s (expected: move: d4e5)", score, move)
 	}
 }
 
