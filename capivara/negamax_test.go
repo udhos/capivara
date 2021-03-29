@@ -9,8 +9,8 @@ func TestB1(t *testing.T) {
 	b := game.history[last]
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 2, []string{})
-	if score != 0.0 || move != "d3e4" {
-		t.Errorf("score: %v move: %s (expected: score=0.0 move: d3e4)", score, move)
+	if move != "d3e4" {
+		t.Errorf("score: %v move: %s (expected: move: d3e4)", score, move)
 	}
 }
 
@@ -155,13 +155,13 @@ const b3 = `
    -------------------------
 5  |  |  |  |  |.p|  |  |  |  5
    -------------------------
-4  |  |  |  |  |  |*K|  |  |  4
+4  |  |  |  |  |  |  |  |  |  4
    -------------------------
-3  |  |.R|  |  |  |  |  |  |  3
+3  |  |.R|  |  |  |.p|  |  |  3
    -------------------------
-2  |*p|  |  |  |  |  |  |  |  2
+2  |*p|  |  |  |  |  |.p|*N|  2
    -------------------------
-1  |  |  |  |  |  |  |  |  |  1
+1  |  |  |  |  |  |  |*B|*K|  1
    -------------------------
     a  b  c  d  e  f  g  h
 `

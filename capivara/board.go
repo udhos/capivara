@@ -165,6 +165,17 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		children = b.generateSliding(children, loc, 1, -1)
 		children = b.generateSliding(children, loc, -1, -1)
 		children = b.generateSliding(children, loc, -1, 1)
+
+	case whiteKing: // white + black
+		children = b.generateSlidingKing(children, loc, 0, 1)
+		children = b.generateSlidingKing(children, loc, 1, 1)
+		children = b.generateSlidingKing(children, loc, 1, 0)
+		children = b.generateSlidingKing(children, loc, 1, -1)
+		children = b.generateSlidingKing(children, loc, 0, -1)
+		children = b.generateSlidingKing(children, loc, -1, -1)
+		children = b.generateSlidingKing(children, loc, -1, 0)
+		children = b.generateSlidingKing(children, loc, -1, 1)
+
 	}
 
 	return children
@@ -193,6 +204,33 @@ func (b board) generateSliding(children []board, src, incRow, incCol location) [
 		children = b.recordMoveIfValid(children, src, dstLoc)
 		break
 	}
+
+	return children
+}
+
+func (b board) generateSlidingKing(children []board, src, incRow, incCol location) []board {
+	dstRow := src / 8
+	dstCol := src % 8
+
+	dstRow += incRow
+	dstCol += incCol
+	if dstRow < 0 || dstRow > 7 || dstCol < 0 || dstCol > 7 {
+		return children // out of board
+	}
+	dstLoc := dstRow*8 + dstCol
+	dstP := b.square[dstLoc]
+	if dstP == pieceNone {
+		// empty square
+		children = b.recordMoveIfValid(children, src, dstLoc)
+		return children
+	}
+	if dstP.color() != b.turn {
+		// capture opponent piece
+		children = b.recordMoveIfValid(children, src, dstLoc)
+		return children
+	}
+
+	// blocked by same color piece
 
 	return children
 }
@@ -339,6 +377,32 @@ func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dst
 			return true
 		}
 
+	case whiteKing: // white + black
+		if b.slidingAttackKing(srcLoc, dstLoc, 0, 1) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, 1, 1) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, 1, 0) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, 1, -1) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, 0, -1) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, -1, -1) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, -1, 0) {
+			return true
+		}
+		if b.slidingAttackKing(srcLoc, dstLoc, -1, 1) {
+			return true
+		}
+
 	}
 
 	return false
@@ -363,4 +427,17 @@ func (b board) slidingAttack(src, target, incRow, incCol location) bool {
 		}
 	}
 	return false
+}
+
+func (b board) slidingAttackKing(src, target, incRow, incCol location) bool {
+	dstRow := src / 8
+	dstCol := src % 8
+
+	dstRow += incRow
+	dstCol += incCol
+	if dstRow < 0 || dstRow > 7 || dstCol < 0 || dstCol > 7 {
+		return false // out of board
+	}
+	dstLoc := dstRow*8 + dstCol
+	return dstLoc == target
 }
