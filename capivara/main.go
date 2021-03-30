@@ -219,7 +219,7 @@ func cmdClear(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdHelp(cmds []command, game *gameState, tokens []string) {
-	fmt.Print("available commands:")
+	fmt.Println("available commands:")
 	for _, cmd := range cmds {
 		fmt.Printf(" %s - %s\n", cmd.name, cmd.description)
 	}
