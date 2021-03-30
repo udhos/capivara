@@ -203,6 +203,7 @@ type command struct {
 }
 
 var tableCmd = []command{
+	{"ab", cmdAlphaBeta, "alpha-beta search"},
 	{"clear", cmdClear, "erase board"},
 	{"help", cmdHelp, "show help"},
 	{"load", cmdLoad, "load board from file"},
@@ -301,6 +302,22 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	nega := negamaxState{}
 	score, move, path := rootNegamax(&nega, b, depth, make([]string, 0, 20))
 	fmt.Printf("negamax: nodes=%d best score=%v move: %s path: %s\n", nega.nodes, score, move, path)
+}
+
+func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
+	depth := 4
+	if len(tokens) > 1 {
+		d, errConv := strconv.Atoi(tokens[1])
+		if errConv == nil {
+			depth = d
+		}
+	}
+	fmt.Printf("alphabeta depth=%d\n", depth)
+	last := len(game.history) - 1
+	b := game.history[last]
+	ab := alphaBetaState{}
+	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20))
+	fmt.Printf("alphabeta: nodes=%d best score=%v move: %s path: %s\n", ab.nodes, score, move, path)
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {
