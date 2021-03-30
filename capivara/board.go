@@ -145,13 +145,7 @@ func (b board) generateCastlingLeft(children []board) []board {
 	child.turn = colorInverse(b.turn)                       // switch color
 	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
 
-	if child.otherKingInCheck() {
-		return children // drop invalid move
-	}
-
-	children = append(children, child) // append valid move to children
-
-	return children
+	return b.recordIfValid(children, child)
 }
 
 func (b board) generateCastlingRight(children []board) []board {
@@ -175,13 +169,7 @@ func (b board) generateCastlingRight(children []board) []board {
 	child.turn = colorInverse(b.turn)                       // switch color
 	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
 
-	if child.otherKingInCheck() {
-		return children // drop invalid move
-	}
-
-	children = append(children, child) // append valid move to children
-
-	return children
+	return b.recordIfValid(children, child)
 }
 
 func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
@@ -308,6 +296,13 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 	return children
 }
 
+func (b board) recordIfValid(children []board, child board) []board {
+	if child.otherKingInCheck() {
+		return children // drop invalid move 'child'
+	}
+	return append(children, child) // record
+}
+
 func (b board) generateSliding(children []board, src, incRow, incCol location) []board {
 	dstRow := src / 8
 	dstCol := src % 8
@@ -369,12 +364,7 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 	child.turn = colorInverse(b.turn)               // switch color
 	child.lastMove = moveToStr(src, dst, pieceNone) // record move
 
-	if child.otherKingInCheck() {
-		return children // drop invalid move
-	}
-
-	children = append(children, child) // append valid move to children
-	return children
+	return b.recordIfValid(children, child)
 }
 
 func (b board) recordPromotionIfValid(children []board, src, dst location, p piece) []board {
@@ -384,18 +374,12 @@ func (b board) recordPromotionIfValid(children []board, src, dst location, p pie
 	child.turn = colorInverse(b.turn)       // switch color
 	child.lastMove = moveToStr(src, dst, p) // record move
 
-	if child.otherKingInCheck() {
-		return children // drop invalid move
-	}
-
-	children = append(children, child) // append valid move to children
-	return children
+	return b.recordIfValid(children, child)
 }
 
 func (b board) otherKingInCheck() bool {
 	otherKingColor := colorInverse(b.turn)
 	otherKingLoc := b.king[otherKingColor]
-	//otherKingPiece := b.square[otherKingLoc]
 
 	// any piece attacks other king?
 	for loc := location(0); loc < location(64); loc++ {
@@ -415,24 +399,7 @@ func (b board) otherKingInCheck() bool {
 }
 
 func (b board) kingInCheck() bool {
-	kingLoc := b.king[b.turn]
-	//kingPiece := b.square[kingLoc]
-
-	// any piece attacks king?
-	for loc := location(0); loc < location(64); loc++ {
-		p := b.square[loc]
-		if p == pieceNone {
-			continue
-		}
-		if p.color() == b.turn {
-			continue
-		}
-		if b.pieceAttacks(p, loc, kingLoc) {
-			return true // king is in check
-		}
-	}
-
-	return false
+	return b.anyPieceAttacks(b.king[b.turn])
 }
 
 // any piece attacks square?
