@@ -137,6 +137,30 @@ func TestB10(t *testing.T) {
 	}
 }
 
+func TestB11(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b11)
+	last := len(game.history) - 1
+	b := game.history[last]
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 4, []string{})
+	if move != "e1g1" {
+		t.Errorf("score: %v move: %s (expected: move e1g1)", score, move)
+	}
+}
+
+func TestB12(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b12)
+	last := len(game.history) - 1
+	b := game.history[last]
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 4, []string{})
+	if move != "h1h6" {
+		t.Errorf("score: %v move: %s (expected: move h1h6)", score, move)
+	}
+}
+
 const b1 = `
     a  b  c  d  e  f  g  h
    -------------------------
@@ -353,6 +377,50 @@ const b10 = `
 2  |  |  |  |  |  |  |  |  |  2
    -------------------------
 1  |  |  |  |  |*K|  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+const b11 = `
+   a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |.N|.B|  |.R|  |  |  |  8
+   -------------------------
+7  |.p|.p|.p|.p|.p|  |  |  |  7
+   -------------------------
+6  |  |  |  |  |  |  |  |.R|  6
+   -------------------------
+5  |  |  |  |  |  |  |  |  |  5
+   -------------------------
+4  |  |  |  |  |  |  |  |  |  4
+   -------------------------
+3  |  |*Q|  |  |  |  |  |  |  3
+   -------------------------
+2  |*p|*p|*p|*p|  |  |  |  |  2
+   -------------------------
+1  |  |.K|  |  |*K|  |  |*R|  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+`
+
+const b12 = `
+   a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |.N|.B|  |.R|  |  |  |  8
+   -------------------------
+7  |.p|.p|.p|.p|.p|  |  |  |  7
+   -------------------------
+6  |  |  |  |  |  |.R|  |.R|  6
+   -------------------------
+5  |  |  |  |  |  |  |  |  |  5
+   -------------------------
+4  |  |  |  |  |  |  |  |  |  4
+   -------------------------
+3  |  |*Q|  |  |  |  |  |  |  3
+   -------------------------
+2  |*p|*p|*p|*p|  |  |  |  |  2
+   -------------------------
+1  |  |.K|  |  |*K|  |  |*R|  1
    -------------------------
     a  b  c  d  e  f  g  h
 `

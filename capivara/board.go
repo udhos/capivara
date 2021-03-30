@@ -38,21 +38,39 @@ func (b *board) delPiece(i, j location) piece {
 
 func (b *board) addPieceLoc(loc location, p piece) {
 	b.delPieceLoc(loc)
-
 	b.square[loc] = p
-
-	// record king position
+	b.materialValue[p.color()] += p.materialValue() // piece material value enters board
 	if p.kind() == whiteKing {
+		// record king new position
 		b.king[p.color()] = loc
 	}
-
-	b.materialValue[p.color()] += p.materialValue() // piece material value enters board
 }
 
 func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
 	b.materialValue[p.color()] -= p.materialValue() // piece material value leaves board
 	b.square[loc] = pieceNone
+
+	switch p.kind() {
+	case whiteRook:
+		// rook moved, then disable castling
+		firstRow := 7 * location(p.color()) // 0=>0 1=>7
+		row := loc / 8
+		if row == firstRow {
+			// rook in initial row
+			col := loc % 8
+			switch col {
+			case 0: // left rook
+				b.flags[b.turn] |= lostCastlingLeft
+			case 7: // right rook
+				b.flags[b.turn] |= lostCastlingRight
+			}
+		}
+	case whiteKing:
+		// king moved, then disable castling
+		b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
+	}
+
 	return p
 }
 
@@ -73,6 +91,96 @@ func (b board) generateChildren(children []board) []board {
 		}
 		children = b.generateChildrenPiece(children, loc, p)
 	}
+
+	if b.flags[b.turn]&lostCastlingLeft == 0 {
+		// castling left
+		firstRow8 := 8 * 7 * location(b.turn) // 0=>0 1=>7
+		colB := firstRow8 + 1
+		colC := firstRow8 + 2
+		colD := firstRow8 + 3
+		if b.square[colB] == pieceNone && b.square[colC] == pieceNone && b.square[colD] == pieceNone {
+			// squares are free
+			colE := firstRow8 + 4 // king
+			if !b.anyPieceAttacks(colB) && !b.anyPieceAttacks(colC) && !b.anyPieceAttacks(colD) && !b.anyPieceAttacks(colE) {
+				children = b.generateCastlingLeft(children)
+			}
+		}
+	}
+	if b.flags[b.turn]&lostCastlingRight == 0 {
+		// castling right
+		firstRow8 := 8 * 7 * location(b.turn) // 0=>0 1=>7
+		colF := firstRow8 + 5
+		colG := firstRow8 + 6
+		if b.square[colF] == pieceNone && b.square[colG] == pieceNone {
+			// squares are free
+			colE := firstRow8 + 4 // king
+			if !b.anyPieceAttacks(colE) && !b.anyPieceAttacks(colF) && !b.anyPieceAttacks(colG) {
+				children = b.generateCastlingRight(children)
+			}
+		}
+	}
+
+	return children
+}
+
+func (b board) generateCastlingLeft(children []board) []board {
+
+	row := 7 * location(b.turn)
+	kingSrc := row*8 + 4 // E
+	kingDst := row*8 + 2 // C
+	rookSrc := row * 8   // A
+	rookDst := row*8 + 3 // D
+
+	child := b // copy board
+
+	// move
+	child.square[kingDst] = child.square[kingSrc]
+	child.square[rookDst] = child.square[rookSrc]
+	child.square[kingSrc] = pieceNone
+	child.square[rookSrc] = pieceNone
+
+	// disable castling
+	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
+
+	child.turn = colorInverse(b.turn)                       // switch color
+	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
+
+	if child.otherKingInCheck() {
+		return children // drop invalid move
+	}
+
+	children = append(children, child) // append valid move to children
+
+	return children
+}
+
+func (b board) generateCastlingRight(children []board) []board {
+	row := 7 * location(b.turn)
+	kingSrc := row*8 + 4 // E
+	kingDst := row*8 + 6 // G
+	rookSrc := row*8 + 7 // H
+	rookDst := row*8 + 5 // F
+
+	child := b // copy board
+
+	// move
+	child.square[kingDst] = child.square[kingSrc]
+	child.square[rookDst] = child.square[rookSrc]
+	child.square[kingSrc] = pieceNone
+	child.square[rookSrc] = pieceNone
+
+	// disable castling
+	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
+
+	child.turn = colorInverse(b.turn)                       // switch color
+	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
+
+	if child.otherKingInCheck() {
+		return children // drop invalid move
+	}
+
+	children = append(children, child) // append valid move to children
+
 	return children
 }
 
@@ -287,7 +395,7 @@ func (b board) recordPromotionIfValid(children []board, src, dst location, p pie
 func (b board) otherKingInCheck() bool {
 	otherKingColor := colorInverse(b.turn)
 	otherKingLoc := b.king[otherKingColor]
-	otherKingPiece := b.square[otherKingLoc]
+	//otherKingPiece := b.square[otherKingLoc]
 
 	// any piece attacks other king?
 	for loc := location(0); loc < location(64); loc++ {
@@ -298,7 +406,7 @@ func (b board) otherKingInCheck() bool {
 		if p.color() != b.turn {
 			continue
 		}
-		if b.pieceAttacks(p, loc, otherKingPiece, otherKingLoc) {
+		if b.pieceAttacks(p, loc, otherKingLoc) {
 			return true // other king is in check
 		}
 	}
@@ -308,7 +416,7 @@ func (b board) otherKingInCheck() bool {
 
 func (b board) kingInCheck() bool {
 	kingLoc := b.king[b.turn]
-	kingPiece := b.square[kingLoc]
+	//kingPiece := b.square[kingLoc]
 
 	// any piece attacks king?
 	for loc := location(0); loc < location(64); loc++ {
@@ -319,7 +427,7 @@ func (b board) kingInCheck() bool {
 		if p.color() == b.turn {
 			continue
 		}
-		if b.pieceAttacks(p, loc, kingPiece, kingLoc) {
+		if b.pieceAttacks(p, loc, kingLoc) {
 			return true // king is in check
 		}
 	}
@@ -327,7 +435,26 @@ func (b board) kingInCheck() bool {
 	return false
 }
 
-func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dstLoc location) bool {
+// any piece attacks square?
+func (b board) anyPieceAttacks(target location) bool {
+
+	for loc := location(0); loc < location(64); loc++ {
+		p := b.square[loc]
+		if p == pieceNone {
+			continue
+		}
+		if p.color() == b.turn {
+			continue
+		}
+		if b.pieceAttacks(p, loc, target) {
+			return true // square attacked
+		}
+	}
+
+	return false // square not attacked
+}
+
+func (b board) pieceAttacks(srcPiece piece, srcLoc, dstLoc location) bool {
 
 	srcRow, srcCol := srcLoc/8, srcLoc%8
 	dstRow, dstCol := dstLoc/8, dstLoc%8

@@ -38,15 +38,16 @@ func (g gameState) show() {
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Printf("turn: %s\n", b.turn.name())
 	fmt.Printf("material: %v\n", b.getMaterialValue())
-	fmt.Printf("white king: %s material=%d\n", locToStr(b.king[0]), b.materialValue[0])
-	fmt.Printf("black king: %s material=%d\n", locToStr(b.king[1]), b.materialValue[1])
+	fmt.Printf("white king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[0]), b.materialValue[0], b.flags[0]&lostCastlingLeft == 0, b.flags[0]&lostCastlingRight == 0)
+	fmt.Printf("black king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[1]), b.materialValue[1], b.flags[1]&lostCastlingLeft == 0, b.flags[1]&lostCastlingRight == 0)
 	fmt.Printf("history %d moves: ", len(g.history))
 	for _, m := range g.history {
 		fmt.Printf("(%s)", m.lastMove)
 	}
 	fmt.Println()
-	fmt.Printf("valid moves:")
-	for _, c := range b.generateChildren([]board{}) {
+	children := b.generateChildren([]board{})
+	fmt.Printf("%d valid moves:", len(children))
+	for _, c := range children {
 		fmt.Printf(" %s", c.lastMove)
 	}
 	fmt.Println()
@@ -317,56 +318,65 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 		return
 	}
 
-	if len(move) < 4 || len(move) > 5 {
-		fmt.Printf("usage: bad move length=%d: '%s'\n", len(move), move)
-		return
-	}
-	from := strings.ToLower(move[:2])
-	to := strings.ToLower(move[2:4])
-
-	fmt.Printf("[%s][%s]\n", from, to)
-
-	// from
-	if len(from) != 2 {
-		fmt.Printf("bad source format: [%s]\n", from)
-		return
-	}
-	if from[0] < 'a' || from[0] > 'h' {
-		fmt.Printf("bad source column letter: [%s]\n", from)
-	}
-	if from[1] < '1' || from[1] > '8' {
-		fmt.Printf("bad source row digit: [%s]\n", from)
-	}
-
-	// to
-	if len(to) != 2 {
-		fmt.Printf("bad target format: [%s]\n", to)
-		return
-	}
-	if to[0] < 'a' || to[0] > 'h' {
-		fmt.Printf("bad target column letter: [%s]\n", to)
-	}
-	if to[1] < '1' || to[1] > '8' {
-		fmt.Printf("bad target row digit: [%s]\n", to)
-	}
-
-	//b := game.history[len(game.history)-1]                        // will update a copy
-	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
-
-	if len(move) > 4 {
-		// promotion
-		promotion := move[4]
-		kind := pieceKindFromLetter(rune(promotion))
-		if kind != pieceNone {
-			p = piece(b.turn<<3) + kind
+	for _, c := range b.generateChildren(nil) {
+		if c.lastMove == move {
+			game.history = append(game.history, c)
+			break
 		}
 	}
 
-	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
-	b.turn = colorInverse(b.turn)                           // switch color
-	b.lastMove = fmt.Sprintf("%s %s", from, to)             // record move
+	/*
+		if len(move) < 4 || len(move) > 5 {
+			fmt.Printf("usage: bad move length=%d: '%s'\n", len(move), move)
+			return
+		}
+		from := strings.ToLower(move[:2])
+		to := strings.ToLower(move[2:4])
 
-	game.history = append(game.history, b) // append to history
+		fmt.Printf("[%s][%s]\n", from, to)
+
+		// from
+		if len(from) != 2 {
+			fmt.Printf("bad source format: [%s]\n", from)
+			return
+		}
+		if from[0] < 'a' || from[0] > 'h' {
+			fmt.Printf("bad source column letter: [%s]\n", from)
+		}
+		if from[1] < '1' || from[1] > '8' {
+			fmt.Printf("bad source row digit: [%s]\n", from)
+		}
+
+		// to
+		if len(to) != 2 {
+			fmt.Printf("bad target format: [%s]\n", to)
+			return
+		}
+		if to[0] < 'a' || to[0] > 'h' {
+			fmt.Printf("bad target column letter: [%s]\n", to)
+		}
+		if to[1] < '1' || to[1] > '8' {
+			fmt.Printf("bad target row digit: [%s]\n", to)
+		}
+
+		//b := game.history[len(game.history)-1]                        // will update a copy
+		p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
+
+		if len(move) > 4 {
+			// promotion
+			promotion := move[4]
+			kind := pieceKindFromLetter(rune(promotion))
+			if kind != pieceNone {
+				p = piece(b.turn<<3) + kind
+			}
+		}
+
+		b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
+		b.turn = colorInverse(b.turn)                           // switch color
+		b.lastMove = fmt.Sprintf("%s %s", from, to)             // record move
+
+		game.history = append(game.history, b) // append to history
+	*/
 }
 
 func cmdReset(cmds []command, game *gameState, tokens []string) {
