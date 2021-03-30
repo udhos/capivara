@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"unicode"
 )
 
 type pieceColor uint8
@@ -65,6 +66,24 @@ func (p piece) kindLetter() string {
 		return "p"
 	}
 	return "?"
+}
+
+func pieceKindFromLetter(letter rune) piece {
+	switch unicode.ToLower(letter) {
+	case 'k':
+		return whiteKing
+	case 'q':
+		return whiteQueen
+	case 'r':
+		return whiteRook
+	case 'b':
+		return whiteBishop
+	case 'n':
+		return whiteKnight
+	case 'p':
+		return whitePawn
+	}
+	return pieceNone
 }
 
 func (p piece) materialValue() int {

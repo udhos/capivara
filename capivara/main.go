@@ -43,6 +43,11 @@ func (g gameState) show() {
 		fmt.Printf("(%s)", m.lastMove)
 	}
 	fmt.Println()
+	fmt.Printf("valid moves:")
+	for _, c := range b.generateChildren([]board{}) {
+		fmt.Printf(" %s", c.lastMove)
+	}
+	fmt.Println()
 }
 
 const builtinBoard = `
@@ -218,40 +223,57 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdMove(cmds []command, game *gameState, tokens []string) {
-	if len(tokens) < 3 {
-		fmt.Printf("usage: move from to\n")
+	if len(tokens) < 2 {
+		fmt.Printf("usage: move fromto\n")
 		return
 	}
-	from := strings.ToLower(tokens[1])
-	to := strings.ToLower(tokens[2])
+	move := tokens[1]
+	if len(move) < 4 || len(move) > 5 {
+		fmt.Printf("usage: bad move length=%d: '%s'\n", len(move), move)
+		return
+	}
+	from := strings.ToLower(move[:2])
+	to := strings.ToLower(move[2:4])
+
+	fmt.Printf("[%s][%s]\n", from, to)
 
 	// from
 	if len(from) != 2 {
-		fmt.Printf("bad source format: [%s]", from)
+		fmt.Printf("bad source format: [%s]\n", from)
 		return
 	}
 	if from[0] < 'a' || from[0] > 'h' {
-		fmt.Printf("bad source column letter: [%s]", from)
+		fmt.Printf("bad source column letter: [%s]\n", from)
 	}
 	if from[1] < '1' || from[1] > '8' {
-		fmt.Printf("bad source row digit: [%s]", from)
+		fmt.Printf("bad source row digit: [%s]\n", from)
 	}
 
 	// to
 	if len(to) != 2 {
-		fmt.Printf("bad target format: [%s]", to)
+		fmt.Printf("bad target format: [%s]\n", to)
 		return
 	}
 	if to[0] < 'a' || to[0] > 'h' {
-		fmt.Printf("bad target column letter: [%s]", to)
+		fmt.Printf("bad target column letter: [%s]\n", to)
 	}
 	if to[1] < '1' || to[1] > '8' {
-		fmt.Printf("bad target row digit: [%s]", to)
+		fmt.Printf("bad target row digit: [%s]\n", to)
 	}
 
 	b := &game.history[len(game.history)-1]                       // will update in-place
 	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
-	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
+
+	if len(move) > 4 {
+		// promotion
+		promotion := move[4]
+		kind := pieceKindFromLetter(rune(promotion))
+		if kind != pieceNone {
+			p = piece(b.turn<<3) + kind
+		}
+	}
+
+	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
 }
 
 func cmdNegamax(cmds []command, game *gameState, tokens []string) {
@@ -271,42 +293,68 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {
-	if len(tokens) < 3 {
-		fmt.Printf("usage: play from to\n")
+	if len(tokens) < 2 {
+		fmt.Printf("usage: play fromto\n")
 		return
 	}
-	from := strings.ToLower(tokens[1])
-	to := strings.ToLower(tokens[2])
+	move := tokens[1]
+
+	// valid move?
+	last := len(game.history) - 1
+	b := game.history[last]
+	if !b.validMove(move) {
+		fmt.Printf("not a valid move: %s\n", move)
+		return
+	}
+
+	if len(move) < 4 || len(move) > 5 {
+		fmt.Printf("usage: bad move length=%d: '%s'\n", len(move), move)
+		return
+	}
+	from := strings.ToLower(move[:2])
+	to := strings.ToLower(move[2:4])
+
+	fmt.Printf("[%s][%s]\n", from, to)
 
 	// from
 	if len(from) != 2 {
-		fmt.Printf("bad source format: [%s]", from)
+		fmt.Printf("bad source format: [%s]\n", from)
 		return
 	}
 	if from[0] < 'a' || from[0] > 'h' {
-		fmt.Printf("bad source column letter: [%s]", from)
+		fmt.Printf("bad source column letter: [%s]\n", from)
 	}
 	if from[1] < '1' || from[1] > '8' {
-		fmt.Printf("bad source row digit: [%s]", from)
+		fmt.Printf("bad source row digit: [%s]\n", from)
 	}
 
 	// to
 	if len(to) != 2 {
-		fmt.Printf("bad target format: [%s]", to)
+		fmt.Printf("bad target format: [%s]\n", to)
 		return
 	}
 	if to[0] < 'a' || to[0] > 'h' {
-		fmt.Printf("bad target column letter: [%s]", to)
+		fmt.Printf("bad target column letter: [%s]\n", to)
 	}
 	if to[1] < '1' || to[1] > '8' {
-		fmt.Printf("bad target row digit: [%s]", to)
+		fmt.Printf("bad target row digit: [%s]\n", to)
 	}
 
-	b := game.history[len(game.history)-1]                        // will update a copy
+	//b := game.history[len(game.history)-1]                        // will update a copy
 	p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
-	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p)       // put piece on board
-	b.turn = colorInverse(b.turn)                                 // switch color
-	b.lastMove = fmt.Sprintf("%s %s", from, to)                   // record move
+
+	if len(move) > 4 {
+		// promotion
+		promotion := move[4]
+		kind := pieceKindFromLetter(rune(promotion))
+		if kind != pieceNone {
+			p = piece(b.turn<<3) + kind
+		}
+	}
+
+	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
+	b.turn = colorInverse(b.turn)                           // switch color
+	b.lastMove = fmt.Sprintf("%s %s", from, to)             // record move
 
 	game.history = append(game.history, b) // append to history
 }

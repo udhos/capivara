@@ -17,6 +17,15 @@ type board struct {
 	lastMove      string
 }
 
+func (b *board) validMove(move string) bool {
+	for _, c := range b.generateChildren([]board{}) {
+		if move == c.lastMove {
+			return true
+		}
+	}
+	return false
+}
+
 func (b *board) addPiece(i, j location, p piece) {
 	loc := i*8 + j
 	b.addPieceLoc(loc, p)
