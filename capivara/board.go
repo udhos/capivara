@@ -126,10 +126,11 @@ func (b board) generateChildren(children []board) []board {
 func (b board) generateCastlingLeft(children []board) []board {
 
 	row := 7 * location(b.turn)
-	kingSrc := row*8 + 4 // E
-	kingDst := row*8 + 2 // C
-	rookSrc := row * 8   // A
-	rookDst := row*8 + 3 // D
+	row8 := 8 * row
+	kingSrc := row8 + 4 // E
+	kingDst := row8 + 2 // C
+	rookSrc := row8     // A
+	rookDst := row8 + 3 // D
 
 	child := b // copy board
 
@@ -150,10 +151,11 @@ func (b board) generateCastlingLeft(children []board) []board {
 
 func (b board) generateCastlingRight(children []board) []board {
 	row := 7 * location(b.turn)
-	kingSrc := row*8 + 4 // E
-	kingDst := row*8 + 6 // G
-	rookSrc := row*8 + 7 // H
-	rookDst := row*8 + 5 // F
+	row8 := 8 * row
+	kingSrc := row8 + 4 // E
+	kingDst := row8 + 6 // G
+	rookSrc := row8 + 7 // H
+	rookDst := row8 + 5 // F
 
 	child := b // copy board
 
@@ -319,11 +321,10 @@ func (b board) generateSliding(children []board, src, incRow, incCol location) [
 			children = b.recordMoveIfValid(children, src, dstLoc)
 			continue
 		}
-		if dstP.color() == b.turn {
-			break // blocked by same color piece
+		if dstP.color() != b.turn {
+			// capture opponent piece
+			children = b.recordMoveIfValid(children, src, dstLoc)
 		}
-		// capture opponent piece
-		children = b.recordMoveIfValid(children, src, dstLoc)
 		break
 	}
 
@@ -384,10 +385,7 @@ func (b board) otherKingInCheck() bool {
 	// any piece attacks other king?
 	for loc := location(0); loc < location(64); loc++ {
 		p := b.square[loc]
-		if p == pieceNone {
-			continue
-		}
-		if p.color() != b.turn {
+		if p == pieceNone || p.color() != b.turn {
 			continue
 		}
 		if b.pieceAttacks(p, loc, otherKingLoc) {
@@ -407,10 +405,7 @@ func (b board) anyPieceAttacks(target location) bool {
 
 	for loc := location(0); loc < location(64); loc++ {
 		p := b.square[loc]
-		if p == pieceNone {
-			continue
-		}
-		if p.color() == b.turn {
+		if p == pieceNone || p.color() == b.turn {
 			continue
 		}
 		if b.pieceAttacks(p, loc, target) {
