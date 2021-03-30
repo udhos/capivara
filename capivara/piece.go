@@ -104,7 +104,7 @@ func pieceKindFromLetter(letter rune) piece {
 	return pieceNone
 }
 
-func (p piece) materialValue() int {
+func (p piece) materialValue() int16 {
 	switch p {
 	case pieceNone:
 		return 0

@@ -1,7 +1,7 @@
 package main
 
 type location int8
-type colorFlag uint32
+type colorFlag uint8
 
 const (
 	lostCastlingLeft colorFlag = 1 << iota
@@ -13,7 +13,7 @@ type board struct {
 	square        [64]piece
 	flags         [2]colorFlag
 	turn          pieceColor
-	materialValue [2]int
+	materialValue [2]int16
 	lastMove      string
 }
 
@@ -77,14 +77,15 @@ func (b board) generateChildren(children []board) []board {
 }
 
 func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
-	i, j := int(loc)/8, int(loc)%8
 	kind := p.kind()
-	color := p.color()
-	signal := colorToSignal(color)    // 0=>1 1=>-1
-	lastRow := 7 - 7*int(color)       // 0=>7 1=>0
-	firstRow := 7*int(color) + signal // 0=>1 1=>6
 	switch kind {
 	case whitePawn: // white + black
+		i, j := int(loc)/8, int(loc)%8
+		color := p.color()
+		signal := colorToSignal(color)    // 0=>1 1=>-1
+		lastRow := 7 - 7*int(color)       // 0=>7 1=>0
+		firstRow := 7*int(color) + signal // 0=>1 1=>6
+
 		// can move one up/down?
 		{
 			dstRow := i + signal

@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"unicode"
+	"unsafe"
 )
 
 type gameState struct {
@@ -143,7 +145,13 @@ func (g *gameState) loadFromReader(input io.Reader) {
 	}
 }
 
+const version = "0.0"
+
 func main() {
+
+	fmt.Printf("capivara version %s runtime %s GOMAXPROCS=%d OS=%s arch=%s\n",
+		version, runtime.Version(), runtime.GOMAXPROCS(0), runtime.GOOS, runtime.GOARCH)
+
 	gameLoop()
 }
 
@@ -151,6 +159,8 @@ func gameLoop() {
 
 	game := newGame()
 	game.loadFromString(builtinBoard)
+
+	fmt.Printf("board size: %d bytes\n", unsafe.Sizeof(board{}))
 
 LOOP:
 	for {
