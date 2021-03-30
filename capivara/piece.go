@@ -68,6 +68,24 @@ func (p piece) kindLetter() string {
 	return "?"
 }
 
+func (p piece) kindLetterLow() string {
+	switch p.kind() {
+	case whitePawn:
+		return "p"
+	case whiteRook:
+		return "r"
+	case whiteBishop:
+		return "b"
+	case whiteKnight:
+		return "n"
+	case whiteKing:
+		return "k"
+	case whiteQueen:
+		return "q"
+	}
+	return "?"
+}
+
 func pieceKindFromLetter(letter rune) piece {
 	switch unicode.ToLower(letter) {
 	case 'k':
@@ -136,8 +154,11 @@ func locToStr(loc location) string {
 	return coordToStr(loc/8, loc%8)
 }
 
-func moveToStr(src, dst location) string {
-	return fmt.Sprintf("%s%s", locToStr(src), locToStr(dst))
+func moveToStr(src, dst location, p piece) string {
+	if p == pieceNone {
+		return fmt.Sprintf("%s%s", locToStr(src), locToStr(dst))
+	}
+	return fmt.Sprintf("%s%s%s", locToStr(src), locToStr(dst), p.kindLetterLow())
 }
 
 // white=0 -> signal=1

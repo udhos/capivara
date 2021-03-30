@@ -96,7 +96,7 @@ func TestB7(t *testing.T) {
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 4, []string{})
 	if move != "g6g7" {
-		t.Errorf("score: %v (expected: move g6g7)", score)
+		t.Errorf("score: %v move: %s (expected: move g6g7)", score, move)
 	}
 }
 
@@ -108,7 +108,19 @@ func TestB8(t *testing.T) {
 	nega := negamaxState{}
 	score, move, _ := rootNegamax(&nega, b, 4, []string{})
 	if move != "d2d3" {
-		t.Errorf("score: %v (expected: move d2d3)", score)
+		t.Errorf("score: %v move: %s (expected: move d2d3)", score, move)
+	}
+}
+
+func TestB9(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b9)
+	last := len(game.history) - 1
+	b := game.history[last]
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 4, []string{})
+	if move != "g7g8q" {
+		t.Errorf("score: %v move: %s (expected: move g7g8q)", score, move)
 	}
 }
 
@@ -286,5 +298,26 @@ const b8 = `
 1  |  |  |  |  |  |  |  |  |  1
    -------------------------
     a  b  c  d  e  f  g  h
+`
 
+const b9 = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |  |  |  |.K|  |  |  |  8
+   -------------------------
+7  |  |  |  |  |.p|  |*p|  |  7
+   -------------------------
+6  |  |  |  |  |  |  |  |  |  6
+   -------------------------
+5  |  |  |  |  |  |  |  |  |  5
+   -------------------------
+4  |  |  |  |  |  |  |  |  |  4
+   -------------------------
+3  |  |  |  |  |  |  |  |  |  3
+   -------------------------
+2  |  |  |  |  |  |  |  |  |  2
+   -------------------------
+1  |  |  |  |  |*K|  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
 `

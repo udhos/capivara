@@ -254,11 +254,11 @@ func (b board) generateRelative(children []board, src, incRow, incCol location) 
 }
 
 func (b board) recordMoveIfValid(children []board, src, dst location) []board {
-	child := b                           // copy board
-	p := child.delPieceLoc(src)          // take piece from board
-	child.addPieceLoc(dst, p)            // put piece on board
-	child.turn = colorInverse(b.turn)    // switch color
-	child.lastMove = moveToStr(src, dst) // record move
+	child := b                                      // copy board
+	p := child.delPieceLoc(src)                     // take piece from board
+	child.addPieceLoc(dst, p)                       // put piece on board
+	child.turn = colorInverse(b.turn)               // switch color
+	child.lastMove = moveToStr(src, dst, pieceNone) // record move
 
 	if child.otherKingInCheck() {
 		return children // drop invalid move
@@ -269,11 +269,11 @@ func (b board) recordMoveIfValid(children []board, src, dst location) []board {
 }
 
 func (b board) recordPromotionIfValid(children []board, src, dst location, p piece) []board {
-	child := b                           // copy board
-	child.delPieceLoc(src)               // take pawn from board
-	child.addPieceLoc(dst, p)            // put new piece on board
-	child.turn = colorInverse(b.turn)    // switch color
-	child.lastMove = moveToStr(src, dst) // record move
+	child := b                              // copy board
+	child.delPieceLoc(src)                  // take pawn from board
+	child.addPieceLoc(dst, p)               // put new piece on board
+	child.turn = colorInverse(b.turn)       // switch color
+	child.lastMove = moveToStr(src, dst, p) // record move
 
 	if child.otherKingInCheck() {
 		return children // drop invalid move
