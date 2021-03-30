@@ -63,7 +63,9 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string) (float32
 		*/
 	}
 
-	sort.SliceStable(negaChildren, func(i, j int) bool { return len(negaChildren[i].path) < len(negaChildren[j].path) })
+	fmt.Println()
+
+	sort.Slice(negaChildren, func(i, j int) bool { return len(negaChildren[i].path) < len(negaChildren[j].path) })
 	sort.SliceStable(negaChildren, func(i, j int) bool { return negaChildren[i].score > negaChildren[j].score })
 
 	for _, c := range negaChildren {

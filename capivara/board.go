@@ -167,15 +167,24 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 		children = b.generateSliding(children, loc, -1, 1)
 
 	case whiteKing: // white + black
-		children = b.generateSlidingKing(children, loc, 0, 1)
-		children = b.generateSlidingKing(children, loc, 1, 1)
-		children = b.generateSlidingKing(children, loc, 1, 0)
-		children = b.generateSlidingKing(children, loc, 1, -1)
-		children = b.generateSlidingKing(children, loc, 0, -1)
-		children = b.generateSlidingKing(children, loc, -1, -1)
-		children = b.generateSlidingKing(children, loc, -1, 0)
-		children = b.generateSlidingKing(children, loc, -1, 1)
+		children = b.generateRelative(children, loc, 0, 1)
+		children = b.generateRelative(children, loc, 1, 1)
+		children = b.generateRelative(children, loc, 1, 0)
+		children = b.generateRelative(children, loc, 1, -1)
+		children = b.generateRelative(children, loc, 0, -1)
+		children = b.generateRelative(children, loc, -1, -1)
+		children = b.generateRelative(children, loc, -1, 0)
+		children = b.generateRelative(children, loc, -1, 1)
 
+	case whiteKnight: // white + black
+		children = b.generateRelative(children, loc, -1, 2)
+		children = b.generateRelative(children, loc, 1, 2)
+		children = b.generateRelative(children, loc, 2, -1)
+		children = b.generateRelative(children, loc, 2, 1)
+		children = b.generateRelative(children, loc, -1, -2)
+		children = b.generateRelative(children, loc, 1, -2)
+		children = b.generateRelative(children, loc, -2, -1)
+		children = b.generateRelative(children, loc, -2, 1)
 	}
 
 	return children
@@ -208,7 +217,7 @@ func (b board) generateSliding(children []board, src, incRow, incCol location) [
 	return children
 }
 
-func (b board) generateSlidingKing(children []board, src, incRow, incCol location) []board {
+func (b board) generateRelative(children []board, src, incRow, incCol location) []board {
 	dstRow := src / 8
 	dstCol := src % 8
 
@@ -378,31 +387,56 @@ func (b board) pieceAttacks(srcPiece piece, srcLoc location, dstPiece piece, dst
 		}
 
 	case whiteKing: // white + black
-		if b.slidingAttackKing(srcLoc, dstLoc, 0, 1) {
+		if b.relativeAttack(srcLoc, dstLoc, 0, 1) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, 1, 1) {
+		if b.relativeAttack(srcLoc, dstLoc, 1, 1) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, 1, 0) {
+		if b.relativeAttack(srcLoc, dstLoc, 1, 0) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, 1, -1) {
+		if b.relativeAttack(srcLoc, dstLoc, 1, -1) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, 0, -1) {
+		if b.relativeAttack(srcLoc, dstLoc, 0, -1) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, -1, -1) {
+		if b.relativeAttack(srcLoc, dstLoc, -1, -1) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, -1, 0) {
+		if b.relativeAttack(srcLoc, dstLoc, -1, 0) {
 			return true
 		}
-		if b.slidingAttackKing(srcLoc, dstLoc, -1, 1) {
+		if b.relativeAttack(srcLoc, dstLoc, -1, 1) {
 			return true
 		}
 
+	case whiteKnight: // white + black
+		if b.relativeAttack(srcLoc, dstLoc, -1, 2) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, 1, 2) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, 2, -1) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, 2, 1) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, -1, -2) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, 1, -2) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, -2, -1) {
+			return true
+		}
+		if b.relativeAttack(srcLoc, dstLoc, -2, 1) {
+			return true
+		}
 	}
 
 	return false
@@ -429,7 +463,7 @@ func (b board) slidingAttack(src, target, incRow, incCol location) bool {
 	return false
 }
 
-func (b board) slidingAttackKing(src, target, incRow, incCol location) bool {
+func (b board) relativeAttack(src, target, incRow, incCol location) bool {
 	dstRow := src / 8
 	dstCol := src % 8
 

@@ -100,6 +100,18 @@ func TestB7(t *testing.T) {
 	}
 }
 
+func TestB8(t *testing.T) {
+	game := newGame()
+	game.loadFromString(b8)
+	last := len(game.history) - 1
+	b := game.history[last]
+	nega := negamaxState{}
+	score, move, _ := rootNegamax(&nega, b, 4, []string{})
+	if move != "d2d3" {
+		t.Errorf("score: %v (expected: move d2d3)", score)
+	}
+}
+
 const b1 = `
     a  b  c  d  e  f  g  h
    -------------------------
@@ -252,4 +264,27 @@ const b7 = `
 1  |  |  |  |  |*K|  |  |  |  1
    -------------------------
     a  b  c  d  e  f  g  h
+`
+
+const b8 = `
+    a  b  c  d  e  f  g  h
+   -------------------------
+8  |  |  |  |.K|  |  |  |  |  8
+   -------------------------
+7  |  |  |  |  |.p|*B|  |  |  7
+   -------------------------
+6  |  |  |  |  |  |  |  |  |  6
+   -------------------------
+5  |  |  |  |  |  |  |  |  |  5
+   -------------------------
+4  |  |  |  |  |  |  |  |  |  4
+   -------------------------
+3  |  |  |  |.p|  |*N|  |  |  3
+   -------------------------
+2  |  |  |  |*R|  |  |  |*K|  2
+   -------------------------
+1  |  |  |  |  |  |  |  |  |  1
+   -------------------------
+    a  b  c  d  e  f  g  h
+
 `
