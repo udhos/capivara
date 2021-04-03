@@ -85,10 +85,7 @@ func (b board) getMaterialValue() float32 {
 func (b board) generateChildren(children []board) []board {
 	for loc := location(0); loc < location(64); loc++ {
 		p := b.square[loc]
-		if p == pieceNone {
-			continue
-		}
-		if p.color() != b.turn {
+		if p == pieceNone || p.color() != b.turn {
 			continue
 		}
 		children = b.generateChildrenPiece(children, loc, p)
@@ -508,13 +505,12 @@ func (b board) pieceAttacks(srcPiece piece, srcLoc, dstLoc location) bool {
 
 	srcRow, srcCol := srcLoc/8, srcLoc%8
 	dstRow, dstCol := dstLoc/8, dstLoc%8
-
 	srcKind := srcPiece.kind()
-	srcColor := srcPiece.color()
-	srcSignal := colorToSignal(srcColor) // 0=>1 1=>-1
 
 	switch srcKind {
 	case whitePawn: // white + black
+		srcColor := srcPiece.color()
+		srcSignal := colorToSignal(srcColor) // 0=>1 1=>-1
 		if int(srcRow)+srcSignal == int(dstRow) {
 			return (dstCol == srcCol-1) || (dstCol == srcCol+1)
 		}

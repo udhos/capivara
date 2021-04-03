@@ -203,12 +203,12 @@ type command struct {
 }
 
 var tableCmd = []command{
-	{"ab", cmdAlphaBeta, "alpha-beta search"},
+	{"ab", cmdAlphaBeta, "ab [depth] - alpha-beta search"},
 	{"clear", cmdClear, "erase board"},
 	{"help", cmdHelp, "show help"},
 	{"load", cmdLoad, "load board from file"},
 	{"move", cmdMove, "change piece position"},
-	{"negamax", cmdNegamax, "negamax search"},
+	{"negamax", cmdNegamax, "negamax [depth] - negamax search"},
 	{"play", cmdPlay, "play move"},
 	{"reset", cmdReset, "reset board to initial position"},
 	{"switch", cmdSwitch, "switch turn"},
@@ -305,7 +305,7 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
-	depth := 4
+	depth := 6
 	if len(tokens) > 1 {
 		d, errConv := strconv.Atoi(tokens[1])
 		if errConv == nil {
