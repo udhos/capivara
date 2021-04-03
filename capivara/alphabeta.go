@@ -8,7 +8,8 @@ const (
 )
 
 type alphaBetaState struct {
-	nodes int
+	nodes      int
+	showSearch bool
 }
 
 func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string) (float32, string, []string) {
@@ -41,7 +42,9 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string) (float
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove))
 		score = -score
 		ab.nodes += len(children)
-		fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
+		if ab.showSearch {
+			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
+		}
 		if score >= beta {
 			return beta, child.lastMove, childPath
 		}

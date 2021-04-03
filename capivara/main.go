@@ -315,7 +315,7 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 	fmt.Printf("alphabeta depth=%d\n", depth)
 	last := len(game.history) - 1
 	b := game.history[last]
-	ab := alphaBetaState{}
+	ab := alphaBetaState{showSearch: true}
 	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20))
 	fmt.Printf("alphabeta: nodes=%d best score=%v move: %s path: %s\n", ab.nodes, score, move, path)
 }

@@ -11,6 +11,9 @@ build() {
 	hash staticcheck >/dev/null && staticcheck "$pkg"
 
 	go test -failfast "$pkg"
+
+	(cd "$pkg" && go test -run=Benchmark -bench=.)
+
 	go install -v "$pkg"
 }
 
