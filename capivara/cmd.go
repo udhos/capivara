@@ -225,14 +225,17 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 
 	fmt.Printf("perft depth=%d\n", d)
 
-	var total int
+	total := len(children)
+	var nodes int
 	for _, c := range children {
-		moves := perft(c, d-1)
-		fmt.Printf("%s %d\n", c.lastMove, moves)
-		total += moves
+		moves1 := perft(c, d-1)
+		moves2 := perft(c, d)
+		fmt.Printf("%s nodes=%d total_nodes=%d\n", c.lastMove, moves2-moves1, moves2)
+		nodes += moves2 - moves1
+		total += moves2
 	}
 
-	fmt.Printf("perft depth=%d total: %d\n", d, total)
+	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d\n", d, nodes, total)
 }
 
 func perft(b board, depth int) int {
