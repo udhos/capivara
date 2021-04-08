@@ -162,9 +162,9 @@ func gameLoop() {
 
 	fmt.Printf("board size: %d bytes\n", unsafe.Sizeof(board{}))
 
+        input := bufio.NewReader(os.Stdin)
 LOOP:
 	for {
-		input := bufio.NewReader(os.Stdin)
 		game.show()
 		fmt.Print("enter command:")
 		text, errInput := input.ReadString('\n')
