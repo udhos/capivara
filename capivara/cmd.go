@@ -221,33 +221,41 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 
 	last := len(game.history) - 1
 	b := game.history[last]
-	children := b.generateChildren(nil)
+	//buf := make([]board, 0, 100)
+	buf := []board(nil)
+	children := b.generateChildren(buf)
 
 	fmt.Printf("perft depth=%d\n", d)
 
 	total := len(children)
 	var nodes int
 	for _, c := range children {
-		moves1 := perft(c, d-1)
-		moves2 := perft(c, d)
-		fmt.Printf("%s nodes=%d total_nodes=%d\n", c.lastMove, moves2-moves1, moves2)
-		nodes += moves2 - moves1
-		total += moves2
+		//moves1 := perft(c, d-1)
+		n, t := perft(c, d, buf)
+		fmt.Printf("%s nodes=%d total_nodes=%d\n", c.lastMove, n, t)
+		nodes += n
+		total += t
 	}
 
 	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d\n", d, nodes, total)
 }
 
-func perft(b board, depth int) int {
+func perft(b board, depth int, buf []board) (int, int) {
 	if depth < 1 {
-		return 0
+		return 0, 0
 	}
-	children := b.generateChildren(nil)
+	children := b.generateChildren(buf)
 	moves := len(children)
-	for _, c := range children {
-		moves += perft(c, depth-1)
+	if depth == 1 {
+		return moves, moves
 	}
-	return moves
+	var nodes int
+	for _, c := range children {
+		n, total := perft(c, depth-1, buf)
+		nodes += n
+		moves += total
+	}
+	return nodes, moves
 }
 
 func cmdReset(cmds []command, game *gameState, tokens []string) {
