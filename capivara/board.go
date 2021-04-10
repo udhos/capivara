@@ -82,17 +82,37 @@ func (b board) getMaterialValue() float32 {
 	return (wh + bl) / 100
 }
 
+func (b board) generatePassantCapture(attackerLoc, targetLoc location, children []board) []board {
+	attackerP := b.square[attackerLoc]
+	attackerColor := attackerP.color()
+	targetColor := b.square[targetLoc].color()
+
+	if attackerP.kind() == whitePawn && attackerColor != targetColor {
+
+		attackerSignal := colorToSignal(attackerColor)
+		attackerDstLoc := targetLoc + location(8*attackerSignal)
+
+		child, _ := b.newChild(attackerLoc, attackerDstLoc)
+
+		child.delPieceLoc(targetLoc) // captured passant pawn
+
+		return b.recordIfValid(children, child)
+	}
+
+	return children
+}
+
 func (b board) generateChildren(children []board) []board {
 
 	// generate en passant captures
 
 	lastMove := b.lastMove
-	if lastMove != "" {
-		trgColor := b.turn
+	if len(lastMove) == 4 {
+		trgColor := colorInverse(b.turn)
 		trgSignal := colorToSignal(trgColor)
 
-		trgSrcRow := int(lastMove[1]) - '0'
-		trgDstRow := int(lastMove[3]) - '0'
+		trgSrcRow := int(lastMove[1]) - '0' - 1
+		trgDstRow := int(lastMove[3]) - '0' - 1
 
 		trgRowFrom := 7*int(trgColor) + trgSignal // 0=>1 1=>6
 		trgRowTo := trgRowFrom + 2*trgSignal      // 1=>3 7=>5
@@ -102,17 +122,23 @@ func (b board) generateChildren(children []board) []board {
 			trgSrcCol := int(lastMove[0]) - 'a'
 			trgDstCol := int(lastMove[2]) - 'a'
 
-			// same column?
+			// kept column?
 			if trgSrcCol == trgDstCol {
-				trgDstLoc := trgDstCol + 8*trgDstRow
+				trgDstLoc := location(trgDstCol + 8*trgDstRow)
 				trgKind := b.square[trgDstLoc].kind()
+
 				if trgKind == whitePawn {
+
 					// it is pawn
 					if trgDstCol > 0 {
 						// might be captured from left
+						attackerLoc := location(trgDstCol - 1 + 8*trgDstRow)
+						children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 					}
 					if trgDstCol < 7 {
 						// might be captured from right
+						attackerLoc := location(trgDstCol + 1 + 8*trgDstRow)
+						children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 					}
 				}
 			}
