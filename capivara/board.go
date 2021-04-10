@@ -83,6 +83,43 @@ func (b board) getMaterialValue() float32 {
 }
 
 func (b board) generateChildren(children []board) []board {
+
+	// generate en passant captures
+
+	lastMove := b.lastMove
+	if lastMove != "" {
+		trgColor := b.turn
+		trgSignal := colorToSignal(trgColor)
+
+		trgSrcRow := int(lastMove[1]) - '0'
+		trgDstRow := int(lastMove[3]) - '0'
+
+		trgRowFrom := 7*int(trgColor) + trgSignal // 0=>1 1=>6
+		trgRowTo := trgRowFrom + 2*trgSignal      // 1=>3 7=>5
+
+		// from 2nd to 4th ?
+		if trgSrcRow == trgRowFrom && trgDstRow == trgRowTo {
+			trgSrcCol := int(lastMove[0]) - 'a'
+			trgDstCol := int(lastMove[2]) - 'a'
+
+			// same column?
+			if trgSrcCol == trgDstCol {
+				trgDstLoc := trgDstCol + 8*trgDstRow
+				trgKind := b.square[trgDstLoc].kind()
+				if trgKind == whitePawn {
+					// it is pawn
+					if trgDstCol > 0 {
+						// might be captured from left
+					}
+					if trgDstCol < 7 {
+						// might be captured from right
+					}
+				}
+			}
+		}
+	}
+
+	// scan pieces
 	for loc := location(0); loc < location(64); loc++ {
 		p := b.square[loc]
 		if p == pieceNone || p.color() != b.turn {
@@ -90,6 +127,8 @@ func (b board) generateChildren(children []board) []board {
 		}
 		children = b.generateChildrenPiece(children, loc, p)
 	}
+
+	// generate castling
 
 	if b.flags[b.turn]&lostCastlingLeft == 0 {
 		// castling left
