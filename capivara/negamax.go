@@ -13,7 +13,8 @@ import (
 // relativeMaterial(board) converts absolute material score to relative:
 // the higher the better for the current player
 func relativeMaterial(b board) float32 {
-	return float32(colorToSignal(b.turn)) * b.getMaterialValue()
+	n := float32(len(b.generateChildren(nil))) / 100.0
+	return float32(colorToSignal(b.turn)) * (b.getMaterialValue() + n)
 }
 
 const (

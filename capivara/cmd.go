@@ -116,7 +116,7 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
-	depth := 6
+	depth := 4
 	if len(tokens) > 1 {
 		d, errConv := strconv.Atoi(tokens[1])
 		if errConv == nil {
