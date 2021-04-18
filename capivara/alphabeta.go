@@ -12,9 +12,9 @@ type alphaBetaState struct {
 	showSearch bool
 }
 
-func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string) (float32, string, []string) {
+func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChildren bool) (float32, string, []string) {
 	if depth < 1 {
-		return relativeMaterial(b), "invalid-depth", path
+		return relativeMaterial(b, addChildren), "invalid-depth", path
 	}
 	if b.otherKingInCheck() {
 		return alphabetaMax, "checkmate", nil
@@ -30,7 +30,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string) (float
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
-		return relativeMaterial(children[0]), children[0].lastMove, path
+		return relativeMaterial(children[0], addChildren), children[0].lastMove, path
 	}
 
 	var bestPath []string
@@ -39,7 +39,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string) (float
 	var beta float32 = alphabetaMax
 
 	for _, child := range children {
-		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove))
+		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
 		ab.nodes += len(children)
 		if ab.showSearch {
@@ -58,9 +58,9 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string) (float
 	return alpha, bestMove, bestPath
 }
 
-func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path []string) (float32, []string) {
+func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path []string, addChildren bool) (float32, []string) {
 	if depth < 1 {
-		return relativeMaterial(b), path
+		return relativeMaterial(b, addChildren), path
 	}
 
 	children := b.generateChildren([]board{})
@@ -74,7 +74,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 	var bestPath []string
 
 	for _, child := range children {
-		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove))
+		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
 		ab.nodes += len(children)
 		if score >= beta {

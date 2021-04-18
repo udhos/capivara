@@ -111,7 +111,7 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	last := len(game.history) - 1
 	b := game.history[last]
 	nega := negamaxState{}
-	score, move, path := rootNegamax(&nega, b, depth, make([]string, 0, 20))
+	score, move, path := rootNegamax(&nega, b, depth, make([]string, 0, 20), game.addChildren)
 	fmt.Printf("negamax: nodes=%d best score=%v move: %s path: %s\n", nega.nodes, score, move, path)
 }
 
@@ -127,7 +127,7 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 	last := len(game.history) - 1
 	b := game.history[last]
 	ab := alphaBetaState{showSearch: true}
-	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20))
+	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
 	fmt.Printf("alphabeta: nodes=%d best score=%v move: %s path: %s\n", ab.nodes, score, move, path)
 }
 

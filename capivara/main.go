@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -12,7 +13,8 @@ import (
 )
 
 type gameState struct {
-	history []board
+	history     []board
+	addChildren bool
 }
 
 func newGame() gameState {
@@ -36,7 +38,7 @@ func (g gameState) show() {
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Printf("turn: %s\n", b.turn.name())
-	fmt.Printf("material: %v evaluation: %v\n", b.getMaterialValue(), relativeMaterial(b))
+	fmt.Printf("material: %v evaluation: %v\n", b.getMaterialValue(), relativeMaterial(b, g.addChildren))
 	fmt.Printf("white king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[0]), b.materialValue[0], b.flags[0]&lostCastlingLeft == 0, b.flags[0]&lostCastlingRight == 0)
 	fmt.Printf("black king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[1]), b.materialValue[1], b.flags[1]&lostCastlingLeft == 0, b.flags[1]&lostCastlingRight == 0)
 	fmt.Printf("history %d moves: ", len(g.history))
@@ -152,12 +154,19 @@ func main() {
 	fmt.Printf("capivara version %s runtime %s GOMAXPROCS=%d OS=%s arch=%s\n",
 		version, runtime.Version(), runtime.GOMAXPROCS(0), runtime.GOOS, runtime.GOARCH)
 
-	gameLoop()
+	var addChildren bool
+
+	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
+
+	flag.Parse()
+
+	gameLoop(addChildren)
 }
 
-func gameLoop() {
+func gameLoop(addChildren bool) {
 
 	game := newGame()
+	game.addChildren = addChildren
 	game.loadFromString(builtinBoard)
 
 	fmt.Printf("board size: %d bytes\n", unsafe.Sizeof(board{}))

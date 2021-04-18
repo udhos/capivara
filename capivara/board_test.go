@@ -11,7 +11,20 @@ func BenchmarkCastling(b *testing.B) {
 	ab := alphaBetaState{}
 	var mv string
 	for n := 0; n < b.N; n++ {
-		_, m, _ := rootAlphaBeta(&ab, brd, 4, nil)
+		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, false)
+		mv = m // record call result to prevent compiler from eliminating function call
+	}
+	move = mv // record bench result to prevent the compiler from eliminating the test
+}
+
+func BenchmarkCastlingAddChildren(b *testing.B) {
+	game := newGame()
+	game.loadFromString(castling)
+	brd := game.history[len(game.history)-1]
+	ab := alphaBetaState{}
+	var mv string
+	for n := 0; n < b.N; n++ {
+		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, true)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
 	move = mv // record bench result to prevent the compiler from eliminating the test
