@@ -529,21 +529,8 @@ func (b board) recordPromotionIfValid(children []board, src, dst location, p pie
 }
 
 func (b board) otherKingInCheck() bool {
-	otherKingColor := colorInverse(b.turn)
-	otherKingLoc := b.king[otherKingColor]
-
-	// any piece attacks other king?
-	for loc := location(0); loc < location(64); loc++ {
-		p := b.square[loc]
-		if p == pieceNone || p.color() != b.turn {
-			continue
-		}
-		if b.pieceAttacks(p, loc, otherKingLoc) {
-			return true // other king is in check
-		}
-	}
-
-	return false
+	b.turn = colorInverse(b.turn)
+	return b.kingInCheck()
 }
 
 func (b board) kingInCheck() bool {
