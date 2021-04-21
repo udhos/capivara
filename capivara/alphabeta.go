@@ -38,7 +38,27 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 	var alpha float32 = alphabetaMin
 	var beta float32 = alphabetaMax
 
-	for _, child := range children {
+	// handle first child
+	{
+		child := children[0]
+		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
+		score = -score
+		ab.nodes += len(children)
+		if ab.showSearch {
+			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
+		}
+		if score >= beta {
+			return beta, child.lastMove, childPath
+		}
+
+		// pick first child
+		alpha = score
+		bestMove = child.lastMove
+		bestPath = childPath
+	}
+
+	// scan remaining children
+	for _, child := range children[1:] {
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
 		ab.nodes += len(children)
@@ -80,7 +100,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 		if score >= beta {
 			return beta, childPath
 		}
-		if score >= alpha {
+		if score > alpha {
 			alpha = score
 			bestPath = childPath
 		}
