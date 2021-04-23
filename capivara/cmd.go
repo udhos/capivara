@@ -227,8 +227,8 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 
 	fmt.Printf("perft depth=%d\n", d)
 
-	total := len(children)
-	var nodes int
+	total := int64(len(children))
+	var nodes int64
 	for _, c := range children {
 		//moves1 := perft(c, d-1)
 		n, t := perft(c, d, buf)
@@ -238,18 +238,29 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 	}
 
 	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d\n", d, nodes, total)
+
+	if d < len(testPerftTable) {
+		expected := testPerftTable[d+1]
+		if expected != nodes {
+			fmt.Printf("perft depth=%d nodes=%d expected=%d WRONG\n", d, nodes, expected)
+		} else {
+			fmt.Printf("perft depth=%d nodes=%d expected=%d ok\n", d, nodes, expected)
+		}
+	}
 }
 
-func perft(b board, depth int, buf []board) (int, int) {
+var testPerftTable = []int64{0, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860}
+
+func perft(b board, depth int, buf []board) (int64, int64) {
 	if depth < 1 {
 		return 0, 0
 	}
 	children := b.generateChildren(buf)
-	moves := len(children)
+	moves := int64(len(children))
 	if depth == 1 {
 		return moves, moves
 	}
-	var nodes int
+	var nodes int64
 	for _, c := range children {
 		n, total := perft(c, depth-1, buf)
 		nodes += n

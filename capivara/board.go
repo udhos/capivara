@@ -210,7 +210,10 @@ func (b board) generateCastlingLeft(children []board) []board {
 	child.turn = colorInverse(b.turn)                       // switch color
 	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
 
-	return b.recordIfValid(children, child)
+	//return b.recordIfValid(children, child)
+	// no need to verify king in check since castling conditions
+	// previously required king target square is free from attack
+	return append(children, child)
 }
 
 func (b board) generateCastlingRight(children []board) []board {
@@ -235,7 +238,10 @@ func (b board) generateCastlingRight(children []board) []board {
 	child.turn = colorInverse(b.turn)                       // switch color
 	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
 
-	return b.recordIfValid(children, child)
+	//return b.recordIfValid(children, child)
+	// no need to verify king in check since castling conditions
+	// previously required king target square is free from attack
+	return append(children, child)
 }
 
 func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
