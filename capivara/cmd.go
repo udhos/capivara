@@ -256,6 +256,10 @@ LOOP:
 		bestDepth = depth
 		bestScore = score
 		bestMove = move
+		if ab.singleChildren {
+			fmt.Printf("search depth=%d: move=%s single move\n", depth, move)
+			break
+		}
 		switch move {
 		case "checkmated", "checkmate", "draw":
 			break LOOP

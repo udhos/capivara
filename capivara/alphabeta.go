@@ -11,10 +11,11 @@ const (
 )
 
 type alphaBetaState struct {
-	nodes      int
-	showSearch bool
-	deadline   time.Time
-	cancelled  bool
+	nodes          int
+	showSearch     bool
+	deadline       time.Time
+	cancelled      bool
+	singleChildren bool
 }
 
 func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChildren bool) (float32, string, []string) {
@@ -35,6 +36,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
+		ab.singleChildren = true
 		return relativeMaterial(children[0], addChildren), children[0].lastMove, path
 	}
 
