@@ -139,74 +139,17 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 		return
 	}
 	move := tokens[1]
-
-	// valid move?
 	last := len(game.history) - 1
 	b := game.history[last]
-	if !b.validMove(move) {
-		fmt.Printf("not a valid move: %s\n", move)
-		return
-	}
-
 	for _, c := range b.generateChildren(nil) {
 		if c.lastMove == move {
+			// found valid move
 			game.history = append(game.history, c)
-			break
+			return
 		}
 	}
 
-	/*
-		if len(move) < 4 || len(move) > 5 {
-			fmt.Printf("usage: bad move length=%d: '%s'\n", len(move), move)
-			return
-		}
-		from := strings.ToLower(move[:2])
-		to := strings.ToLower(move[2:4])
-
-		fmt.Printf("[%s][%s]\n", from, to)
-
-		// from
-		if len(from) != 2 {
-			fmt.Printf("bad source format: [%s]\n", from)
-			return
-		}
-		if from[0] < 'a' || from[0] > 'h' {
-			fmt.Printf("bad source column letter: [%s]\n", from)
-		}
-		if from[1] < '1' || from[1] > '8' {
-			fmt.Printf("bad source row digit: [%s]\n", from)
-		}
-
-		// to
-		if len(to) != 2 {
-			fmt.Printf("bad target format: [%s]\n", to)
-			return
-		}
-		if to[0] < 'a' || to[0] > 'h' {
-			fmt.Printf("bad target column letter: [%s]\n", to)
-		}
-		if to[1] < '1' || to[1] > '8' {
-			fmt.Printf("bad target row digit: [%s]\n", to)
-		}
-
-		//b := game.history[len(game.history)-1]                        // will update a copy
-		p := b.delPiece(location(from[1]-'1'), location(from[0]-'a')) // take piece from board
-
-		if len(move) > 4 {
-			// promotion
-			promotion := move[4]
-			kind := pieceKindFromLetter(rune(promotion))
-			if kind != pieceNone {
-				p = piece(b.turn<<3) + kind
-			}
-		}
-
-		b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
-		b.turn = colorInverse(b.turn)                           // switch color
-		b.lastMove = fmt.Sprintf("%s %s", from, to)             // record move
-
-		game.history = append(game.history, b) // append to history
-	*/
+	fmt.Printf("not a valid move: %s\n", move)
 }
 
 func cmdPerft(cmds []command, game *gameState, tokens []string) {
