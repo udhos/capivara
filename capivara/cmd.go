@@ -232,7 +232,6 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 	total := int64(len(children))
 	var nodes int64
 	for _, c := range children {
-		//moves1 := perft(c, d-1)
 		n, t := perft(c, d, buf)
 		fmt.Printf("%s nodes=%d total_nodes=%d\n", c.lastMove, n, t)
 		nodes += n

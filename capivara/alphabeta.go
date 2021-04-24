@@ -73,9 +73,6 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 			}
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
-		if ab.cancelled {
-			return 0, "", nil
-		}
 		score = -score
 		ab.nodes += len(children)
 		if ab.showSearch {
@@ -119,9 +116,6 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 			}
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
-		if ab.cancelled {
-			return 0, nil
-		}
 		score = -score
 		ab.nodes += len(children)
 		if score >= beta {
