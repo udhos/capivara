@@ -278,7 +278,7 @@ func cmdReset(cmds []command, game *gameState, tokens []string) {
 func cmdSearch(cmds []command, game *gameState, tokens []string) {
 	begin := time.Now()
 
-	availTime := 10 * time.Second
+	availTime := 20 * time.Second
 
 	if len(tokens) > 1 {
 		a, errParse := time.ParseDuration(tokens[1])
@@ -295,6 +295,7 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 	var bestScore float32
 	var bestMove string
 
+LOOP:
 	for depth := 1; ; depth++ {
 		fmt.Printf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline))
 		if deadline.Before(time.Now()) {
@@ -313,6 +314,10 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 		bestDepth = depth
 		bestScore = score
 		bestMove = move
+		switch move {
+		case "checkmated", "checkmate", "draw":
+			break LOOP
+		}
 	}
 
 	fmt.Printf("search: best depth=%d score=%v move=%s elapsed=%v\n", bestDepth, bestScore, bestMove, time.Since(begin))
