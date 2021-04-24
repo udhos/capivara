@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 const (
 	alphabetaMin = -1000.0
@@ -10,6 +13,8 @@ const (
 type alphaBetaState struct {
 	nodes      int
 	showSearch bool
+	deadline   time.Time
+	cancelled  bool
 }
 
 func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChildren bool) (float32, string, []string) {
@@ -59,7 +64,18 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 
 	// scan remaining children
 	for _, child := range children[1:] {
+		if !ab.deadline.IsZero() {
+			// there is a timer
+			if ab.deadline.Before(time.Now()) {
+				// timer has expired
+				ab.cancelled = true
+				return 0, "", nil
+			}
+		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
+		if ab.cancelled {
+			return 0, "", nil
+		}
 		score = -score
 		ab.nodes += len(children)
 		if ab.showSearch {
@@ -94,7 +110,18 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 	var bestPath []string
 
 	for _, child := range children {
+		if !ab.deadline.IsZero() {
+			// there is a timer
+			if ab.deadline.Before(time.Now()) {
+				// timer has expired
+				ab.cancelled = true
+				return 0, nil
+			}
+		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
+		if ab.cancelled {
+			return 0, nil
+		}
 		score = -score
 		ab.nodes += len(children)
 		if score >= beta {

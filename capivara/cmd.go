@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type command struct {
@@ -22,6 +23,7 @@ var tableCmd = []command{
 	{"play", cmdPlay, "play move"},
 	{"perft", cmdPerft, "perft depth - count moves to depth"},
 	{"reset", cmdReset, "reset board to initial position"},
+	{"search", cmdSearch, "search [ms] - search"},
 	{"switch", cmdSwitch, "switch turn"},
 	{"undo", cmdUndo, "undo last played move"},
 }
@@ -271,6 +273,49 @@ func perft(b board, depth int, buf []board) (int64, int64) {
 
 func cmdReset(cmds []command, game *gameState, tokens []string) {
 	game.loadFromString(builtinBoard)
+}
+
+func cmdSearch(cmds []command, game *gameState, tokens []string) {
+	begin := time.Now()
+
+	availTime := 10 * time.Second
+
+	if len(tokens) > 1 {
+		a, errParse := time.ParseDuration(tokens[1])
+		if errParse != nil {
+			fmt.Printf("search: bad duration: '%s': %v\n", tokens[1], errParse)
+			return
+		}
+		availTime = a
+	}
+
+	deadline := begin.Add(availTime / 5)
+
+	var bestDepth int
+	var bestScore float32
+	var bestMove string
+
+	for depth := 1; ; depth++ {
+		fmt.Printf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline))
+		if deadline.Before(time.Now()) {
+			fmt.Printf("search depth=%d: timeout\n", depth)
+			break
+		}
+		last := len(game.history) - 1
+		b := game.history[last]
+		ab := alphaBetaState{showSearch: false, deadline: deadline}
+		score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
+		if ab.cancelled {
+			fmt.Printf("search depth=%d: timeout - cancelled\n", depth)
+			break
+		}
+		fmt.Printf("search depth=%d: nodes=%d best score=%v move: %s path: %s\n", depth, ab.nodes, score, move, path)
+		bestDepth = depth
+		bestScore = score
+		bestMove = move
+	}
+
+	fmt.Printf("search: best depth=%d score=%v move=%s elapsed=%v\n", bestDepth, bestScore, bestMove, time.Since(begin))
 }
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
