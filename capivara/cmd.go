@@ -138,18 +138,20 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 		fmt.Printf("usage: play fromto\n")
 		return
 	}
-	move := tokens[1]
-	last := len(game.history) - 1
-	b := game.history[last]
-	for _, c := range b.generateChildren(nil) {
-		if c.lastMove == move {
-			// found valid move
-			game.history = append(game.history, c)
-			return
-		}
+
+	isSep := func(c rune) bool {
+		return c == '(' || c == ')'
 	}
 
-	fmt.Printf("not a valid move: %s\n", move)
+	for _, t := range tokens[1:] {
+		fields := strings.FieldsFunc(t, isSep)
+		for _, move := range fields {
+			if errPlay := game.play(move); errPlay != nil {
+				fmt.Printf("play error: %v\n", errPlay)
+				return
+			}
+		}
+	}
 }
 
 func cmdPerft(cmds []command, game *gameState, tokens []string) {

@@ -41,29 +41,6 @@ func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
 	b.materialValue[p.color()] -= p.materialValue() // piece material value leaves board
 	b.square[loc] = pieceNone
-
-	/*
-		switch p.kind() {
-		case whiteRook:
-			// rook moved, then disable castling
-			firstRow := 7 * location(p.color()) // 0=>0 1=>7
-			row := loc / 8
-			if row == firstRow {
-				// rook in initial row
-				col := loc % 8
-				switch col {
-				case 0: // left rook
-					b.flags[b.turn] |= lostCastlingLeft
-				case 7: // right rook
-					b.flags[b.turn] |= lostCastlingRight
-				}
-			}
-		case whiteKing:
-			// king moved, then disable castling
-			b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
-		}
-	*/
-
 	return p
 }
 
@@ -195,11 +172,14 @@ func (b board) generateCastlingLeft(children []board) []board {
 	child.square[kingSrc] = pieceNone
 	child.square[rookSrc] = pieceNone
 
+	// record king new position
+	child.king[child.turn] = kingDst
+
 	// disable castling
 	child.flags[child.turn] |= lostCastlingLeft | lostCastlingRight
 
 	child.turn = colorInverse(b.turn)                       // switch color
-	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
+	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -223,11 +203,14 @@ func (b board) generateCastlingRight(children []board) []board {
 	child.square[kingSrc] = pieceNone
 	child.square[rookSrc] = pieceNone
 
+	// record king new position
+	child.king[child.turn] = kingDst
+
 	// disable castling
 	child.flags[child.turn] |= lostCastlingLeft | lostCastlingRight
 
 	child.turn = colorInverse(b.turn)                       // switch color
-	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record move
+	child.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions

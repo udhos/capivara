@@ -55,7 +55,7 @@ func TestPerft2(t *testing.T) {
 	buf := []board(nil)
 	n, _ := perft(b, d+1, buf)
 
-	expected := int64(33947)
+	expected := int64(33949)
 	if n != expected {
 		t.Errorf("perft depth %d: got %d nodes, expected %d", d, n, expected)
 	}

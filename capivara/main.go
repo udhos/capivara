@@ -17,6 +17,19 @@ type gameState struct {
 	addChildren bool
 }
 
+func (g *gameState) play(move string) error {
+	last := len(g.history) - 1
+	b := g.history[last]
+	for _, c := range b.generateChildren(nil) {
+		if c.lastMove == move {
+			// found valid move
+			g.history = append(g.history, c)
+			return nil
+		}
+	}
+	return fmt.Errorf("not a valid move: %s", move)
+}
+
 func newGame() gameState {
 	return gameState{history: []board{{}}}
 }
