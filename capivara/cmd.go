@@ -264,6 +264,10 @@ LOOP:
 		case "checkmated", "checkmate", "draw":
 			break LOOP
 		}
+		if bestScore == alphabetaMax {
+			fmt.Printf("search depth=%d: nodes=%d best score=%v move: %s found checkmate\n", depth, ab.nodes, score, move)
+			break
+		}
 	}
 
 	fmt.Printf("search: best depth=%d score=%v move=%s elapsed=%v\n", bestDepth, bestScore, bestMove, time.Since(begin))
