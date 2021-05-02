@@ -44,8 +44,8 @@ func (g gameState) showFen() {
 		fmt.Print(" ", castling)
 	}
 
-	// FIXME - en passant target square
-	fmt.Print(" -")
+	// En passant target square
+	fmt.Print(" ", passantSquare(b))
 
 	// FIXME - Halfmove clock: This is the number of halfmoves since the last capture or pawn advance.
 	fmt.Print(" 0")
@@ -54,6 +54,31 @@ func (g gameState) showFen() {
 	fmt.Print(" ", 1+(len(g.history)-1)/2)
 
 	fmt.Println()
+}
+
+func passantSquare(b board) string {
+	if len(b.lastMove) == 4 {
+		move := b.lastMove
+		step := int64(move[3]) - int64(move[1])
+		if abs(step) == 2 {
+			// moved two squares
+			dstCol := location(move[2] - 'a')
+			dstRow := location(move[3] - '1')
+			dstLoc := dstRow*8 + dstCol
+			p := b.square[dstLoc]
+			if p.kind() == whitePawn {
+				// it is pawn
+				targetRow := dstRow - location(colorToSignal(p.color()))
+				return coordToStr(targetRow, dstCol)
+			}
+		}
+	}
+	return "-"
+}
+
+func abs(n int64) int64 {
+	y := n >> 63
+	return (n ^ y) - y
 }
 
 func showFenRow(b board, row location) {
