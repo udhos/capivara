@@ -15,6 +15,7 @@ type command struct {
 
 var tableCmd = []command{
 	{"ab", cmdAlphaBeta, "ab [depth] - alpha-beta search"},
+	{"castling", cmdCastling, "castling"},
 	{"clear", cmdClear, "erase board"},
 	{"help", cmdHelp, "show help"},
 	{"load", cmdLoad, "load board from file"},
@@ -30,6 +31,14 @@ var tableCmd = []command{
 
 func cmdClear(cmds []command, game *gameState, tokens []string) {
 	*game = newGame()
+}
+
+func cmdCastling(cmds []command, game *gameState, tokens []string) {
+	last := len(game.history) - 1
+	b := &game.history[last]
+	b.flags[0] |= lostCastlingLeft | lostCastlingRight // disable castling for white
+	b.flags[1] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+	fmt.Println("castling disabled")
 }
 
 func cmdHelp(cmds []command, game *gameState, tokens []string) {
