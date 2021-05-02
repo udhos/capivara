@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 func (g gameState) showFen() {
@@ -127,4 +129,71 @@ func fenLetter(p piece) string {
 		return strings.ToUpper(low)
 	}
 	return low
+}
+
+func fenParse(fen []string) (board, error) {
+	b := board{}
+
+	// drop castling rights
+	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
+	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+
+	fields := len(fen)
+	if fields < 1 {
+		return b, errors.New("missing FEN pieces") // no pieces
+	}
+
+	// parse pieces
+
+	if fields < 2 {
+		return b, nil // no turn
+	}
+
+	rows := strings.FieldsFunc(fen[0], func(r rune) bool { return r == '/' })
+	for r, codeRow := range rows {
+		row := 7 - r
+		col := 0
+		for _, codeCol := range codeRow {
+			if codeCol >= '1' && codeCol <= '8' {
+				col += int(codeCol) - '0'
+				continue
+			}
+			kind := pieceKindFromLetter(codeCol)
+			color := colorBlack
+			if unicode.IsUpper(codeCol) {
+				color = colorWhite
+			}
+			b.addPiece(location(row), location(col), piece(color<<3)+kind)
+			col++
+		}
+	}
+
+	// parse turn
+
+	if fen[1] == "w" {
+		b.turn = colorWhite
+	} else {
+		b.turn = colorBlack
+	}
+
+	if fields < 3 {
+		return b, nil // no castling rights
+	}
+
+	// parse castling rights
+
+	for _, l := range fen[2] {
+		switch l {
+		case 'K':
+			b.flags[colorWhite] &= ^lostCastlingRight
+		case 'Q':
+			b.flags[colorWhite] &= ^lostCastlingLeft
+		case 'k':
+			b.flags[colorBlack] &= ^lostCastlingRight
+		case 'q':
+			b.flags[colorBlack] &= ^lostCastlingLeft
+		}
+	}
+
+	return b, nil
 }

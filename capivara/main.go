@@ -90,6 +90,15 @@ const builtinBoard = `
     a  b  c  d  e  f  g  h
 `
 
+func (g *gameState) loadFromFen(fen []string) {
+	b, errFen := fenParse(fen)
+	if errFen != nil {
+		fmt.Printf("loadFromFen: %v\n", errFen)
+		return
+	}
+	g.history = []board{b} // replace board
+}
+
 func (g *gameState) loadFromString(s string) {
 	g.loadFromReader(strings.NewReader(s))
 }

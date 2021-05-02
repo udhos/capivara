@@ -17,6 +17,7 @@ var tableCmd = []command{
 	{"ab", cmdAlphaBeta, "ab [depth] - alpha-beta search"},
 	{"castling", cmdCastling, "castling"},
 	{"clear", cmdClear, "erase board"},
+	{"fen", cmdFen, "load board from FEN"},
 	{"help", cmdHelp, "show help"},
 	{"load", cmdLoad, "load board from file"},
 	{"move", cmdMove, "change piece position"},
@@ -36,9 +37,17 @@ func cmdClear(cmds []command, game *gameState, tokens []string) {
 func cmdCastling(cmds []command, game *gameState, tokens []string) {
 	last := len(game.history) - 1
 	b := &game.history[last]
-	b.flags[0] |= lostCastlingLeft | lostCastlingRight // disable castling for white
-	b.flags[1] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
+	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
 	fmt.Println("castling disabled")
+}
+
+func cmdFen(cmds []command, game *gameState, tokens []string) {
+	if len(tokens) < 2 {
+		fmt.Printf("usage: fen FEN-string\n")
+		return
+	}
+	game.loadFromFen(tokens[1:])
 }
 
 func cmdHelp(cmds []command, game *gameState, tokens []string) {
