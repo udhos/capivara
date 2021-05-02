@@ -29,13 +29,13 @@ func (g gameState) showFen() {
 	if b.flags[0]&lostCastlingRight == 0 {
 		castling += "K"
 	}
-	if b.flags[0]&lostCastlingRight == 0 {
+	if b.flags[0]&lostCastlingLeft == 0 {
 		castling += "Q"
 	}
 	if b.flags[1]&lostCastlingRight == 0 {
 		castling += "k"
 	}
-	if b.flags[1]&lostCastlingRight == 0 {
+	if b.flags[1]&lostCastlingLeft == 0 {
 		castling += "q"
 	}
 	if castling == "" {
