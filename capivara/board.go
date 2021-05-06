@@ -76,38 +76,25 @@ func (b board) generateChildren(children []board) []board {
 
 	lastMove := b.lastMove
 	if len(lastMove) == 4 {
-		trgColor := colorInverse(b.turn)
-		trgSignal := colorToSignal(trgColor)
-
-		trgSrcRow := int(lastMove[1]) - '0' - 1
-		trgDstRow := int(lastMove[3]) - '0' - 1
-
-		trgRowFrom := 7*int(trgColor) + trgSignal // 0=>1 1=>6
-		trgRowTo := trgRowFrom + 2*trgSignal      // 1=>3 7=>5
-
-		// from 2nd to 4th ?
-		if trgSrcRow == trgRowFrom && trgDstRow == trgRowTo {
-			trgSrcCol := int(lastMove[0]) - 'a'
+		step := int64(lastMove[3]) - int64(lastMove[1])
+		if abs(step) == 2 {
+			// moved two squares
+			trgDstRow := int(lastMove[3]) - '1'
 			trgDstCol := int(lastMove[2]) - 'a'
+			trgDstLoc := location(trgDstCol + 8*trgDstRow)
+			trgKind := b.square[trgDstLoc].kind()
 
-			// kept column?
-			if trgSrcCol == trgDstCol {
-				trgDstLoc := location(trgDstCol + 8*trgDstRow)
-				trgKind := b.square[trgDstLoc].kind()
-
-				if trgKind == whitePawn {
-
-					// it is pawn
-					if trgDstCol > 0 {
-						// might be captured from left
-						attackerLoc := location(trgDstCol - 1 + 8*trgDstRow)
-						children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
-					}
-					if trgDstCol < 7 {
-						// might be captured from right
-						attackerLoc := location(trgDstCol + 1 + 8*trgDstRow)
-						children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
-					}
+			if trgKind == whitePawn {
+				// it is pawn
+				if trgDstCol > 0 {
+					// might be captured from left
+					attackerLoc := location(trgDstCol - 1 + 8*trgDstRow)
+					children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
+				}
+				if trgDstCol < 7 {
+					// might be captured from right
+					attackerLoc := location(trgDstCol + 1 + 8*trgDstRow)
+					children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 				}
 			}
 		}
