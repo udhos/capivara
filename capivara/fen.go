@@ -156,6 +156,9 @@ func fenParse(fen []string) (board, error) {
 				continue
 			}
 			kind := pieceKindFromLetter(codeCol)
+			if kind == pieceNone {
+				return b, fmt.Errorf("bad piece: %c", codeCol)
+			}
 			color := colorBlack
 			if unicode.IsUpper(codeCol) {
 				color = colorWhite
