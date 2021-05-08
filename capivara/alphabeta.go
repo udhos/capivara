@@ -11,7 +11,7 @@ const (
 )
 
 type alphaBetaState struct {
-	nodes          int
+	nodes          int64
 	showSearch     bool
 	deadline       time.Time
 	cancelled      bool
@@ -52,7 +52,11 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 		child := children.pool[0]
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
+<<<<<<< HEAD
 		ab.nodes += countChildren
+=======
+		ab.nodes += int64(len(children))
+>>>>>>> main
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
 		}
@@ -78,7 +82,11 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
+<<<<<<< HEAD
 		ab.nodes += countChildren
+=======
+		ab.nodes += int64(len(children))
+>>>>>>> main
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
 		}
@@ -127,7 +135,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-		ab.nodes += countChildren
+		ab.nodes += int64(countChildren)
 		if score >= beta {
 			children.drop(countChildren)
 			return beta, childPath

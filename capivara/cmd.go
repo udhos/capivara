@@ -155,8 +155,18 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 	children.reset()
 	ab := alphaBetaState{showSearch: true, children: children}
 
+	begin := time.Now()
+
 	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
-	fmt.Printf("alphabeta: nodes=%d best score=%v move: %s path: %s\n", ab.nodes, score, move, path)
+
+	speed := getSpeed(ab.nodes, begin)
+
+	fmt.Printf("alphabeta: nodes=%d speed=%v knodes/s best score=%v move: %s path: %s\n", ab.nodes, speed, score, move, path)
+}
+
+func getSpeed(nodes int64, begin time.Time) int {
+	elap := time.Since(begin).Seconds()
+	return int(float64(nodes/1000) / elap) // knodes / s
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {
@@ -272,7 +282,8 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 LOOP:
 	for depth := 1; ; depth++ {
 		fmt.Printf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline))
-		if deadline.Before(time.Now()) {
+		depthBegin := time.Now()
+		if deadline.Before(depthBegin) {
 			fmt.Printf("search depth=%d: timeout\n", depth)
 			break
 		}
@@ -288,7 +299,10 @@ LOOP:
 			fmt.Printf("search depth=%d: timeout - cancelled\n", depth)
 			break
 		}
-		fmt.Printf("search depth=%d: nodes=%d best score=%v move: %s path: %s\n", depth, ab.nodes, score, move, path)
+
+		speed := getSpeed(ab.nodes, depthBegin)
+
+		fmt.Printf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move: %s path: %s\n", depth, ab.nodes, speed, score, move, path)
 		bestDepth = depth
 		bestScore = score
 		bestMove = move
