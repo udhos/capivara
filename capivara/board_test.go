@@ -10,11 +10,11 @@ func BenchmarkCastling(b *testing.B) {
 	brd := game.history[len(game.history)-1]
 
 	children := defaultBoardPool
-	children.reset()
 	ab := alphaBetaState{children: children}
 
 	var mv string
 	for n := 0; n < b.N; n++ {
+		children.reset()
 		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, false)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
@@ -27,11 +27,11 @@ func BenchmarkCastlingAddChildren(b *testing.B) {
 	brd := game.history[len(game.history)-1]
 
 	children := defaultBoardPool
-	children.reset()
 	ab := alphaBetaState{children: children}
 
 	var mv string
 	for n := 0; n < b.N; n++ {
+		children.reset()
 		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, true)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
