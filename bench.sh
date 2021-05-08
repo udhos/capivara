@@ -1,3 +1,3 @@
 #!/bin/bash
 
-(cd ./capivara && go test -benchtime=100x -run=Benchmark -bench=.)
+(cd ./capivara && go test -benchtime=10x -run=Benchmark -bench=.)
