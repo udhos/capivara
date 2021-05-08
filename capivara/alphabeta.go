@@ -82,11 +82,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-<<<<<<< HEAD
-		ab.nodes += countChildren
-=======
-		ab.nodes += int64(len(children))
->>>>>>> main
+		ab.nodes += int64(countChildren)
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
 		}
