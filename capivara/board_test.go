@@ -8,7 +8,11 @@ func BenchmarkCastling(b *testing.B) {
 	game := newGame()
 	game.loadFromString(castling)
 	brd := game.history[len(game.history)-1]
-	ab := alphaBetaState{}
+
+	children := defaultBoardPool
+	children.reset()
+	ab := alphaBetaState{children: children}
+
 	var mv string
 	for n := 0; n < b.N; n++ {
 		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, false)
@@ -21,7 +25,11 @@ func BenchmarkCastlingAddChildren(b *testing.B) {
 	game := newGame()
 	game.loadFromString(castling)
 	brd := game.history[len(game.history)-1]
-	ab := alphaBetaState{}
+
+	children := defaultBoardPool
+	children.reset()
+	ab := alphaBetaState{children: children}
+
 	var mv string
 	for n := 0; n < b.N; n++ {
 		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, true)

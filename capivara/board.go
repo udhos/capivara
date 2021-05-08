@@ -50,7 +50,7 @@ func (b board) getMaterialValue() float32 {
 	return (wh + bl) / 100
 }
 
-func (b board) generatePassantCapture(attackerLoc, targetLoc location, children []board) []board {
+func (b board) generatePassantCapture(attackerLoc, targetLoc location, children *boardPool) int {
 	attackerP := b.square[attackerLoc]
 	attackerColor := attackerP.color()
 	targetColor := b.square[targetLoc].color()
@@ -67,10 +67,12 @@ func (b board) generatePassantCapture(attackerLoc, targetLoc location, children 
 		return b.recordIfValid(children, child)
 	}
 
-	return children
+	return 0
 }
 
-func (b board) generateChildren(children []board) []board {
+func (b board) generateChildren(children *boardPool) int {
+
+	var countChildren int
 
 	// generate en passant captures
 
@@ -89,12 +91,12 @@ func (b board) generateChildren(children []board) []board {
 				if trgDstCol > 0 {
 					// might be captured from left
 					attackerLoc := location(trgDstCol - 1 + 8*trgDstRow)
-					children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
+					countChildren += b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 				}
 				if trgDstCol < 7 {
 					// might be captured from right
 					attackerLoc := location(trgDstCol + 1 + 8*trgDstRow)
-					children = b.generatePassantCapture(attackerLoc, trgDstLoc, children)
+					countChildren += b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 				}
 			}
 		}
@@ -106,7 +108,7 @@ func (b board) generateChildren(children []board) []board {
 		if p == pieceNone || p.color() != b.turn {
 			continue
 		}
-		children = b.generateChildrenPiece(children, loc, p)
+		countChildren += b.generateChildrenPiece(children, loc, p)
 	}
 
 	// generate castling
@@ -121,7 +123,7 @@ func (b board) generateChildren(children []board) []board {
 			// squares are free
 			colE := firstRow8 + 4 // king
 			if !b.anyPieceAttacks(colB) && !b.anyPieceAttacks(colC) && !b.anyPieceAttacks(colD) && !b.anyPieceAttacks(colE) {
-				children = b.generateCastlingLeft(children)
+				countChildren += b.generateCastlingLeft(children)
 			}
 		}
 	}
@@ -134,15 +136,15 @@ func (b board) generateChildren(children []board) []board {
 			// squares are free
 			colE := firstRow8 + 4 // king
 			if !b.anyPieceAttacks(colE) && !b.anyPieceAttacks(colF) && !b.anyPieceAttacks(colG) {
-				children = b.generateCastlingRight(children)
+				countChildren += b.generateCastlingRight(children)
 			}
 		}
 	}
 
-	return children
+	return countChildren
 }
 
-func (b board) generateCastlingLeft(children []board) []board {
+func (b board) generateCastlingLeft(children *boardPool) int {
 
 	row := 7 * location(b.turn)
 	row8 := 8 * row
@@ -171,10 +173,11 @@ func (b board) generateCastlingLeft(children []board) []board {
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
 	// previously required king target square is free from attack
-	return append(children, child)
+	children.push(&child)
+	return 1
 }
 
-func (b board) generateCastlingRight(children []board) []board {
+func (b board) generateCastlingRight(children *boardPool) int {
 	row := 7 * location(b.turn)
 	row8 := 8 * row
 	kingSrc := row8 + 4 // E
@@ -202,10 +205,13 @@ func (b board) generateCastlingRight(children []board) []board {
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
 	// previously required king target square is free from attack
-	return append(children, child)
+	children.push(&child)
+	return 1
 }
 
-func (b board) generateChildrenPiece(children []board, loc location, p piece) []board {
+func (b board) generateChildrenPiece(children *boardPool, loc location, p piece) int {
+	var countChildren int
+
 	kind := p.kind()
 	switch kind {
 	case whitePawn: // white + black
@@ -223,12 +229,12 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			if dstP == pieceNone {
 				// position is free
 				if dstRow == lastRow {
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
-					children = b.recordMoveIfValid(children, loc, location(dstLoc))
+					countChildren += b.recordMoveIfValid(children, loc, location(dstLoc))
 				}
 			}
 		}
@@ -243,7 +249,7 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			dstP := b.square[dstRowLoc]
 			if secondP == pieceNone && dstP == pieceNone {
 				// free to move
-				children = b.recordMoveIfValid(children, loc, location(dstRowLoc))
+				countChildren += b.recordMoveIfValid(children, loc, location(dstRowLoc))
 			}
 		}
 
@@ -255,12 +261,12 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
 				if dstRow == lastRow {
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
-					children = b.recordMoveIfValid(children, loc, location(dstLoc))
+					countChildren += b.recordMoveIfValid(children, loc, location(dstLoc))
 				}
 			}
 		}
@@ -273,70 +279,73 @@ func (b board) generateChildrenPiece(children []board, loc location, p piece) []
 			if dstP != pieceNone && dstP.color() != color {
 				// free to capture
 				if dstRow == lastRow {
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
-					children = b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteQueen)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteRook)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
+					countChildren += b.recordPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
-					children = b.recordMoveIfValid(children, loc, location(dstLoc))
+					countChildren += b.recordMoveIfValid(children, loc, location(dstLoc))
 				}
 			}
 		}
 
 	case whiteQueen: // white + black
-		children = b.generateSliding(children, loc, 0, 1)
-		children = b.generateSliding(children, loc, 1, 1)
-		children = b.generateSliding(children, loc, 1, 0)
-		children = b.generateSliding(children, loc, 1, -1)
-		children = b.generateSliding(children, loc, 0, -1)
-		children = b.generateSliding(children, loc, -1, -1)
-		children = b.generateSliding(children, loc, -1, 0)
-		children = b.generateSliding(children, loc, -1, 1)
+		countChildren += b.generateSliding(children, loc, 0, 1)
+		countChildren += b.generateSliding(children, loc, 1, 1)
+		countChildren += b.generateSliding(children, loc, 1, 0)
+		countChildren += b.generateSliding(children, loc, 1, -1)
+		countChildren += b.generateSliding(children, loc, 0, -1)
+		countChildren += b.generateSliding(children, loc, -1, -1)
+		countChildren += b.generateSliding(children, loc, -1, 0)
+		countChildren += b.generateSliding(children, loc, -1, 1)
 
 	case whiteRook: // white + black
-		children = b.generateSlidingRook(children, loc, 0, 1)
-		children = b.generateSlidingRook(children, loc, 1, 0)
-		children = b.generateSlidingRook(children, loc, 0, -1)
-		children = b.generateSlidingRook(children, loc, -1, 0)
+		countChildren += b.generateSlidingRook(children, loc, 0, 1)
+		countChildren += b.generateSlidingRook(children, loc, 1, 0)
+		countChildren += b.generateSlidingRook(children, loc, 0, -1)
+		countChildren += b.generateSlidingRook(children, loc, -1, 0)
 
 	case whiteBishop: // white + black
-		children = b.generateSliding(children, loc, 1, 1)
-		children = b.generateSliding(children, loc, 1, -1)
-		children = b.generateSliding(children, loc, -1, -1)
-		children = b.generateSliding(children, loc, -1, 1)
+		countChildren += b.generateSliding(children, loc, 1, 1)
+		countChildren += b.generateSliding(children, loc, 1, -1)
+		countChildren += b.generateSliding(children, loc, -1, -1)
+		countChildren += b.generateSliding(children, loc, -1, 1)
 
 	case whiteKing: // white + black
-		children = b.generateRelativeKing(children, loc, 0, 1)
-		children = b.generateRelativeKing(children, loc, 1, 1)
-		children = b.generateRelativeKing(children, loc, 1, 0)
-		children = b.generateRelativeKing(children, loc, 1, -1)
-		children = b.generateRelativeKing(children, loc, 0, -1)
-		children = b.generateRelativeKing(children, loc, -1, -1)
-		children = b.generateRelativeKing(children, loc, -1, 0)
-		children = b.generateRelativeKing(children, loc, -1, 1)
+		countChildren += b.generateRelativeKing(children, loc, 0, 1)
+		countChildren += b.generateRelativeKing(children, loc, 1, 1)
+		countChildren += b.generateRelativeKing(children, loc, 1, 0)
+		countChildren += b.generateRelativeKing(children, loc, 1, -1)
+		countChildren += b.generateRelativeKing(children, loc, 0, -1)
+		countChildren += b.generateRelativeKing(children, loc, -1, -1)
+		countChildren += b.generateRelativeKing(children, loc, -1, 0)
+		countChildren += b.generateRelativeKing(children, loc, -1, 1)
 
 	case whiteKnight: // white + black
-		children = b.generateRelative(children, loc, -1, 2)
-		children = b.generateRelative(children, loc, 1, 2)
-		children = b.generateRelative(children, loc, 2, -1)
-		children = b.generateRelative(children, loc, 2, 1)
-		children = b.generateRelative(children, loc, -1, -2)
-		children = b.generateRelative(children, loc, 1, -2)
-		children = b.generateRelative(children, loc, -2, -1)
-		children = b.generateRelative(children, loc, -2, 1)
+		countChildren += b.generateRelative(children, loc, -1, 2)
+		countChildren += b.generateRelative(children, loc, 1, 2)
+		countChildren += b.generateRelative(children, loc, 2, -1)
+		countChildren += b.generateRelative(children, loc, 2, 1)
+		countChildren += b.generateRelative(children, loc, -1, -2)
+		countChildren += b.generateRelative(children, loc, 1, -2)
+		countChildren += b.generateRelative(children, loc, -2, -1)
+		countChildren += b.generateRelative(children, loc, -2, 1)
 	}
 
-	return children
+	return countChildren
 }
 
-func (b board) recordIfValid(children []board, child board) []board {
+func (b board) recordIfValid(children *boardPool, child board) int {
 	if child.otherKingInCheck() {
-		return children // drop invalid move 'child'
+		return 0 // drop invalid move 'child'
 	}
-	return append(children, child) // record
+	children.push(&child) // record
+	return 1
 }
 
-func (b board) generateSliding(children []board, src, incRow, incCol location) []board {
+func (b board) generateSliding(children *boardPool, src, incRow, incCol location) int {
+	var countChildren int
+
 	dstRow := src / 8
 	dstCol := src % 8
 	for {
@@ -349,20 +358,22 @@ func (b board) generateSliding(children []board, src, incRow, incCol location) [
 		dstP := b.square[dstLoc]
 		if dstP == pieceNone {
 			// empty square
-			children = b.recordMoveIfValid(children, src, dstLoc)
+			countChildren += b.recordMoveIfValid(children, src, dstLoc)
 			continue
 		}
 		if dstP.color() != b.turn {
 			// capture opponent piece
-			children = b.recordMoveIfValid(children, src, dstLoc)
+			countChildren += b.recordMoveIfValid(children, src, dstLoc)
 		}
 		break
 	}
 
-	return children
+	return countChildren
 }
 
-func (b board) generateSlidingRook(children []board, src, incRow, incCol location) []board {
+func (b board) generateSlidingRook(children *boardPool, src, incRow, incCol location) int {
+	var countChildren int
+
 	dstRow := src / 8
 	dstCol := src % 8
 	for {
@@ -375,71 +386,67 @@ func (b board) generateSlidingRook(children []board, src, incRow, incCol locatio
 		dstP := b.square[dstLoc]
 		if dstP == pieceNone {
 			// empty square
-			children = b.recordMoveIfValidRook(children, src, dstLoc)
+			countChildren += b.recordMoveIfValidRook(children, src, dstLoc)
 			continue
 		}
 		if dstP.color() != b.turn {
 			// capture opponent piece
-			children = b.recordMoveIfValidRook(children, src, dstLoc)
+			countChildren += b.recordMoveIfValidRook(children, src, dstLoc)
 		}
 		break
 	}
 
-	return children
+	return countChildren
 }
 
-func (b board) generateRelative(children []board, src, incRow, incCol location) []board {
+func (b board) generateRelative(children *boardPool, src, incRow, incCol location) int {
 	dstRow := src / 8
 	dstCol := src % 8
 
 	dstRow += incRow
 	dstCol += incCol
 	if dstRow < 0 || dstRow > 7 || dstCol < 0 || dstCol > 7 {
-		return children // out of board
+		return 0 // out of board
 	}
 	dstLoc := dstRow*8 + dstCol
 	dstP := b.square[dstLoc]
 	if dstP == pieceNone {
 		// empty square
-		children = b.recordMoveIfValid(children, src, dstLoc)
-		return children
+		return b.recordMoveIfValid(children, src, dstLoc)
 	}
 	if dstP.color() != b.turn {
 		// capture opponent piece
-		children = b.recordMoveIfValid(children, src, dstLoc)
-		return children
+		return b.recordMoveIfValid(children, src, dstLoc)
 	}
 
 	// blocked by same color piece
 
-	return children
+	return 0
 }
 
-func (b board) generateRelativeKing(children []board, src, incRow, incCol location) []board {
+func (b board) generateRelativeKing(children *boardPool, src, incRow, incCol location) int {
 	dstRow := src / 8
 	dstCol := src % 8
 
 	dstRow += incRow
 	dstCol += incCol
 	if dstRow < 0 || dstRow > 7 || dstCol < 0 || dstCol > 7 {
-		return children // out of board
+		return 0 // out of board
 	}
 	dstLoc := dstRow*8 + dstCol
 	dstP := b.square[dstLoc]
 	if dstP == pieceNone {
 		// empty square
-		children = b.recordMoveIfValidKing(children, src, dstLoc)
-		return children
+		return b.recordMoveIfValidKing(children, src, dstLoc)
 	}
 	if dstP.color() != b.turn {
 		// capture opponent piece
-		children = b.recordMoveIfValidKing(children, src, dstLoc)
-		return children
+		return b.recordMoveIfValidKing(children, src, dstLoc)
 	}
 
 	// blocked by same color piece
 
-	return children
+	return 0
 }
 
 func (b board) newChild(src, dst location) (board, piece) {
@@ -451,12 +458,12 @@ func (b board) newChild(src, dst location) (board, piece) {
 	return child, p
 }
 
-func (b board) recordMoveIfValid(children []board, src, dst location) []board {
+func (b board) recordMoveIfValid(children *boardPool, src, dst location) int {
 	child, _ := b.newChild(src, dst)
 	return b.recordIfValid(children, child)
 }
 
-func (b board) recordMoveIfValidKing(children []board, src, dst location) []board {
+func (b board) recordMoveIfValidKing(children *boardPool, src, dst location) int {
 	child, p := b.newChild(src, dst)
 
 	// king moved, then disable castling
@@ -465,7 +472,7 @@ func (b board) recordMoveIfValidKing(children []board, src, dst location) []boar
 	return b.recordIfValid(children, child)
 }
 
-func (b board) recordMoveIfValidRook(children []board, src, dst location) []board {
+func (b board) recordMoveIfValidRook(children *boardPool, src, dst location) int {
 	child, p := b.newChild(src, dst)
 
 	// rook moved, then disable castling
@@ -485,7 +492,7 @@ func (b board) recordMoveIfValidRook(children []board, src, dst location) []boar
 	return b.recordIfValid(children, child)
 }
 
-func (b board) recordPromotionIfValid(children []board, src, dst location, p piece) []board {
+func (b board) recordPromotionIfValid(children *boardPool, src, dst location, p piece) int {
 	child := b                              // copy board
 	child.delPieceLoc(src)                  // take pawn from board
 	child.addPieceLoc(dst, p)               // put new piece on board

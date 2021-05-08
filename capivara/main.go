@@ -20,7 +20,12 @@ type gameState struct {
 func (g *gameState) play(move string) error {
 	last := len(g.history) - 1
 	b := g.history[last]
-	for _, c := range b.generateChildren(nil) {
+
+	children := defaultBoardPool
+	children.reset()
+	b.generateChildren(children)
+
+	for _, c := range children.pool {
 		if c.lastMove == move {
 			// found valid move
 			g.history = append(g.history, c)
@@ -51,7 +56,11 @@ func (g gameState) show() {
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Printf("turn: %s\n", b.turn.name())
-	fmt.Printf("material: %v evaluation: %v\n", b.getMaterialValue(), relativeMaterial(b, g.addChildren))
+
+	children := defaultBoardPool
+	children.reset()
+
+	fmt.Printf("material: %v evaluation: %v\n", b.getMaterialValue(), relativeMaterial(children, b, g.addChildren))
 	fmt.Printf("white king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[0]), b.materialValue[0], b.flags[0]&lostCastlingLeft == 0, b.flags[0]&lostCastlingRight == 0)
 	fmt.Printf("black king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[1]), b.materialValue[1], b.flags[1]&lostCastlingLeft == 0, b.flags[1]&lostCastlingRight == 0)
 	g.showFen()
@@ -60,9 +69,12 @@ func (g gameState) show() {
 		fmt.Printf("(%s)", m.lastMove)
 	}
 	fmt.Println()
-	children := b.generateChildren([]board{})
-	fmt.Printf("%d valid moves:", len(children))
-	for _, c := range children {
+
+	children.reset()
+	countChildren := b.generateChildren(children)
+
+	fmt.Printf("%d valid moves:", countChildren)
+	for _, c := range children.pool {
 		fmt.Printf(" %s", c.lastMove)
 	}
 	fmt.Println()

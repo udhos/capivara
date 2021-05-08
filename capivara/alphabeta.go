@@ -16,28 +16,30 @@ type alphaBetaState struct {
 	deadline       time.Time
 	cancelled      bool
 	singleChildren bool
+	children       *boardPool
 }
 
 func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChildren bool) (float32, string, []string) {
 	if depth < 1 {
-		return relativeMaterial(b, addChildren), "invalid-depth", path
+		return relativeMaterial(ab.children, b, addChildren), "invalid-depth", path
 	}
 	if b.otherKingInCheck() {
 		return alphabetaMax, "checkmate", nil
 	}
-	children := b.generateChildren([]board{})
-	if len(children) == 0 {
+	children := ab.children
+	countChildren := b.generateChildren(children)
+	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin, "checkmated", path // checkmated
 		}
 		return 0, "draw", path
 	}
-	if len(children) == 1 {
+	if countChildren == 1 {
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
 		ab.singleChildren = true
-		return relativeMaterial(children[0], addChildren), children[0].lastMove, path
+		return relativeMaterial(children, b, addChildren), ab.children.pool[0].lastMove, path
 	}
 
 	var bestPath []string
@@ -47,10 +49,10 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 
 	// handle first child
 	{
-		child := children[0]
+		child := children.pool[0]
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-		ab.nodes += len(children)
+		ab.nodes += countChildren
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
 		}
@@ -65,7 +67,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 	}
 
 	// scan remaining children
-	for _, child := range children[1:] {
+	for _, child := range children.pool[1:] {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
@@ -76,7 +78,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-		ab.nodes += len(children)
+		ab.nodes += countChildren
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, ab.nodes, score, child.lastMove, childPath)
 		}
@@ -94,33 +96,40 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 }
 
 func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path []string, addChildren bool) (float32, []string) {
+
+	children := ab.children
+
 	if depth < 1 {
-		return relativeMaterial(b, addChildren), path
+		return relativeMaterial(children, b, addChildren), path
 	}
 
-	children := b.generateChildren([]board{})
-	if len(children) == 0 {
+	countChildren := b.generateChildren(children)
+	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin, path // checkmated
 		}
 		return 0, path // draw
 	}
 
+	lastChildren := children.pool[len(children.pool)-countChildren:]
+
 	var bestPath []string
 
-	for _, child := range children {
+	for _, child := range lastChildren {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
 				// timer has expired
 				ab.cancelled = true
+				children.drop(countChildren)
 				return 0, nil
 			}
 		}
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-		ab.nodes += len(children)
+		ab.nodes += countChildren
 		if score >= beta {
+			children.drop(countChildren)
 			return beta, childPath
 		}
 		if score > alpha {
@@ -129,5 +138,6 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 		}
 	}
 
+	children.drop(countChildren)
 	return alpha, bestPath
 }

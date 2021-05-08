@@ -12,10 +12,12 @@ import (
 //
 // relativeMaterial(board) converts absolute material score to relative:
 // the higher the better for the current player
-func relativeMaterial(b board, addChildren bool) float32 {
+func relativeMaterial(children *boardPool, b board, addChildren bool) float32 {
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
-		relative += float32(len(b.generateChildren(nil))) / 100.0
+		countChildren := b.generateChildren(children)
+		relative += float32(countChildren) / 100.0
+		children.drop(countChildren)
 	}
 	return relative
 }
@@ -26,28 +28,32 @@ const (
 )
 
 type negamaxState struct {
-	nodes int
+	nodes    int
+	children *boardPool
 }
 
 func rootNegamax(nega *negamaxState, b board, depth int, path []string, addChildren bool) (float32, string, []string) {
 	if depth < 1 {
-		return relativeMaterial(b, addChildren), "invalid-depth", path
+		return relativeMaterial(nega.children, b, addChildren), "invalid-depth", path
 	}
 	if b.otherKingInCheck() {
 		return negamaxMax, "checkmate", nil
 	}
-	children := b.generateChildren([]board{})
-	if len(children) == 0 {
+
+	children := nega.children
+	countChildren := b.generateChildren(children)
+
+	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin, "checkmated", path // checkmated
 		}
 		return 0, "draw", path
 	}
-	if len(children) == 1 {
+	if countChildren == 1 {
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
-		return relativeMaterial(children[0], addChildren), children[0].lastMove, path
+		return relativeMaterial(children, children.pool[0], addChildren), children.pool[0].lastMove, path
 	}
 
 	var max float32 = negamaxMin
@@ -58,12 +64,14 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string, addChild
 
 	var negaChildren []negaChild
 
-	for _, child := range children {
+	lastChildren := children.pool[len(children.pool)-countChildren:]
+
+	for _, child := range lastChildren {
 		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-		nega.nodes += len(children)
+		nega.nodes += countChildren
 		fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s path: %s\n", depth, nega.nodes, score, child.lastMove, childPath)
-		negaChildren = append(negaChildren, negaChild{b: child, score: score, path: childPath, nodes: len(children)})
+		negaChildren = append(negaChildren, negaChild{b: child, score: score, path: childPath, nodes: countChildren})
 		/*
 			if score >= max {
 				max = score
@@ -97,12 +105,15 @@ type negaChild struct {
 }
 
 func negamax(nega *negamaxState, b board, depth int, path []string, addChildren bool) (float32, []string) {
+
+	children := nega.children
+
 	if depth < 1 {
-		return relativeMaterial(b, addChildren), path
+		return relativeMaterial(children, b, addChildren), path
 	}
 
-	children := b.generateChildren([]board{})
-	if len(children) == 0 {
+	countChildren := b.generateChildren(children)
+	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin, path // checkmated
 		}
@@ -112,10 +123,12 @@ func negamax(nega *negamaxState, b board, depth int, path []string, addChildren 
 	var max float32 = negamaxMin
 	var bestPath []string
 
-	for _, child := range children {
+	lastChildren := children.pool[len(children.pool)-countChildren:]
+
+	for _, child := range lastChildren {
 		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
-		nega.nodes += len(children)
+		nega.nodes += countChildren
 		if score >= max {
 			max = score
 			bestPath = childPath

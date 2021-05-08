@@ -14,7 +14,9 @@ func TestPerft(t *testing.T) {
 			break
 		}
 
-		buf := []board(nil)
+		buf := defaultBoardPool
+		buf.reset()
+
 		n, _ := perft(b, d, buf)
 
 		if n != nodes {
@@ -52,7 +54,10 @@ func TestPerft2(t *testing.T) {
 	b := game.history[len(game.history)-1]
 
 	d := 2
-	buf := []board(nil)
+
+	buf := defaultBoardPool
+	buf.reset()
+
 	n, _ := perft(b, d+1, buf)
 
 	expected := int64(33949)

@@ -130,7 +130,11 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	fmt.Printf("negamax depth=%d\n", depth)
 	last := len(game.history) - 1
 	b := game.history[last]
-	nega := negamaxState{}
+
+	children := defaultBoardPool
+	children.reset()
+	nega := negamaxState{children: children}
+
 	score, move, path := rootNegamax(&nega, b, depth, make([]string, 0, 20), game.addChildren)
 	fmt.Printf("negamax: nodes=%d best score=%v move: %s path: %s\n", nega.nodes, score, move, path)
 }
@@ -146,7 +150,11 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 	fmt.Printf("alphabeta depth=%d\n", depth)
 	last := len(game.history) - 1
 	b := game.history[last]
-	ab := alphaBetaState{showSearch: true}
+
+	children := defaultBoardPool
+	children.reset()
+	ab := alphaBetaState{showSearch: true, children: children}
+
 	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
 	fmt.Printf("alphabeta: nodes=%d best score=%v move: %s path: %s\n", ab.nodes, score, move, path)
 }
@@ -187,15 +195,17 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 	last := len(game.history) - 1
 	b := game.history[last]
 	//buf := make([]board, 0, 100)
-	buf := []board(nil)
-	children := b.generateChildren(buf)
+	//buf := []board(nil)
+	children := defaultBoardPool
+	children.reset()
+	countChildren := b.generateChildren(children)
 
 	fmt.Printf("perft depth=%d\n", d)
 
-	total := int64(len(children))
+	total := int64(countChildren)
 	var nodes int64
-	for _, c := range children {
-		n, t := perft(c, d, buf)
+	for _, c := range children.pool {
+		n, t := perft(c, d, children)
 		fmt.Printf("%s nodes=%d total_nodes=%d\n", c.lastMove, n, t)
 		nodes += n
 		total += t
@@ -215,21 +225,23 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 
 var testPerftTable = []int64{0, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860}
 
-func perft(b board, depth int, buf []board) (int64, int64) {
+func perft(b board, depth int, buf *boardPool) (int64, int64) {
 	if depth < 1 {
 		return 0, 0
 	}
-	children := b.generateChildren(buf)
-	moves := int64(len(children))
+	countChildren := b.generateChildren(buf)
+	moves := int64(countChildren)
 	if depth == 1 {
 		return moves, moves
 	}
 	var nodes int64
-	for _, c := range children {
+	lastChildren := buf.pool[len(buf.pool)-countChildren:]
+	for _, c := range lastChildren {
 		n, total := perft(c, depth-1, buf)
 		nodes += n
 		moves += total
 	}
+	buf.drop(countChildren)
 	return nodes, moves
 }
 
@@ -264,9 +276,13 @@ LOOP:
 			fmt.Printf("search depth=%d: timeout\n", depth)
 			break
 		}
+
+		children := defaultBoardPool
+		children.reset()
+		ab := alphaBetaState{showSearch: false, deadline: deadline, children: children}
+
 		last := len(game.history) - 1
 		b := game.history[last]
-		ab := alphaBetaState{showSearch: false, deadline: deadline}
 		score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
 		if ab.cancelled {
 			fmt.Printf("search depth=%d: timeout - cancelled\n", depth)
