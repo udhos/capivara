@@ -68,7 +68,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 	}
 
 	// scan remaining children
-	for _, child := range children.pool[firstChild:] {
+	for _, child := range children.pool[firstChild+1:] {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
