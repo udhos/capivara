@@ -34,12 +34,13 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 		}
 		return 0, "draw", path
 	}
+	firstChild := len(children.pool) - countChildren
 	if countChildren == 1 {
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
 		ab.singleChildren = true
-		return relativeMaterial(children, b, addChildren), ab.children.pool[0].lastMove, path
+		return relativeMaterial(children, b, addChildren), ab.children.pool[firstChild].lastMove, path
 	}
 
 	var bestPath []string
@@ -49,7 +50,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 
 	// handle first child
 	{
-		child := children.pool[0]
+		child := children.pool[firstChild]
 		score, childPath := alphaBeta(ab, child, -beta, -alpha, depth-1, append(path, child.lastMove), addChildren)
 		score = -score
 		ab.nodes += int64(countChildren)
@@ -67,7 +68,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, path []string, addChi
 	}
 
 	// scan remaining children
-	for _, child := range children.pool[1:] {
+	for _, child := range children.pool[firstChild:] {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {

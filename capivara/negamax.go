@@ -49,11 +49,12 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string, addChild
 		}
 		return 0, "draw", path
 	}
+	firstChild := len(children.pool) - countChildren
 	if countChildren == 1 {
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
-		return relativeMaterial(children, children.pool[0], addChildren), children.pool[0].lastMove, path
+		return relativeMaterial(children, children.pool[firstChild], addChildren), children.pool[firstChild].lastMove, path
 	}
 
 	var max float32 = negamaxMin
@@ -64,7 +65,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, path []string, addChild
 
 	var negaChildren []negaChild
 
-	lastChildren := children.pool[len(children.pool)-countChildren:]
+	lastChildren := children.pool[firstChild:]
 
 	for _, child := range lastChildren {
 		score, childPath := negamax(nega, child, depth-1, append(path, child.lastMove), addChildren)
