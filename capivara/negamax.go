@@ -124,7 +124,7 @@ func negamax(nega *negamaxState, b board, depth int, path []string, addChildren 
 	var max float32 = negamaxMin
 	var bestPath []string
 
-        firstChild := len(children.pool)-countChildren
+	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
 
 	for _, child := range lastChildren {
