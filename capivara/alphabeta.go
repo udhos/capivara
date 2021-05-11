@@ -112,7 +112,8 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, path
 		return 0, path // draw
 	}
 
-	lastChildren := children.pool[len(children.pool)-countChildren:]
+        firstChild := len(children.pool)-countChildren
+	lastChildren := children.pool[firstChild:]
 
 	var bestPath []string
 
