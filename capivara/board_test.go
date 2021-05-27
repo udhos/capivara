@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-var move string
+var testMove move
 
 func BenchmarkCastling(b *testing.B) {
 	game := newGame()
@@ -12,13 +12,13 @@ func BenchmarkCastling(b *testing.B) {
 	children := defaultBoardPool
 	ab := alphaBetaState{children: children}
 
-	var mv string
+	var mv move
 	for n := 0; n < b.N; n++ {
 		children.reset()
-		_, m := rootAlphaBeta(&ab, brd, 2, false)
+		_, m, _ := rootAlphaBeta(&ab, brd, 2, false)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
-	move = mv // record bench result to prevent the compiler from eliminating the test
+	testMove = mv // record bench result to prevent the compiler from eliminating the test
 }
 
 func BenchmarkCastlingAddChildren(b *testing.B) {
@@ -29,13 +29,13 @@ func BenchmarkCastlingAddChildren(b *testing.B) {
 	children := defaultBoardPool
 	ab := alphaBetaState{children: children}
 
-	var mv string
+	var mv move
 	for n := 0; n < b.N; n++ {
 		children.reset()
-		_, m := rootAlphaBeta(&ab, brd, 2, true)
+		_, m, _ := rootAlphaBeta(&ab, brd, 2, true)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
-	move = mv // record bench result to prevent the compiler from eliminating the test
+	testMove = mv // record bench result to prevent the compiler from eliminating the test
 }
 
 const castling = `

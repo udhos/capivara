@@ -154,12 +154,14 @@ func locToStr(loc location) string {
 	return coordToStr(loc/8, loc%8)
 }
 
+/*
 func moveToStr(src, dst location, p piece) string {
 	if p == pieceNone {
 		return fmt.Sprintf("%s%s", locToStr(src), locToStr(dst))
 	}
 	return fmt.Sprintf("%s%s%s", locToStr(src), locToStr(dst), p.kindLetterLow())
 }
+*/
 
 // white=0 -> signal=1
 // black=1 -> signal=-1

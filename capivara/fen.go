@@ -59,14 +59,16 @@ func (g gameState) showFen() {
 }
 
 func passantSquare(b board) string {
-	if len(b.lastMove) == 4 {
-		move := b.lastMove
-		step := int64(move[3]) - int64(move[1])
-		if abs(step) == 2 {
+	lastMove := b.lastMove
+	if !lastMove.isNull() {
+		if lastMove.rankDelta() == 2 {
 			// moved two squares
-			dstCol := location(move[2] - 'a')
-			dstRow := location(move[3] - '1')
-			dstLoc := dstRow*8 + dstCol
+			//dstCol := location(move[2] - 'a')
+			//dstRow := location(move[3] - '1')
+			//dstLoc := dstRow*8 + dstCol
+			dstLoc := lastMove.dst
+			dstCol := dstLoc % 8
+			dstRow := dstLoc / 8
 			p := b.square[dstLoc]
 			if p.kind() == whitePawn {
 				// it is pawn

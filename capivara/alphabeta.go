@@ -19,20 +19,20 @@ type alphaBetaState struct {
 	children       *boardPool
 }
 
-func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (float32, string) {
+func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (float32, move, string) {
 	if depth < 1 {
-		return relativeMaterial(ab.children, b, addChildren), "invalid-depth"
+		return relativeMaterial(ab.children, b, addChildren), nullMove, "invalid-depth"
 	}
 	if b.otherKingInCheck() {
-		return alphabetaMax, "checkmate"
+		return alphabetaMax, nullMove, "checkmate"
 	}
 	children := ab.children
 	countChildren := b.generateChildren(children)
 	if countChildren == 0 {
 		if b.kingInCheck() {
-			return alphabetaMin, "checkmated" // checkmated
+			return alphabetaMin, nullMove, "checkmated" // checkmated
 		}
-		return 0, "draw"
+		return 0, nullMove, "draw"
 	}
 	firstChild := len(children.pool) - countChildren
 	if countChildren == 1 {
@@ -40,10 +40,10 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
 		ab.singleChildren = true
-		return relativeMaterial(children, b, addChildren), ab.children.pool[firstChild].lastMove
+		return relativeMaterial(children, b, addChildren), ab.children.pool[firstChild].lastMove, ""
 	}
 
-	var bestMove string
+	var bestMove move
 	var alpha float32 = alphabetaMin
 	var beta float32 = alphabetaMax
 
@@ -57,7 +57,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
 		if score >= beta {
-			return beta, child.lastMove
+			return beta, child.lastMove, ""
 		}
 
 		// pick first child
@@ -72,7 +72,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 			if ab.deadline.Before(time.Now()) {
 				// timer has expired
 				ab.cancelled = true
-				return 0, ""
+				return 0, nullMove, ""
 			}
 		}
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
@@ -82,7 +82,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
 		if score >= beta {
-			return beta, child.lastMove
+			return beta, child.lastMove, ""
 		}
 		if score > alpha {
 			alpha = score
@@ -90,7 +90,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		}
 	}
 
-	return alpha, bestMove
+	return alpha, bestMove, ""
 }
 
 func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addChildren bool) float32 {

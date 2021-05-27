@@ -12,9 +12,9 @@ func TestB1(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 2, []string{}, false)
-	if move != "d3e4" {
-		t.Errorf("score: %v move: %s (expected: move: d3e4)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 2, false)
+	if m.String() != "d3e4" {
+		t.Errorf("score: %v move: %s (expected: move: d3e4)", score, m)
 	}
 }
 
@@ -28,9 +28,9 @@ func TestB2(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 2, []string{}, false)
-	if move != "d4e5" {
-		t.Errorf("score: %v move: %s (expected: move: d4e5)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 2, false)
+	if m.String() != "d4e5" {
+		t.Errorf("score: %v move: %s (expected: move: d4e5)", score, m)
 	}
 }
 
@@ -44,9 +44,9 @@ func TestB3(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 2, []string{}, false)
-	if score != -1000.0 || move != "checkmated" {
-		t.Errorf("score: %v move: %s (expected: score=-1000.0 move: checkmated)", score, move)
+	score, m, comment := rootNegamax(&nega, b, 2, false)
+	if score != -1000.0 || comment != "checkmated" {
+		t.Errorf("score: %v move: %s (expected: score=-1000.0 move: checkmated)", score, m)
 	}
 }
 
@@ -61,9 +61,9 @@ func TestB4(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 2, []string{}, false)
-	if move != "e6d5" {
-		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 2, false)
+	if m.String() != "e6d5" {
+		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, m)
 	}
 }
 
@@ -78,9 +78,9 @@ func TestB4Depth6(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 6, []string{}, false)
-	if move != "e6d5" {
-		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 6, false)
+	if m.String() != "e6d5" {
+		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, m)
 	}
 }
 
@@ -94,9 +94,9 @@ func TestB5(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 2, []string{}, false)
-	if move != "f6f7" {
-		t.Errorf("score: %v move: %s (expected: checkmate f6f7)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 2, false)
+	if m.String() != "f6f7" {
+		t.Errorf("score: %v move: %s (expected: checkmate f6f7)", score, m)
 	}
 }
 
@@ -110,7 +110,7 @@ func TestB6(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, _, _ := rootNegamax(&nega, b, 2, []string{}, false)
+	score, _, _ := rootNegamax(&nega, b, 2, false)
 	if score != 1000 {
 		t.Errorf("score: %v (expected: score=1000.0)", score)
 	}
@@ -126,9 +126,9 @@ func TestB7(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 4, []string{}, false)
-	if move != "g6g7" {
-		t.Errorf("score: %v move: %s (expected: move g6g7)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 4, false)
+	if m.String() != "g6g7" {
+		t.Errorf("score: %v move: %s (expected: move g6g7)", score, m)
 	}
 }
 
@@ -142,9 +142,9 @@ func TestB8(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 4, []string{}, false)
-	if move != "d2d3" {
-		t.Errorf("score: %v move: %s (expected: move d2d3)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 4, false)
+	if m.String() != "d2d3" {
+		t.Errorf("score: %v move: %s (expected: move d2d3)", score, m)
 	}
 }
 
@@ -158,9 +158,9 @@ func TestB9(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 4, []string{}, false)
-	if move != "g7g8q" {
-		t.Errorf("score: %v move: %s (expected: move g7g8q)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 4, false)
+	if m.String() != "g7g8q" {
+		t.Errorf("score: %v move: %s (expected: move g7g8q)", score, m)
 	}
 }
 
@@ -175,9 +175,9 @@ func TestB10(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 4, []string{}, false)
-	if move != "e8d7" {
-		t.Errorf("score: %v move: %s (expected: move e8d7)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 4, false)
+	if m.String() != "e8d7" {
+		t.Errorf("score: %v move: %s (expected: move e8d7)", score, m)
 	}
 }
 
@@ -191,9 +191,9 @@ func TestB11(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 4, []string{}, false)
-	if move != "e1g1" {
-		t.Errorf("score: %v move: %s (expected: move e1g1)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 4, false)
+	if m.String() != "e1g1" {
+		t.Errorf("score: %v move: %s (expected: move e1g1)", score, m)
 	}
 }
 
@@ -207,9 +207,9 @@ func TestB12(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, move, _ := rootNegamax(&nega, b, 4, []string{}, false)
-	if move != "h1h6" {
-		t.Errorf("score: %v move: %s (expected: move h1h6)", score, move)
+	score, m, _ := rootNegamax(&nega, b, 4, false)
+	if m.String() != "h1h6" {
+		t.Errorf("score: %v move: %s (expected: move h1h6)", score, m)
 	}
 }
 

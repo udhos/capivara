@@ -18,7 +18,7 @@ type gameState struct {
 	cpuprofile  string
 }
 
-func (g *gameState) play(move string) error {
+func (g *gameState) play(moveStr string) error {
 	last := len(g.history) - 1
 	b := g.history[last]
 
@@ -26,14 +26,16 @@ func (g *gameState) play(move string) error {
 	children.reset()
 	b.generateChildren(children)
 
+	m := newMove(moveStr)
+
 	for _, c := range children.pool {
-		if c.lastMove == move {
+		if c.lastMove == m {
 			// found valid move
 			g.history = append(g.history, c)
 			return nil
 		}
 	}
-	return fmt.Errorf("not a valid move: %s", move)
+	return fmt.Errorf("not a valid move: %s", moveStr)
 }
 
 func newGame() gameState {

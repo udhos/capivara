@@ -136,10 +136,10 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 
 	children := defaultBoardPool
 	children.reset()
-	nega := negamaxState{children: children}
+	nega := negamaxState{children: children, showSearch: true}
 
-	score, move, path := rootNegamax(&nega, b, depth, make([]string, 0, 20), game.addChildren)
-	fmt.Printf("negamax: nodes=%d best score=%v move: %s path: %s\n", nega.nodes, score, move, path)
+	score, move, comment := rootNegamax(&nega, b, depth, game.addChildren)
+	fmt.Printf("negamax: nodes=%d best score=%v move=%s (%s)\n", nega.nodes, score, move, comment)
 }
 
 func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
@@ -160,11 +160,11 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 
 	begin := time.Now()
 
-	score, move := rootAlphaBeta(&ab, b, depth, game.addChildren)
+	score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
 
 	speed := getSpeed(ab.nodes, begin)
 
-	fmt.Printf("alphabeta: nodes=%d speed=%v knodes/s best score=%v move: %s\n", ab.nodes, speed, score, move)
+	fmt.Printf("alphabeta: nodes=%d speed=%v knodes/s best score=%v move=%s (%s)\n", ab.nodes, speed, score, move, comment)
 }
 
 func getSpeed(nodes int64, begin time.Time) int {
@@ -280,7 +280,7 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 
 	var bestDepth int
 	var bestScore float32
-	var bestMove string
+	var bestMove move
 
 	if game.cpuprofile != "" {
 		f, err := os.Create(game.cpuprofile)
@@ -307,7 +307,7 @@ LOOP:
 
 		last := len(game.history) - 1
 		b := game.history[last]
-		score, move := rootAlphaBeta(&ab, b, depth, game.addChildren)
+		score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
 		if ab.cancelled {
 			fmt.Printf("search depth=%d: timeout - cancelled\n", depth)
 			break
@@ -315,7 +315,7 @@ LOOP:
 
 		speed := getSpeed(ab.nodes, depthBegin)
 
-		fmt.Printf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move: %s\n", depth, ab.nodes, speed, score, move)
+		fmt.Printf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move=%s (%s)\n", depth, ab.nodes, speed, score, move, comment)
 		bestDepth = depth
 		bestScore = score
 		bestMove = move
@@ -323,7 +323,7 @@ LOOP:
 			fmt.Printf("search depth=%d: move=%s single move\n", depth, move)
 			break
 		}
-		switch move {
+		switch comment {
 		case "checkmated", "checkmate", "draw":
 			break LOOP
 		}

@@ -14,7 +14,7 @@ type board struct {
 	flags         [2]colorFlag
 	turn          pieceColor
 	materialValue [2]int16
-	lastMove      string
+	lastMove      move
 }
 
 func (b *board) addPiece(i, j location, p piece) {
@@ -77,13 +77,16 @@ func (b board) generateChildren(children *boardPool) int {
 	// generate en passant captures
 
 	lastMove := b.lastMove
-	if len(lastMove) == 4 {
-		step := int64(lastMove[3]) - int64(lastMove[1])
-		if abs(step) == 2 {
+	if !lastMove.isNull() {
+		step := lastMove.rankDelta()
+		if step == 2 {
 			// moved two squares
-			trgDstRow := int(lastMove[3]) - '1'
-			trgDstCol := int(lastMove[2]) - 'a'
-			trgDstLoc := location(trgDstCol + 8*trgDstRow)
+			//trgDstRow := int(lastMove[3]) - '1'
+			//trgDstCol := int(lastMove[2]) - 'a'
+			//trgDstLoc := location(trgDstCol + 8*trgDstRow)
+			trgDstLoc := lastMove.dst
+			trgDstCol := trgDstLoc % 8
+			trgDstRow := trgDstLoc / 8
 			trgKind := b.square[trgDstLoc].kind()
 
 			if trgKind == whitePawn {
@@ -167,8 +170,9 @@ func (b board) generateCastlingLeft(children *boardPool) int {
 	// disable castling
 	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
 
-	b.turn = colorInverse(b.turn)                       // switch color
-	b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
+	b.turn = colorInverse(b.turn) // switch color
+	//b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
+	b.lastMove = move{src: kingSrc, dst: kingDst} // record last move
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -199,8 +203,9 @@ func (b board) generateCastlingRight(children *boardPool) int {
 	// disable castling
 	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
 
-	b.turn = colorInverse(b.turn)                       // switch color
-	b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
+	b.turn = colorInverse(b.turn) // switch color
+	//b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
+	b.lastMove = move{src: kingSrc, dst: kingDst} // record last move
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -451,10 +456,10 @@ func (b board) generateRelativeKing(children *boardPool, src, incRow, incCol loc
 
 func (b board) newChild(src, dst location) (board, piece) {
 	//child := b                                      // copy board
-	p := b.delPieceLoc(src)                     // take piece from board
-	b.addPieceLoc(dst, p)                       // put piece on board
-	b.turn = colorInverse(b.turn)               // switch color
-	b.lastMove = moveToStr(src, dst, pieceNone) // record move
+	p := b.delPieceLoc(src)               // take piece from board
+	b.addPieceLoc(dst, p)                 // put piece on board
+	b.turn = colorInverse(b.turn)         // switch color
+	b.lastMove = move{src: src, dst: dst} // record move
 	return b, p
 }
 
@@ -494,10 +499,11 @@ func (b board) recordMoveIfValidRook(children *boardPool, src, dst location) int
 
 func (b board) recordPromotionIfValid(children *boardPool, src, dst location, p piece) int {
 	//child := b                              // copy board
-	b.delPieceLoc(src)                  // take pawn from board
-	b.addPieceLoc(dst, p)               // put new piece on board
-	b.turn = colorInverse(b.turn)       // switch color
-	b.lastMove = moveToStr(src, dst, p) // record move
+	b.delPieceLoc(src)            // take pawn from board
+	b.addPieceLoc(dst, p)         // put new piece on board
+	b.turn = colorInverse(b.turn) // switch color
+	//b.lastMove = moveToStr(src, dst, p) // record move
+	b.lastMove = move{src: src, dst: dst, promotion: p} // record move
 
 	return b.recordIfValid(children, b)
 }
