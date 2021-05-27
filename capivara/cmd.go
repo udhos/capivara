@@ -157,11 +157,11 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 
 	begin := time.Now()
 
-	score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
+	score, move := rootAlphaBeta(&ab, b, depth, game.addChildren)
 
 	speed := getSpeed(ab.nodes, begin)
 
-	fmt.Printf("alphabeta: nodes=%d speed=%v knodes/s best score=%v move: %s path: %s\n", ab.nodes, speed, score, move, path)
+	fmt.Printf("alphabeta: nodes=%d speed=%v knodes/s best score=%v move: %s\n", ab.nodes, speed, score, move)
 }
 
 func getSpeed(nodes int64, begin time.Time) int {
@@ -294,7 +294,7 @@ LOOP:
 
 		last := len(game.history) - 1
 		b := game.history[last]
-		score, move, path := rootAlphaBeta(&ab, b, depth, make([]string, 0, 20), game.addChildren)
+		score, move := rootAlphaBeta(&ab, b, depth, game.addChildren)
 		if ab.cancelled {
 			fmt.Printf("search depth=%d: timeout - cancelled\n", depth)
 			break
@@ -302,7 +302,7 @@ LOOP:
 
 		speed := getSpeed(ab.nodes, depthBegin)
 
-		fmt.Printf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move: %s path: %s\n", depth, ab.nodes, speed, score, move, path)
+		fmt.Printf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move: %s\n", depth, ab.nodes, speed, score, move)
 		bestDepth = depth
 		bestScore = score
 		bestMove = move

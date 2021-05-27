@@ -15,7 +15,7 @@ func BenchmarkCastling(b *testing.B) {
 	var mv string
 	for n := 0; n < b.N; n++ {
 		children.reset()
-		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, false)
+		_, m := rootAlphaBeta(&ab, brd, 2, false)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
 	move = mv // record bench result to prevent the compiler from eliminating the test
@@ -32,7 +32,7 @@ func BenchmarkCastlingAddChildren(b *testing.B) {
 	var mv string
 	for n := 0; n < b.N; n++ {
 		children.reset()
-		_, m, _ := rootAlphaBeta(&ab, brd, 2, nil, true)
+		_, m := rootAlphaBeta(&ab, brd, 2, true)
 		mv = m // record call result to prevent compiler from eliminating function call
 	}
 	move = mv // record bench result to prevent the compiler from eliminating the test
