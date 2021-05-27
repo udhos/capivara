@@ -31,7 +31,7 @@ func newMove(s string) move {
 		promotion: p,
 	}
 
-	log.Printf("NewMove: %s => %s", s, m)
+	log.Printf("newMove: %s => %s step=%d", s, m, m.rankDelta())
 
 	return m
 }
@@ -41,7 +41,7 @@ func (m move) isNull() bool {
 }
 
 func (m move) rankDelta() int {
-	return int(abs(int64(m.dst-m.src) >> 3))
+	return int(abs(int64(m.dst/8 - m.src/8)))
 }
 
 func (m move) String() string {
