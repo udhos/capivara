@@ -45,6 +45,9 @@ func (m move) rankDelta() int {
 }
 
 func (m move) String() string {
+	if m.isNull() {
+		return ""
+	}
 	srcRow := m.src / 8
 	srcCol := m.src % 8
 	dstRow := m.dst / 8
