@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
 var nullMove = move{}
@@ -30,8 +29,6 @@ func newMove(s string) move {
 		dst:       8*location(dst[1]-'1') + location(dst[0]-'a'),
 		promotion: p,
 	}
-
-	log.Printf("newMove: %s => %s step=%d", s, m, m.rankDelta())
 
 	return m
 }
