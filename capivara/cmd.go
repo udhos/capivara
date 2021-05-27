@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -278,6 +281,16 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 	var bestDepth int
 	var bestScore float32
 	var bestMove string
+
+	if game.cpuprofile != "" {
+		f, err := os.Create(game.cpuprofile)
+		if err != nil {
+			log.Printf("cpuprofile: %v", err)
+		} else {
+			pprof.StartCPUProfile(f)
+			defer pprof.StopCPUProfile()
+		}
+	}
 
 LOOP:
 	for depth := 1; ; depth++ {

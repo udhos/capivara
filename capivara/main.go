@@ -15,6 +15,7 @@ import (
 type gameState struct {
 	history     []board
 	addChildren bool
+	cpuprofile  string
 }
 
 func (g *gameState) play(move string) error {
@@ -190,18 +191,21 @@ func main() {
 		version, runtime.Version(), runtime.GOMAXPROCS(0), runtime.GOOS, runtime.GOARCH)
 
 	var addChildren bool
+	var cpuprofile string
 
 	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
+	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")
 
 	flag.Parse()
 
-	gameLoop(addChildren)
+	gameLoop(addChildren, cpuprofile)
 }
 
-func gameLoop(addChildren bool) {
+func gameLoop(addChildren bool, cpuprofile string) {
 
 	game := newGame()
 	game.addChildren = addChildren
+	game.cpuprofile = cpuprofile
 	game.loadFromString(builtinBoard)
 
 	fmt.Printf("board size: %d bytes\n", unsafe.Sizeof(board{}))
