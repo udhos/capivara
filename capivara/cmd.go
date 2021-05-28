@@ -168,8 +168,12 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 }
 
 func getSpeed(nodes int64, begin time.Time) int {
-	elap := time.Since(begin).Seconds()
-	return int(float64(nodes/1000) / elap) // knodes / s
+	elap := time.Since(begin)
+	return getSpeedElapsed(nodes, elap)
+}
+
+func getSpeedElapsed(nodes int64, elap time.Duration) int {
+	return int(float64(nodes/1000) / elap.Seconds()) // knodes / s
 }
 
 func cmdPlay(cmds []command, game *gameState, tokens []string) {
@@ -205,6 +209,8 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 		return
 	}
 
+	perftBegin := time.Now()
+
 	last := len(game.history) - 1
 	b := game.history[last]
 	//buf := make([]board, 0, 100)
@@ -218,13 +224,19 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 	total := int64(countChildren)
 	var nodes int64
 	for _, c := range children.pool {
+		begin := time.Now()
 		n, t := perft(c, d, children)
-		fmt.Printf("%s nodes=%d total_nodes=%d\n", c.lastMove, n, t)
+		elap := time.Since(begin)
+		speed := getSpeedElapsed(t, elap)
+		fmt.Printf("%s nodes=%d total_nodes=%d elapsed=%v speed=%v knodes/s\n", c.lastMove, n, t, elap, speed)
 		nodes += n
 		total += t
 	}
 
-	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d\n", d, nodes, total)
+	perftElap := time.Since(perftBegin)
+	perftSpeed := getSpeedElapsed(total, perftElap)
+
+	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d elapsed=%v speed=%v knodes/s\n", d, nodes, total, perftElap, perftSpeed)
 
 	if d < len(testPerftTable) {
 		expected := testPerftTable[d+1]
@@ -234,28 +246,6 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 			fmt.Printf("perft depth=%d nodes=%d expected=%d ok\n", d, nodes, expected)
 		}
 	}
-}
-
-var testPerftTable = []int64{0, 20, 400, 8902, 197281, 4865609, 119060324, 3195901860}
-
-func perft(b board, depth int, buf *boardPool) (int64, int64) {
-	if depth < 1 {
-		return 0, 0
-	}
-	countChildren := b.generateChildren(buf)
-	moves := int64(countChildren)
-	if depth == 1 {
-		return moves, moves
-	}
-	var nodes int64
-	lastChildren := buf.pool[len(buf.pool)-countChildren:]
-	for _, c := range lastChildren {
-		n, total := perft(c, depth-1, buf)
-		nodes += n
-		moves += total
-	}
-	buf.drop(countChildren)
-	return nodes, moves
 }
 
 func cmdReset(cmds []command, game *gameState, tokens []string) {
