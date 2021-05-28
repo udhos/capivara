@@ -12,7 +12,11 @@ type move struct {
 	promotion piece
 }
 
-func newMove(s string) move {
+func newMove(s string) (move, error) {
+	if len(s) < 4 {
+		return nullMove, fmt.Errorf("newMove: bad move length(%s)=%d < 4", s, len(s))
+	}
+
 	src := s[:2]
 	dst := s[2:4]
 
@@ -22,6 +26,25 @@ func newMove(s string) move {
 		// promotion
 		promotion := s[4]
 		p = pieceKindFromLetter(rune(promotion))
+		if p == pieceNone {
+			return nullMove, fmt.Errorf("newMove: bad move promotion: %s", s)
+		}
+	}
+
+	if src[0] < 'a' || src[0] > 'h' {
+		return nullMove, fmt.Errorf("newMove: bad move source column: %s", s)
+	}
+
+	if src[1] < '1' || src[1] > '8' {
+		return nullMove, fmt.Errorf("newMove: bad move source rank: %s", s)
+	}
+
+	if dst[0] < 'a' || dst[0] > 'h' {
+		return nullMove, fmt.Errorf("newMove: bad move destination column: %s", s)
+	}
+
+	if dst[1] < '1' || dst[1] > '8' {
+		return nullMove, fmt.Errorf("newMove: bad move destination rank: %s", s)
 	}
 
 	m := move{
@@ -30,7 +53,7 @@ func newMove(s string) move {
 		promotion: p,
 	}
 
-	return m
+	return m, nil
 }
 
 func (m move) isNull() bool {

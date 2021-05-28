@@ -26,7 +26,10 @@ func (g *gameState) play(moveStr string) error {
 	children.reset()
 	b.generateChildren(children)
 
-	m := newMove(moveStr)
+	m, errMove := newMove(moveStr)
+	if errMove != nil {
+		return errMove
+	}
 
 	for _, c := range children.pool {
 		if c.lastMove == m {
