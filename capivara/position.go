@@ -19,5 +19,5 @@ var positionTable = [6][64]int16{
 	defaultPositionWeight, // rook
 	defaultPositionWeight, // bishop
 	defaultPositionWeight, // knight
-	defaultPositionWeight, // queen
+	defaultPositionWeight, // pawn
 }
