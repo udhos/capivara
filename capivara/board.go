@@ -30,7 +30,10 @@ func (b *board) delPiece(i, j location) piece {
 func (b *board) addPieceLoc(loc location, p piece) {
 	b.delPieceLoc(loc)
 	b.square[loc] = p
-	b.materialValue[p.color()] += p.materialValue() // piece material value enters board
+	//w := positionWeight[loc] * int16(colorToSignal(p.color()))
+	value := p.materialValue(loc)
+	b.materialValue[p.color()] += value // piece material value enters board
+	//log.Printf("add: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
 	if p.kind() == whiteKing {
 		// record king new position
 		b.king[p.color()] = loc
@@ -39,7 +42,11 @@ func (b *board) addPieceLoc(loc location, p piece) {
 
 func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
-	b.materialValue[p.color()] -= p.materialValue() // piece material value leaves board
+	b.square[loc] = p
+	//w := positionWeight[loc] * int16(colorToSignal(p.color()))
+	value := p.materialValue(loc)
+	b.materialValue[p.color()] -= value // piece material value leaves board
+	//log.Printf("del: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
 	b.square[loc] = pieceNone
 	return p
 }

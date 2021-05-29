@@ -172,20 +172,25 @@ func (g *gameState) loadFromReader(input io.Reader) {
 			case c == '.':
 				color = colorBlack
 			case c == 'p':
-				b.addPiece(location(row), location(col), piece(color<<3)+whitePawn)
+				b.loadPiece(location(row), location(col), piece(color<<3)+whitePawn)
 			case c == 'R':
-				b.addPiece(location(row), location(col), piece(color<<3)+whiteRook)
+				b.loadPiece(location(row), location(col), piece(color<<3)+whiteRook)
 			case c == 'N':
-				b.addPiece(location(row), location(col), piece(color<<3)+whiteKnight)
+				b.loadPiece(location(row), location(col), piece(color<<3)+whiteKnight)
 			case c == 'B':
-				b.addPiece(location(row), location(col), piece(color<<3)+whiteBishop)
+				b.loadPiece(location(row), location(col), piece(color<<3)+whiteBishop)
 			case c == 'Q':
-				b.addPiece(location(row), location(col), piece(color<<3)+whiteQueen)
+				b.loadPiece(location(row), location(col), piece(color<<3)+whiteQueen)
 			case c == 'K':
-				b.addPiece(location(row), location(col), piece(color<<3)+whiteKing)
+				b.loadPiece(location(row), location(col), piece(color<<3)+whiteKing)
 			}
 		}
 	}
+}
+
+func (b *board) loadPiece(row, col location, p piece) {
+	//log.Printf("loadPiece: %c%c %s %s", col+'a', row+'1', p.color().name(), p.kindLetterLow())
+	b.addPiece(row, col, p)
 }
 
 const version = "0.2.0"
@@ -195,13 +200,27 @@ func main() {
 	fmt.Printf("capivara version %s runtime %s GOMAXPROCS=%d OS=%s arch=%s\n",
 		version, runtime.Version(), runtime.GOMAXPROCS(0), runtime.GOOS, runtime.GOARCH)
 
+	var positionalTable bool
 	var addChildren bool
 	var cpuprofile string
 
+	flag.BoolVar(&positionalTable, "positionalTable", positionalTable, "use positional table")
 	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")
 
 	flag.Parse()
+
+	if !positionalTable {
+		// clear table
+		positionTable = [6][64]int16{
+			noWeight, // king
+			noWeight, // queen
+			noWeight, // rook
+			noWeight, // bishop
+			noWeight, // knight
+			noWeight, // queen
+		}
+	}
 
 	gameLoop(addChildren, cpuprofile)
 }

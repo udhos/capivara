@@ -255,7 +255,7 @@ func cmdReset(cmds []command, game *gameState, tokens []string) {
 func cmdSearch(cmds []command, game *gameState, tokens []string) {
 	begin := time.Now()
 
-	availTime := 20 * time.Second
+	availTime := 30 * time.Second
 
 	if len(tokens) > 1 {
 		a, errParse := time.ParseDuration(tokens[1])

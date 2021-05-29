@@ -104,32 +104,36 @@ func pieceKindFromLetter(letter rune) piece {
 	return pieceNone
 }
 
-func (p piece) materialValue() int16 {
+func (p piece) materialValue(loc location) int16 {
 	switch p {
 	case pieceNone:
 		return 0
 	case whitePawn:
-		return 100
+		return p.piecePlusPosition(100, loc)
 	case blackPawn:
-		return -100
+		return -p.piecePlusPosition(100, loc)
 	case whiteRook:
-		return 500
+		return p.piecePlusPosition(500, loc)
 	case whiteBishop:
-		return 300
+		return p.piecePlusPosition(300, loc)
 	case whiteKnight:
-		return 300
+		return p.piecePlusPosition(250, loc)
 	case blackRook:
-		return -500
+		return -p.piecePlusPosition(500, loc)
 	case blackBishop:
-		return -300
+		return -p.piecePlusPosition(300, loc)
 	case blackKnight:
-		return -300
+		return -p.piecePlusPosition(250, loc)
 	case whiteQueen:
-		return 900
+		return p.piecePlusPosition(900, loc)
 	case blackQueen:
-		return -900
+		return -p.piecePlusPosition(900, loc)
 	}
 	return 0
+}
+
+func (p piece) piecePlusPosition(value int16, loc location) int16 {
+	return value + positionTable[p.kind()-1][loc]
 }
 
 func (p piece) show() {
