@@ -163,6 +163,7 @@ func (b board) findCheckFromHV(kingLoc location) bool {
 		if kind == whiteRook || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	// down
@@ -180,6 +181,7 @@ func (b board) findCheckFromHV(kingLoc location) bool {
 		if kind == whiteRook || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	// left
@@ -197,6 +199,7 @@ func (b board) findCheckFromHV(kingLoc location) bool {
 		if kind == whiteRook || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	// right
@@ -214,6 +217,7 @@ func (b board) findCheckFromHV(kingLoc location) bool {
 		if kind == whiteRook || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	return false
@@ -239,6 +243,7 @@ func (b board) findCheckFromDiagonal(kingLoc location) bool {
 		if kind == whiteBishop || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	// - +
@@ -257,6 +262,7 @@ func (b board) findCheckFromDiagonal(kingLoc location) bool {
 		if kind == whiteBishop || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	// + -
@@ -275,9 +281,10 @@ func (b board) findCheckFromDiagonal(kingLoc location) bool {
 		if kind == whiteBishop || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
-	// ++
+	// + +
 	for row, col := kingRow, kingCol; row < 7 && col < 7; {
 		row++
 		col++
@@ -293,6 +300,7 @@ func (b board) findCheckFromDiagonal(kingLoc location) bool {
 		if kind == whiteBishop || kind == whiteQueen {
 			return true
 		}
+		break
 	}
 
 	return false
