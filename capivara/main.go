@@ -193,7 +193,7 @@ func (b *board) loadPiece(row, col location, p piece) {
 	b.addPiece(row, col, p)
 }
 
-const version = "0.2.0"
+const version = "0.3.0"
 
 func main() {
 
