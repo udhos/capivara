@@ -1,7 +1,5 @@
 package main
 
-var noWeight [64]int16
-
 var defaultPositionWeight = [64]int16{
 	0, 0, 0, 0, 0, 0, 0, 0, // rank 1
 	0, 5, 5, 5, 5, 5, 5, 0, // rank 2

@@ -200,27 +200,13 @@ func main() {
 	fmt.Printf("capivara version %s runtime %s GOMAXPROCS=%d OS=%s arch=%s\n",
 		version, runtime.Version(), runtime.GOMAXPROCS(0), runtime.GOOS, runtime.GOARCH)
 
-	var positionalTable bool
 	var addChildren bool
 	var cpuprofile string
 
-	flag.BoolVar(&positionalTable, "positionalTable", positionalTable, "use positional table")
 	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")
 
 	flag.Parse()
-
-	if !positionalTable {
-		// clear table
-		positionTable = [6][64]int16{
-			noWeight, // king
-			noWeight, // queen
-			noWeight, // rook
-			noWeight, // bishop
-			noWeight, // knight
-			noWeight, // queen
-		}
-	}
 
 	gameLoop(addChildren, cpuprofile)
 }
