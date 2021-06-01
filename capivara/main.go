@@ -61,7 +61,7 @@ func (g gameState) show() {
 		fmt.Println("   -------------------------")
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
-	fmt.Printf("turn: %s\n", b.turn.name())
+	fmt.Printf("turn: %s check: %v\n", b.turn.name(), b.kingInCheck())
 
 	children := defaultBoardPool
 	children.reset()
@@ -195,6 +195,8 @@ func (b *board) loadPiece(row, col location, p piece) {
 
 const version = "0.2.0"
 
+var shortCheck bool
+
 func main() {
 
 	fmt.Printf("capivara version %s runtime %s GOMAXPROCS=%d OS=%s arch=%s\n",
@@ -204,6 +206,7 @@ func main() {
 	var addChildren bool
 	var cpuprofile string
 
+	flag.BoolVar(&shortCheck, "shortCheck", shortCheck, "use short check")
 	flag.BoolVar(&positionalTable, "positionalTable", positionalTable, "use positional table")
 	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")

@@ -521,6 +521,10 @@ func (b board) otherKingInCheck() bool {
 }
 
 func (b board) kingInCheck() bool {
+	if shortCheck {
+		return b.findCheck()
+	}
+
 	return b.anyPieceAttacks(b.king[b.turn])
 }
 
