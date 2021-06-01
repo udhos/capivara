@@ -1,85 +1,92 @@
 package main
 
-func (b board) findCheck() bool {
+func (b board) otherKingInCheck() bool {
+	b.turn = colorInverse(b.turn)
+	return b.kingInCheck()
+}
 
-	kingLoc := b.king[b.turn]
+func (b board) kingInCheck() bool {
+	return b.anyPieceAttacks(b.king[b.turn])
+}
+
+func (b board) anyPieceAttacks(loc location) bool {
 
 	// pawn
 
-	if b.findCheckFromPawn(kingLoc) {
+	if b.findAttackFromPawn(loc) {
 		return true
 	}
 
 	// king
 
-	if b.findCheckFromKing(kingLoc, 0, 1) {
+	if b.findAttackFromKing(loc, 0, 1) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, 1, 1) {
+	if b.findAttackFromKing(loc, 1, 1) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, 1, 0) {
+	if b.findAttackFromKing(loc, 1, 0) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, 1, -1) {
+	if b.findAttackFromKing(loc, 1, -1) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, 0, -1) {
+	if b.findAttackFromKing(loc, 0, -1) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, -1, -1) {
+	if b.findAttackFromKing(loc, -1, -1) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, -1, 0) {
+	if b.findAttackFromKing(loc, -1, 0) {
 		return true
 	}
-	if b.findCheckFromKing(kingLoc, -1, 1) {
+	if b.findAttackFromKing(loc, -1, 1) {
 		return true
 	}
 
 	// knight
 
-	if b.findCheckFromKnight(kingLoc, -1, 2) {
+	if b.findAttackFromKnight(loc, -1, 2) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, 1, 2) {
+	if b.findAttackFromKnight(loc, 1, 2) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, 2, -1) {
+	if b.findAttackFromKnight(loc, 2, -1) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, 2, 1) {
+	if b.findAttackFromKnight(loc, 2, 1) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, -1, -2) {
+	if b.findAttackFromKnight(loc, -1, -2) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, 1, -2) {
+	if b.findAttackFromKnight(loc, 1, -2) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, -2, -1) {
+	if b.findAttackFromKnight(loc, -2, -1) {
 		return true
 	}
-	if b.findCheckFromKnight(kingLoc, -2, 1) {
+	if b.findAttackFromKnight(loc, -2, 1) {
 		return true
 	}
 
 	// rook or queen
 
-	if b.findCheckFromHV(kingLoc) {
+	if b.findAttackFromHV(loc) {
 		return true
 	}
 
 	// bishop or queen
 
-	if b.findCheckFromDiagonal(kingLoc) {
+	if b.findAttackFromDiagonal(loc) {
 		return true
 	}
 
 	return false
 }
 
-func (b board) findCheckFromPawn(kingLoc location) bool {
+func (b board) findAttackFromPawn(kingLoc location) bool {
 	row := kingLoc / 8
 	col := kingLoc % 8
 	signal := colorToSignal(b.turn) // 0=>1 1=>-1
@@ -106,7 +113,7 @@ func (b board) findCheckFromPawn(kingLoc location) bool {
 	return false
 }
 
-func (b board) findCheckFromKing(kingLoc, incRow, incCol location) bool {
+func (b board) findAttackFromKing(kingLoc, incRow, incCol location) bool {
 	row := kingLoc / 8
 	col := kingLoc % 8
 
@@ -125,7 +132,7 @@ func (b board) findCheckFromKing(kingLoc, incRow, incCol location) bool {
 	return p.kind() == whiteKing
 }
 
-func (b board) findCheckFromKnight(kingLoc, incRow, incCol location) bool {
+func (b board) findAttackFromKnight(kingLoc, incRow, incCol location) bool {
 	row := kingLoc / 8
 	col := kingLoc % 8
 
@@ -144,7 +151,7 @@ func (b board) findCheckFromKnight(kingLoc, incRow, incCol location) bool {
 	return p.kind() == whiteKnight
 }
 
-func (b board) findCheckFromHV(kingLoc location) bool {
+func (b board) findAttackFromHV(kingLoc location) bool {
 	kingRow := kingLoc / 8
 	kingCol := kingLoc % 8
 
@@ -223,7 +230,7 @@ func (b board) findCheckFromHV(kingLoc location) bool {
 	return false
 }
 
-func (b board) findCheckFromDiagonal(kingLoc location) bool {
+func (b board) findAttackFromDiagonal(kingLoc location) bool {
 	kingRow := kingLoc / 8
 	kingCol := kingLoc % 8
 
