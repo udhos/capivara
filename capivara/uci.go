@@ -29,20 +29,31 @@ func uciCmdIsReady(game *gameState, tokens []string) {
 }
 
 func uciCmdPosition(game *gameState, tokens []string) {
-	if tokens[1] == "startpos" && tokens[2] == "moves" {
-		moves := tokens[3:]
+	if len(tokens) < 2 {
+		return
+	}
+
+	if tokens[1] == "startpos" {
 
 		game.loadFromString(builtinBoard)
 
-		// play every move
-		for _, m := range moves {
-			if errPlay := game.play(m); errPlay != nil {
-				game.println(fmt.Sprintf("play error: %v", errPlay))
-				return
-			}
+		if len(tokens) < 3 {
+			return
 		}
 
-		game.println(fmt.Sprintf("played %v", moves))
+		if tokens[2] == "moves" {
+			moves := tokens[3:]
+
+			// play every move
+			for _, m := range moves {
+				if errPlay := game.play(m); errPlay != nil {
+					game.println(fmt.Sprintf("play error: %v", errPlay))
+					return
+				}
+			}
+
+			game.println(fmt.Sprintf("played %v", moves))
+		}
 	}
 }
 
