@@ -208,10 +208,13 @@ func (b *board) loadPiece(row, col location, p piece) {
 
 const version = "0.3.0"
 
+func fullVersion() string {
+	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d", version, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0))
+}
+
 func main() {
 
-	fmt.Printf("capivara version %s runtime %s GOMAXPROCS=%d OS=%s arch=%s\n",
-		version, runtime.Version(), runtime.GOMAXPROCS(0), runtime.GOOS, runtime.GOARCH)
+	fmt.Printf("capivara version %s\n", fullVersion())
 
 	var addChildren bool
 	var cpuprofile string

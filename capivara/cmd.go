@@ -254,9 +254,7 @@ func cmdReset(cmds []command, game *gameState, tokens []string) {
 }
 
 func cmdSearch(cmds []command, game *gameState, tokens []string) {
-	begin := time.Now()
-
-	availTime := 30 * time.Second
+	availTime := 60 * time.Second
 
 	if len(tokens) > 1 {
 		a, errParse := time.ParseDuration(tokens[1])
@@ -267,11 +265,18 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 		availTime = a
 	}
 
-	deadline := begin.Add(availTime / 5)
+	game.search(availTime)
+}
+
+func (game *gameState) search(availTime time.Duration) string {
+	begin := time.Now()
+
+	deadline := begin.Add(availTime / 10)
 
 	var bestDepth int
 	var bestScore float32
 	var bestMove move
+	var bestComment string
 
 	if game.cpuprofile != "" {
 		f, err := os.Create(game.cpuprofile)
@@ -285,10 +290,10 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 
 LOOP:
 	for depth := 1; ; depth++ {
-		fmt.Printf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline))
+		game.print(fmt.Sprintf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline)))
 		depthBegin := time.Now()
 		if deadline.Before(depthBegin) {
-			fmt.Printf("search depth=%d: timeout\n", depth)
+			game.print(fmt.Sprintf("search depth=%d: timeout\n", depth))
 			break
 		}
 
@@ -300,18 +305,19 @@ LOOP:
 		b := game.history[last]
 		score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
 		if ab.cancelled {
-			fmt.Printf("search depth=%d: timeout - cancelled\n", depth)
+			game.print(fmt.Sprintf("search depth=%d: timeout - cancelled\n", depth))
 			break
 		}
 
 		speed := getSpeed(ab.nodes, depthBegin)
 
-		fmt.Printf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move=%s (%s)\n", depth, ab.nodes, speed, score, move, comment)
+		game.print(fmt.Sprintf("search depth=%d: nodes=%d speed=%v knodes/s best score=%v move=%s (%s)\n", depth, ab.nodes, speed, score, move, comment))
 		bestDepth = depth
 		bestScore = score
 		bestMove = move
+		bestComment = comment
 		if ab.singleChildren {
-			fmt.Printf("search depth=%d: move=%s single move\n", depth, move)
+			game.print(fmt.Sprintf("search depth=%d: move=%s single move\n", depth, move))
 			break
 		}
 		switch comment {
@@ -319,12 +325,18 @@ LOOP:
 			break LOOP
 		}
 		if bestScore == alphabetaMax {
-			fmt.Printf("search depth=%d: nodes=%d best score=%v move: %s found checkmate\n", depth, ab.nodes, score, move)
+			game.print(fmt.Sprintf("search depth=%d: nodes=%d best score=%v move: %s found checkmate\n", depth, ab.nodes, score, move))
 			break
 		}
 	}
 
-	fmt.Printf("search: best depth=%d score=%v move=%s elapsed=%v\n", bestDepth, bestScore, bestMove, time.Since(begin))
+	game.println(fmt.Sprintf("search: best depth=%d score=%v move=%s elapsed=%v", bestDepth, bestScore, bestMove, time.Since(begin)))
+
+	if bestMove.isNull() {
+		return bestComment
+	}
+
+	return bestMove.String()
 }
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
