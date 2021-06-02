@@ -16,6 +16,7 @@ type gameState struct {
 	history     []board
 	addChildren bool
 	cpuprofile  string
+	uci         bool
 }
 
 func (g *gameState) play(moveStr string) error {
@@ -132,6 +133,18 @@ func (g *gameState) loadFromFile(filename string) {
 	g.loadFromReader(input)
 }
 
+func (g *gameState) print(s string) {
+	if g.uci {
+		fmt.Print("info capivara ")
+	}
+	fmt.Print(s)
+}
+
+func (g *gameState) println(s string) {
+	g.print(s)
+	fmt.Println()
+}
+
 func (g *gameState) loadFromReader(input io.Reader) {
 
 	reader := bufio.NewReader(input)
@@ -144,7 +157,7 @@ func (g *gameState) loadFromReader(input io.Reader) {
 		line, errRead := reader.ReadString('\n')
 		switch errRead {
 		case io.EOF:
-			fmt.Println("loadFromReader: resetting board")
+			g.println("loadFromReader: resetting board")
 			g.history = []board{b} // replace board
 			return
 		case nil:
@@ -223,8 +236,11 @@ func gameLoop(addChildren bool, cpuprofile string) {
 	input := bufio.NewReader(os.Stdin)
 LOOP:
 	for {
-		game.show()
-		fmt.Print("enter command:")
+		if !game.uci {
+			game.show()
+			fmt.Print("enter command:")
+		}
+
 		text, errInput := input.ReadString('\n')
 		switch errInput {
 		case io.EOF:
@@ -240,6 +256,18 @@ LOOP:
 		if len(tokens) < 1 {
 			continue
 		}
+
+		if game.uci {
+			uciCmd := tokens[0]
+			for _, cmd := range tableUci {
+				if strings.HasPrefix(cmd.name, uciCmd) {
+					cmd.call(&game, tokens)
+					continue LOOP
+				}
+			}
+			continue LOOP
+		}
+
 		cmdPrefix := tokens[0]
 
 		for _, cmd := range tableCmd {

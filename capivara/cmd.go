@@ -31,6 +31,7 @@ var tableCmd = []command{
 	{"search", cmdSearch, "search [ms] - search"},
 	{"switch", cmdSwitch, "switch turn"},
 	{"undo", cmdUndo, "undo last played move"},
+	{"uci", cmdUci, "start UCI mode"},
 }
 
 func cmdClear(cmds []command, game *gameState, tokens []string) {
@@ -188,8 +189,8 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 
 	for _, t := range tokens[1:] {
 		fields := strings.FieldsFunc(t, isSep)
-		for _, move := range fields {
-			if errPlay := game.play(move); errPlay != nil {
+		for _, m := range fields {
+			if errPlay := game.play(m); errPlay != nil {
 				fmt.Printf("play error: %v\n", errPlay)
 				return
 			}
@@ -329,6 +330,11 @@ LOOP:
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
 	b := &game.history[len(game.history)-1] // will update in place
 	b.turn = colorInverse(b.turn)           // switch color
+}
+
+func cmdUci(cmds []command, game *gameState, tokens []string) {
+	uciCmdUci(game, tokens)
+	game.uci = true
 }
 
 func cmdUndo(cmds []command, game *gameState, tokens []string) {
