@@ -271,7 +271,7 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 func (game *gameState) search(availTime time.Duration) string {
 	begin := time.Now()
 
-	deadline := begin.Add(availTime / 10)
+	deadline := begin.Add(availTime / 20)
 
 	var bestDepth int
 	var bestScore float32
