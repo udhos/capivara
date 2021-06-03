@@ -38,3 +38,15 @@ Use command `play <move>` to make a move.
 Use command `help` to get help. 
 
     enter command:h
+
+# Other Golang Chess Engine
+
+https://github.com/tonyOreglia/glee
+
+https://github.com/zserge/carnatus
+
+https://github.com/ChizhovVadim/CounterGo
+
+https://github.com/WeaselFOSS/Chess
+
+https://github.com/amanjpro/zahak
