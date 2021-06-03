@@ -33,28 +33,56 @@ func uciCmdPosition(game *gameState, tokens []string) {
 		return
 	}
 
-	if tokens[1] == "startpos" {
+	var moves []string
 
-		game.loadFromString(builtinBoard)
+	switch tokens[1] {
+	case "startpos":
+		// position startpos moves e2e4 c7c5
+
+		game.loadFromString(builtinBoard) // reset board
 
 		if len(tokens) < 3 {
 			return
 		}
+		if tokens[2] != "moves" {
+			return
+		}
+		moves = tokens[3:]
 
-		if tokens[2] == "moves" {
-			moves := tokens[3:]
+	case "fen":
+		// position fen r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b -    c3 0 19
+		// position fen nbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR         w KQkq -  0 1
 
-			// play every move
-			for _, m := range moves {
-				if errPlay := game.play(m); errPlay != nil {
-					game.println(fmt.Sprintf("play error: %v", errPlay))
-					return
-				}
+		fenTokens := tokens[2:]
+
+		var fen []string
+		for i, t := range fenTokens {
+			if t == "moves" {
+				moves = fenTokens[i+1:]
+				break
 			}
+			fen = append(fen, t)
+		}
 
-			game.println(fmt.Sprintf("played %v", moves))
+		game.println(fmt.Sprintf("position fen: %v", fen))
+
+		game.loadFromFen(fen)
+
+	default:
+		return
+	}
+
+	game.println(fmt.Sprintf("position moves: %v", moves))
+
+	// play every move
+	for _, m := range moves {
+		if errPlay := game.play(m); errPlay != nil {
+			game.println(fmt.Sprintf("play error: %v", errPlay))
+			return
 		}
 	}
+
+	game.println(fmt.Sprintf("played: %v", moves))
 }
 
 func uciCmdGo(game *gameState, tokens []string) {
