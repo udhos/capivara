@@ -39,7 +39,7 @@ Use command `help` to get help.
 
     enter command:h
 
-# Other Golang Chess Engine
+# Other Golang Chess Engines
 
 https://github.com/tonyOreglia/glee
 
