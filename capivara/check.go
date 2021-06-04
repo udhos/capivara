@@ -25,28 +25,7 @@ func (b board) anyPieceAttacks(loc location) bool {
 
 	// knight
 
-	if b.findAttackFromKnight(loc, -1, 2) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, 1, 2) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, 2, -1) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, 2, 1) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, -1, -2) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, 1, -2) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, -2, -1) {
-		return true
-	}
-	if b.findAttackFromKnight(loc, -2, 1) {
+	if b.findAttackFromKnight(loc) {
 		return true
 	}
 
@@ -167,23 +146,95 @@ func (b board) findAttackFromKing(trg location) bool {
 	return false
 }
 
-func (b board) findAttackFromKnight(kingLoc, incRow, incCol location) bool {
-	row := kingLoc / 8
-	col := kingLoc % 8
+func (b board) findAttackFromKnight(kingLoc location) bool {
+	trgRow := kingLoc / 8
+	trgCol := kingLoc % 8
 
-	row += incRow
-	col += incCol
-	if row < 0 || row > 7 || col < 0 || col > 7 {
-		return false // out of board
+	if trgRow > 1 {
+		// row-2
+		srcRow := trgRow - 2
+
+		if trgCol > 0 {
+			// row-2 col-1
+			srcCol := trgCol - 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
+
+		if trgCol < 7 {
+			// row-2 col+1
+			srcCol := trgCol + 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
 	}
 
-	loc := row*8 + col
-	p := b.square[loc]
-	if p == pieceNone || p.color() == b.turn {
-		return false
+	if trgRow < 6 {
+		// row+2
+		srcRow := trgRow + 2
+
+		if trgCol > 0 {
+			// row+2 col-1
+			srcCol := trgCol - 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
+
+		if trgCol < 7 {
+			// row+2 col+1
+			srcCol := trgCol + 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
 	}
 
-	return p.kind() == whiteKnight
+	if trgCol > 1 {
+		// col-2
+		srcCol := trgCol - 2
+
+		if trgRow > 0 {
+			// row-1 col-2
+			srcRow := trgRow - 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
+
+		if trgRow < 7 {
+			// row+1 col-2
+			srcRow := trgRow + 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
+	}
+
+	if trgCol < 6 {
+		// col+2
+		srcCol := trgCol + 2
+
+		if trgRow > 0 {
+			// row-1 col+2
+			srcRow := trgRow - 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
+
+		if trgRow < 7 {
+			// row+1 col+2
+			srcRow := trgRow + 1
+			if p := b.square[srcRow*8+srcCol]; p != pieceNone && p.color() != b.turn && p.kind() == whiteKnight {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (b board) findAttackFromHV(kingLoc location) bool {
