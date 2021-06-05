@@ -139,8 +139,13 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	children.reset()
 	nega := negamaxState{children: children, showSearch: true}
 
+	begin := time.Now()
+
 	score, move, comment := rootNegamax(&nega, b, depth, game.addChildren)
-	fmt.Printf("negamax: nodes=%d best score=%v move=%s (%s)\n", nega.nodes, score, move, comment)
+
+	speed := getSpeed(nega.nodes, begin)
+
+	fmt.Printf("negamax: nodes=%d speed=%v knodes/s best score=%v move=%s (%s)\n", nega.nodes, speed, score, move, comment)
 }
 
 func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {

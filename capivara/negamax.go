@@ -28,7 +28,7 @@ const (
 )
 
 type negamaxState struct {
-	nodes      int
+	nodes      int64
 	children   *boardPool
 	showSearch bool
 }
@@ -71,7 +71,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 	for _, child := range lastChildren {
 		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
-		nega.nodes += countChildren
+		nega.nodes += int64(countChildren)
 		if nega.showSearch {
 			fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s\n", depth, nega.nodes, score, child.lastMove)
 		}
@@ -133,10 +133,12 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 	for _, child := range lastChildren {
 		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
-		nega.nodes += countChildren
+		nega.nodes += int64(countChildren)
 		if score >= max {
 			max = score
 		}
 	}
+
+	children.drop(countChildren)
 	return max
 }
