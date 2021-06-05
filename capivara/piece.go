@@ -128,6 +128,10 @@ func (p piece) materialValue(loc location) int16 {
 		return p.piecePlusPosition(900, loc)
 	case blackQueen:
 		return -p.piecePlusPosition(900, loc)
+	case whiteKing:
+		return p.piecePlusPosition(0, loc)
+	case blackKing:
+		return -p.piecePlusPosition(0, loc)
 	}
 	return 0
 }
