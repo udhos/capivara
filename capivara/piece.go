@@ -133,6 +133,7 @@ func (p piece) materialValue(loc location) int16 {
 }
 
 func (p piece) piecePlusPosition(value int16, loc location) int16 {
+	//return value + pieceSquareTable[p.kind()-1][loc]
 	return value + pieceSquareTable[p.color()][p.kind()-1][loc]
 }
 
