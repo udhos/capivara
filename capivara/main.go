@@ -206,7 +206,7 @@ func (b *board) loadPiece(row, col location, p piece) {
 	b.addPiece(row, col, p)
 }
 
-const version = "0.3.0"
+const version = "0.4.0"
 
 func fullVersion() string {
 	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d", version, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0))
@@ -223,6 +223,8 @@ func main() {
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")
 
 	flag.Parse()
+
+	mirrorPieceSquareTable()
 
 	gameLoop(addChildren, cpuprofile)
 }
