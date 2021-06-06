@@ -50,3 +50,5 @@ https://github.com/ChizhovVadim/CounterGo
 https://github.com/WeaselFOSS/Chess
 
 https://github.com/amanjpro/zahak
+
+https://github.com/frankkopp/FrankyGo
