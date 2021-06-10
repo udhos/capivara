@@ -106,6 +106,9 @@ func loadLine(count int, line string) {
 	if line == "" {
 		return
 	}
+	if line[0] == '#' {
+		return
+	}
 
 	entry := strings.SplitN(line, ":", 2)
 	if len(entry) != 2 {
@@ -136,20 +139,22 @@ func loadLine(count int, line string) {
 		log.Printf("loadLine: line=%d: position=[%s] move=%s weight=%d", count, position, moveStr, w)
 
 		book[position] = append(book[position], bookMove{move: moveStr, weight: w})
-
 	}
 }
 
+// format:
+// position: move [weigth] [... , move [weight]]
 const defaultBook = `
+# format:
+# position: move [weigth] [... , move [weight]]
+
 : e2e4 2, d2d4, b1f3
 e2e4: c7c5 2, e7e5, e7e6
 e2e4 c7c5: g1f3 2, b1c3, c2c3
+e2e4 c7c5 g1f3: d7d6, b8c6, e7e6
 `
 
-var book = map[string][]bookMove{
-	//"":     {{move: "e2e4", weight: 1}, {move: "d2d4", weight: 1}, {move: "b1f3", weight: 1}},
-	//"e2e4": {{move: "c7c5", weight: 1}},
-}
+var book = map[string][]bookMove{}
 
 type bookMove struct {
 	move   string
