@@ -18,12 +18,13 @@ type command struct {
 
 var tableCmd = []command{
 	{"ab", cmdAlphaBeta, "ab [depth] - alpha-beta search"},
+	{"book", cmdLoadDumbBook, "book file - load dumb book from file"},
 	{"castling", cmdCastling, "castling"},
 	{"clear", cmdClear, "erase board"},
-	{"dumbbook", cmdDumbBook, "dumb book"},
+	{"dumbbook", cmdDumbBook, "toggle dumb book on/off"},
 	{"fen", cmdFen, "load board from FEN"},
 	{"help", cmdHelp, "show help"},
-	{"load", cmdLoad, "load board from file"},
+	{"load", cmdLoad, "load file - load board from file"},
 	{"move", cmdMove, "change piece position"},
 	{"negamax", cmdNegamax, "negamax [depth] - negamax search"},
 	{"play", cmdPlay, "play move"},
@@ -73,6 +74,14 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 		return
 	}
 	game.loadFromFile(tokens[1])
+}
+
+func cmdLoadDumbBook(cmds []command, game *gameState, tokens []string) {
+	if len(tokens) < 2 {
+		fmt.Printf("usage: book filename\n")
+		return
+	}
+	loadBookFromFile(tokens[1])
 }
 
 func cmdMove(cmds []command, game *gameState, tokens []string) {

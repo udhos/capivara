@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -78,7 +80,36 @@ type stringReader interface {
 	ReadString(delim byte) (string, error) // Example: bufio.Reader
 }
 
+func loadBookFromFile(filename string) {
+	fmt.Printf("loadBookFromFile: %s\n", filename)
+	input, errOpen := os.Open(filename)
+	if errOpen != nil {
+		fmt.Printf("loadBookFromFile: %s: %v\n", filename, errOpen)
+		return
+	}
+	defer input.Close()
+	loadBook(bufio.NewReader(input))
+}
+
+var book = map[string][]bookMove{}
+
+type bookMove struct {
+	move   string
+	weight int
+}
+
+func (m bookMove) getWeight(g *gameState, position string) int {
+	w := m.weight
+	if w < 1 {
+		g.println(fmt.Sprintf("bookLookup: bad weight=%d for move=%s position: [%s]", w, m.move, position))
+		w = 1
+	}
+	return w
+}
+
 func loadBook(reader stringReader) {
+
+	book = map[string][]bookMove{}
 
 	var lineCount int
 
@@ -140,32 +171,4 @@ func loadLine(count int, line string) {
 
 		book[position] = append(book[position], bookMove{move: moveStr, weight: w})
 	}
-}
-
-// format:
-// position: move [weigth] [... , move [weight]]
-const defaultBook = `
-# format:
-# position: move [weigth] [... , move [weight]]
-
-: e2e4 2, d2d4, b1f3
-e2e4: c7c5 2, e7e5, e7e6
-e2e4 c7c5: g1f3 2, b1c3, c2c3
-e2e4 c7c5 g1f3: d7d6, b8c6, e7e6
-`
-
-var book = map[string][]bookMove{}
-
-type bookMove struct {
-	move   string
-	weight int
-}
-
-func (m bookMove) getWeight(g *gameState, position string) int {
-	w := m.weight
-	if w < 1 {
-		g.println(fmt.Sprintf("bookLookup: bad weight=%d for move=%s position: [%s]", w, m.move, position))
-		w = 1
-	}
-	return w
 }
