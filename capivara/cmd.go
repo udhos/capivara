@@ -78,6 +78,16 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 
 func cmdLoadDumbBook(cmds []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
+		fmt.Printf("book size=%d\n", len(book))
+		i := 0
+		for p, moves := range book {
+			i++
+			fmt.Printf("known position %d/%d: [%s]:", i, len(book), p)
+			for _, m := range moves {
+				fmt.Printf(" %s(%d)", m.move, m.weight)
+			}
+			fmt.Println()
+		}
 		fmt.Printf("usage: book filename\n")
 		return
 	}

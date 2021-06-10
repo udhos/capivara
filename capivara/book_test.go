@@ -18,12 +18,12 @@ type positionTest struct {
 }
 
 var testPositionTable = []positionTest{
-	{"e2e4", "e2e4", expectSuccess},
-	{"e2e5", "e2e5", expectError},
-	{"e2e4 e7e5", "e2e4 e7e5", expectSuccess},
-	{"e2e4 c7c5", "e2e4 c7c5", expectSuccess},
-	{"e2e4 e2e4", "e2e4 e2e4", expectError},
-	{"e2e4 e8e7", "e2e4 e8e7", expectError},
+	{"e2e4", " e2e4 ", expectSuccess},
+	{"e2e5", " e2e5 ", expectError},
+	{"e2e4 e7e5", " e2e4  e7e5 ", expectSuccess},
+	{"e2e4 c7c5", " e2e4  c7c5 ", expectSuccess},
+	{"e2e4 e2e4", " e2e4  e2e4 ", expectError},
+	{"e2e4 e8e7", " e2e4  e8e7 ", expectError},
 }
 
 func TestPosition(t *testing.T) {

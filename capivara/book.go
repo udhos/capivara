@@ -148,20 +148,21 @@ const errFatal = true
 const errNonFatal = false
 
 func loadLine(count int, line string) bool {
-	line = strings.TrimSpace(line)
-	if line == "" {
-		return errNonFatal
-	}
-	if line[0] == '#' {
+
+	comment := strings.SplitN(line, "#", 2)
+	uncomment := strings.TrimSpace(comment[0])
+
+	if uncomment == "" {
 		return errNonFatal
 	}
 
-	entry := strings.SplitN(line, ":", 2)
-	if len(entry) != 2 {
-		log.Printf("loadLine: missing position:move at line=%d: %s", count, line)
+	entry := strings.SplitN(uncomment, ":", 2)
+	if len(entry) < 1 {
+		log.Printf("loadLine: missing position at line=%d: %s", count, line)
 		return errNonFatal
 	}
-	position := strings.TrimSpace(entry[0])
+	positionMoves := strings.Fields(entry[0])
+	position := strings.Join(positionMoves, " ")
 
 	tmpG := newGame()
 	tmp := &tmpG
@@ -171,6 +172,10 @@ func loadLine(count int, line string) bool {
 	if errTmp != nil {
 		log.Printf("loadLine: line=%d: invalid position=[%s]: %v", count, position, errTmp)
 		return errFatal
+	}
+
+	if len(entry) == 1 {
+		return loadGame(count, positionMoves)
 	}
 
 	moves := strings.Split(strings.TrimSpace(entry[1]), ",")
@@ -204,6 +209,18 @@ func loadLine(count int, line string) bool {
 		book[position] = append(book[position], bookMove{move: moveStr, weight: w})
 	}
 
+	return errNonFatal
+}
+
+func loadGame(count int, positionMoves []string) bool {
+	full := strings.Join(positionMoves, " ")
+	var moves []string
+	for _, m := range positionMoves {
+		position := strings.Join(moves, " ")
+		log.Printf("loadGame: line=%d: position=[%s] p=[%s] move=%s", count, full, position, m)
+		book[position] = append(book[position], bookMove{move: m, weight: 1})
+		moves = append(moves, m)
+	}
 	return errNonFatal
 }
 
