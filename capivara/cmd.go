@@ -20,6 +20,7 @@ var tableCmd = []command{
 	{"ab", cmdAlphaBeta, "ab [depth] - alpha-beta search"},
 	{"castling", cmdCastling, "castling"},
 	{"clear", cmdClear, "erase board"},
+	{"dumbbook", cmdDumbBook, "dumb book"},
 	{"fen", cmdFen, "load board from FEN"},
 	{"help", cmdHelp, "show help"},
 	{"load", cmdLoad, "load board from file"},
@@ -44,6 +45,11 @@ func cmdCastling(cmds []command, game *gameState, tokens []string) {
 	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
 	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
 	fmt.Println("castling disabled")
+}
+
+func cmdDumbBook(cmds []command, game *gameState, tokens []string) {
+	game.dumbBook = !game.dumbBook
+	fmt.Println("dumb book:", game.dumbBook)
 }
 
 func cmdFen(cmds []command, game *gameState, tokens []string) {
@@ -274,6 +280,15 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 }
 
 func (game *gameState) search(availTime time.Duration) string {
+
+	if game.dumbBook {
+		best := game.bookLookup()
+		if best != "" {
+			game.println(fmt.Sprintf("dumb book best move: %s", best))
+			return best // found
+		}
+	}
+
 	begin := time.Now()
 
 	deadline := begin.Add(availTime / 20)

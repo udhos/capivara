@@ -5,9 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"runtime"
 	"strings"
+	"time"
 	"unicode"
 	"unsafe"
 )
@@ -17,6 +19,7 @@ type gameState struct {
 	addChildren bool
 	cpuprofile  string
 	uci         bool
+	dumbBook    bool
 }
 
 func (g *gameState) play(moveStr string) error {
@@ -218,22 +221,28 @@ func main() {
 
 	var addChildren bool
 	var cpuprofile string
+	dumbBook := true
 
 	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
+	flag.BoolVar(&dumbBook, "dumbBook", dumbBook, "dumb book")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")
 
 	flag.Parse()
 
 	mirrorPieceSquareTable()
 
-	gameLoop(addChildren, cpuprofile)
+	rand.Seed(time.Now().UnixNano())
+	loadBook(bufio.NewReader(strings.NewReader(defaultBook)))
+
+	gameLoop(addChildren, dumbBook, cpuprofile)
 }
 
-func gameLoop(addChildren bool, cpuprofile string) {
+func gameLoop(addChildren, dumbBook bool, cpuprofile string) {
 
 	game := newGame()
 	game.addChildren = addChildren
 	game.cpuprofile = cpuprofile
+	game.dumbBook = dumbBook
 	game.loadFromString(builtinBoard)
 
 	fmt.Printf("board size: %d bytes\n", unsafe.Sizeof(board{}))
