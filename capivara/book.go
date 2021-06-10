@@ -204,21 +204,27 @@ func loadLine(count int, line string) bool {
 			}
 		}
 
-		log.Printf("loadLine: line=%d: position=[%s] move=%s weight=%d", count, position, moveStr, w)
-
-		book[position] = append(book[position], bookMove{move: moveStr, weight: w})
+		//log.Printf("loadLine: line=%d: position=[%s] move=%s weight=%d", count, position, moveStr, w)
+		//book[position] = append(book[position], bookMove{move: moveStr, weight: w})
+		loadPosition(position, bookMove{move: moveStr, weight: w}, count)
 	}
 
 	return errNonFatal
 }
 
+func loadPosition(position string, m bookMove, count int) {
+	log.Printf("loadPosition: line=%d: position=[%s] move=%s weight=%d FIXME PREVENT DUP MOVE", count, position, m.move, m.weight)
+	book[position] = append(book[position], m)
+}
+
 func loadGame(count int, positionMoves []string) bool {
-	full := strings.Join(positionMoves, " ")
+	//full := strings.Join(positionMoves, " ")
 	var moves []string
 	for _, m := range positionMoves {
 		position := strings.Join(moves, " ")
-		log.Printf("loadGame: line=%d: position=[%s] p=[%s] move=%s", count, full, position, m)
-		book[position] = append(book[position], bookMove{move: m, weight: 1})
+		//log.Printf("loadGame: line=%d: position=[%s] p=[%s] move=%s", count, full, position, m)
+		//book[position] = append(book[position], bookMove{move: m, weight: 1})
+		loadPosition(position, bookMove{move: m, weight: 1}, count)
 		moves = append(moves, m)
 	}
 	return errNonFatal
