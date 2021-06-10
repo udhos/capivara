@@ -203,17 +203,10 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 		return
 	}
 
-	isSep := func(c rune) bool {
-		return c == '(' || c == ')'
-	}
-
 	for _, t := range tokens[1:] {
-		fields := strings.FieldsFunc(t, isSep)
-		for _, m := range fields {
-			if errPlay := game.play(m); errPlay != nil {
-				fmt.Printf("play error: %v\n", errPlay)
-				return
-			}
+		if errPlay := game.play(t); errPlay != nil {
+			fmt.Printf("play error: %v\n", errPlay)
+			return
 		}
 	}
 }
@@ -382,5 +375,9 @@ func cmdUndo(cmds []command, game *gameState, tokens []string) {
 	if len(game.history) < 2 {
 		return
 	}
+	game.undo()
+}
+
+func (game *gameState) undo() {
 	game.history = game.history[:len(game.history)-1]
 }

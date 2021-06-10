@@ -42,7 +42,7 @@ func (g *gameState) play(moveStr string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("not a valid move: %s", moveStr)
+	return fmt.Errorf("not a valid move=%s for position: %s", moveStr, g.position())
 }
 
 func newGame() gameState {
@@ -75,9 +75,7 @@ func (g gameState) show() {
 	fmt.Printf("black king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[1]), b.materialValue[1], b.flags[1]&lostCastlingLeft == 0, b.flags[1]&lostCastlingRight == 0)
 	g.showFen()
 	fmt.Printf("history %d moves: ", len(g.history))
-	for _, m := range g.history {
-		fmt.Printf("(%s)", m.lastMove)
-	}
+	fmt.Print(g.position())
 	fmt.Println()
 
 	children.reset()

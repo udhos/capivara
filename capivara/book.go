@@ -13,6 +13,17 @@ import (
 
 func (game *gameState) bookLookup() string {
 
+	position := game.position()
+	game.println(fmt.Sprintf("bookLookup: position: [%s]", position))
+
+	if moves, found := book[position]; found {
+		return game.bookPick(position, moves)
+	}
+
+	return "" // not found
+}
+
+func (game *gameState) position() string {
 	history := game.history
 	if history[0].lastMove.isNull() {
 		history = history[1:]
@@ -23,13 +34,8 @@ func (game *gameState) bookLookup() string {
 		moves = append(moves, m.lastMove.String())
 	}
 	position := strings.Join(moves, " ")
-	game.println(fmt.Sprintf("bookLookup: position: [%s]", position))
 
-	if moves, found := book[position]; found {
-		return game.bookPick(position, moves)
-	}
-
-	return "" // not found
+	return position
 }
 
 func (game *gameState) bookPick(position string, moves []bookMove) string {
@@ -119,34 +125,53 @@ LOOP:
 		line, errRead := reader.ReadString('\n')
 		switch errRead {
 		case io.EOF:
-			loadLine(lineCount, line) // last line
+			// last line
+			loadLine(lineCount, line)
 			break LOOP
 		case nil:
-			loadLine(lineCount, line)
+			if loadLine(lineCount, line) {
+				break LOOP
+			}
 		default:
-			loadLine(lineCount, line)
+			fatal := loadLine(lineCount, line)
 			log.Printf("loadBook: read error at line=%d: %v", lineCount, errRead)
+			if fatal {
+				break LOOP
+			}
 		}
 	}
 
 	log.Printf("loadBook: lines=%d bookSize=%d", lineCount, len(book))
 }
 
-func loadLine(count int, line string) {
+const errFatal = true
+const errNonFatal = false
+
+func loadLine(count int, line string) bool {
 	line = strings.TrimSpace(line)
 	if line == "" {
-		return
+		return errNonFatal
 	}
 	if line[0] == '#' {
-		return
+		return errNonFatal
 	}
 
 	entry := strings.SplitN(line, ":", 2)
 	if len(entry) != 2 {
 		log.Printf("loadLine: missing position:move at line=%d: %s", count, line)
-		return
+		return errNonFatal
 	}
 	position := strings.TrimSpace(entry[0])
+
+	tmpG := newGame()
+	tmp := &tmpG
+	tmp.loadFromString(builtinBoard)
+	var errTmp error
+	tmp, errTmp = tmp.validatePosition(position)
+	if errTmp != nil {
+		log.Printf("loadLine: line=%d: invalid position=[%s]: %v", count, position, errTmp)
+		return errFatal
+	}
 
 	moves := strings.Split(strings.TrimSpace(entry[1]), ",")
 
@@ -157,6 +182,13 @@ func loadLine(count int, line string) {
 		mw := strings.SplitN(strings.TrimSpace(moveWeight), " ", 2)
 
 		moveStr := strings.TrimSpace(mw[0])
+
+		tmp, errTmp = tmp.validatePosition(moveStr)
+		if errTmp != nil {
+			log.Printf("loadLine: line=%d: invalid move position=[%s]: move=%s %v", count, position, moveStr, errTmp)
+			return errFatal
+		}
+		tmp.undo()
 
 		if len(mw) > 1 {
 			value, errConv := strconv.Atoi(strings.TrimSpace(mw[1]))
@@ -171,4 +203,16 @@ func loadLine(count int, line string) {
 
 		book[position] = append(book[position], bookMove{move: moveStr, weight: w})
 	}
+
+	return errNonFatal
+}
+
+func (game *gameState) validatePosition(position string) (*gameState, error) {
+	moves := strings.Fields(position)
+	for _, t := range moves {
+		if errPlay := game.play(t); errPlay != nil {
+			return game, errPlay // error
+		}
+	}
+	return game, nil // ok
 }
