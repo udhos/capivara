@@ -12,6 +12,12 @@ type move struct {
 	promotion piece
 }
 
+func (m move) equals(n move) bool {
+	m.promotion = m.promotion.kind()
+	n.promotion = n.promotion.kind()
+	return m == n
+}
+
 func newMove(s string) (move, error) {
 	if len(s) < 4 {
 		return nullMove, fmt.Errorf("newMove: bad move length(%s)=%d < 4", s, len(s))
