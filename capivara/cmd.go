@@ -29,6 +29,7 @@ var tableCmd = []command{
 	{"negamax", cmdNegamax, "negamax [depth] - negamax search"},
 	{"play", cmdPlay, "play move"},
 	{"perft", cmdPerft, "perft depth - count moves to depth"},
+	{"pst", cmdPst, "show pst"},
 	{"reset", cmdReset, "reset board to initial position"},
 	{"search", cmdSearch, "search [ms] - search"},
 	{"switch", cmdSwitch, "switch turn"},
@@ -270,6 +271,34 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 			fmt.Printf("perft depth=%d nodes=%d expected=%d ok\n", d, nodes, expected)
 		}
 	}
+}
+
+func cmdPst(cmds []command, game *gameState, tokens []string) {
+	fmt.Printf("white:\n")
+	showPst(colorWhite)
+	fmt.Printf("black:\n")
+	showPst(colorBlack)
+}
+
+func showPst(color pieceColor) {
+
+	for k := 0; k < 6; k++ {
+		kind := piece(k + 1)
+		p := kind + piece(color<<3)
+		fmt.Print("piece ", color.name(), ":")
+		p.show()
+		fmt.Println()
+
+		for row := 7; row >= 0; row-- {
+			for col := 0; col < 8; col++ {
+				loc := row*8 + col
+				fmt.Printf("%02d ", pieceSquareTable[color][k][loc])
+			}
+			fmt.Println()
+		}
+
+	}
+
 }
 
 func cmdReset(cmds []command, game *gameState, tokens []string) {

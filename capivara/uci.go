@@ -89,11 +89,15 @@ func uciCmdGo(game *gameState, tokens []string) {
 
 	// go wtime 300000 btime 300000 winc 0 binc 0
 
+	game.println(fmt.Sprintf("version %s", version))
+
 	game.println(fmt.Sprintf("go: %v", tokens))
 
 	avail := 30 * time.Second // just a default
 
 	turn := game.history[len(game.history)-1].turn
+
+	game.println(fmt.Sprintf("turn: %s", turn.name()))
 
 	var timeLabel string
 	if turn == colorWhite {

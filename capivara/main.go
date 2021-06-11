@@ -35,8 +35,11 @@ func (g *gameState) play(moveStr string) error {
 		return errMove
 	}
 
+	//fmt.Printf("play %s ? ", m)
+
 	for _, c := range children.pool {
-		if c.lastMove == m {
+		//fmt.Printf(" %s", c.lastMove)
+		if c.lastMove.equals(m) {
 			// found valid move
 			g.history = append(g.history, c)
 			return nil
@@ -207,7 +210,7 @@ func (b *board) loadPiece(row, col location, p piece) {
 	b.addPiece(row, col, p)
 }
 
-const version = "0.4.0"
+const version = "0.5.0"
 
 func fullVersion() string {
 	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d", version, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0))
