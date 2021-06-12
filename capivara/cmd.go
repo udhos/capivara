@@ -385,6 +385,7 @@ LOOP:
 
 		// 1. sort moves by score
 		sort.Slice(rootScore, func(i, j int) bool { return rootScore[i].score > rootScore[j].score })
+		//sort.Slice(rootScore, func(i, j int) bool { return rootScore[i].score < rootScore[j].score })
 
 		// 2. reset scores (sort is done)
 		for _, s := range rootScore {
