@@ -73,7 +73,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 
 	// scan remaining children
 	//for _, child := range children.pool[firstChild+1:] {
-	for _, rs := range ab.rootScore {
+	for _, rs := range ab.rootScore[1:] {
 		child := rs.b
 		if !ab.deadline.IsZero() {
 			// there is a timer
