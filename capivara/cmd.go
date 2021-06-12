@@ -331,6 +331,7 @@ func (game *gameState) search(availTime time.Duration) string {
 	}
 
 	begin := time.Now()
+	var totalNodes int64
 
 	deadline := begin.Add(availTime / 20)
 
@@ -365,6 +366,9 @@ LOOP:
 		last := len(game.history) - 1
 		b := game.history[last]
 		score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
+
+		totalNodes += ab.nodes
+
 		if ab.cancelled {
 			game.print(fmt.Sprintf("search depth=%d: timeout - cancelled\n", depth))
 			break
@@ -391,7 +395,9 @@ LOOP:
 		}
 	}
 
-	game.println(fmt.Sprintf("search: best depth=%d score=%v move=%s elapsed=%v", bestDepth, bestScore, bestMove, time.Since(begin)))
+	speed := getSpeed(totalNodes, begin)
+
+	game.println(fmt.Sprintf("search: best depth=%d nodes=%d speed=%v knodes/s score=%v move=%s elapsed=%v", bestDepth, totalNodes, speed, bestScore, bestMove, time.Since(begin)))
 
 	if bestMove.isNull() {
 		return bestComment
