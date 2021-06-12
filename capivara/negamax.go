@@ -5,6 +5,8 @@ import (
 	"sort"
 )
 
+var materialTmpPool = newPoolSize(100)
+
 // negamax needs a relative material score.
 //
 // board.getMaterialValue() computes an absolute material score:
@@ -12,12 +14,13 @@ import (
 //
 // relativeMaterial(board) converts absolute material score to relative:
 // the higher the better for the current player
-func relativeMaterial(children *boardPool, b board, addChildren bool) float32 {
+func relativeMaterial(b board, addChildren bool) float32 {
+
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
-		countChildren := b.generateChildren(children)
+		materialTmpPool.reset()
+		countChildren := b.generateChildren(materialTmpPool)
 		relative += float32(countChildren) / 100.0
-		children.drop(countChildren)
 	}
 	return relative
 }
@@ -35,7 +38,7 @@ type negamaxState struct {
 
 func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (float32, move, string) {
 	if depth < 1 {
-		return relativeMaterial(nega.children, b, addChildren), nullMove, "invalid-depth"
+		return relativeMaterial(b, addChildren), nullMove, "invalid-depth"
 	}
 	if b.otherKingInCheck() {
 		return negamaxMax, nullMove, "checkmate"
@@ -55,7 +58,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
-		return relativeMaterial(children, children.pool[firstChild], addChildren), children.pool[firstChild].lastMove, ""
+		return relativeMaterial(children.pool[firstChild], addChildren), children.pool[firstChild].lastMove, ""
 	}
 
 	var max float32 = negamaxMin
@@ -114,7 +117,7 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 	children := nega.children
 
 	if depth < 1 {
-		return relativeMaterial(children, b, addChildren)
+		return relativeMaterial(b, addChildren)
 	}
 
 	countChildren := b.generateChildren(children)

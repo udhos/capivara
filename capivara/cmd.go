@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -320,6 +321,12 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 	game.search(availTime)
 }
 
+// save boards scores from previous depath for move ordering
+type boardScore struct {
+	b     board
+	score float32
+}
+
 func (game *gameState) search(availTime time.Duration) string {
 
 	if game.dumbBook {
@@ -331,6 +338,7 @@ func (game *gameState) search(availTime time.Duration) string {
 	}
 
 	begin := time.Now()
+	var totalNodes int64
 
 	deadline := begin.Add(availTime / 20)
 
@@ -349,6 +357,23 @@ func (game *gameState) search(availTime time.Duration) string {
 		}
 	}
 
+	last := len(game.history) - 1
+	rootBoard := game.history[last]
+
+	var rootScore []*boardScore
+	{
+		children := defaultBoardPool
+		children.reset()
+		rootCount := rootBoard.generateChildren(children)
+		rootScore = make([]*boardScore, rootCount)
+		for i := range rootScore {
+			rootScore[i] = &boardScore{
+				b:     children.pool[i],
+				score: alphabetaMin,
+			}
+		}
+	}
+
 LOOP:
 	for depth := 1; ; depth++ {
 		game.print(fmt.Sprintf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline)))
@@ -358,13 +383,26 @@ LOOP:
 			break
 		}
 
+		// 1. sort moves by score
+		sort.Slice(rootScore, func(i, j int) bool { return rootScore[i].score > rootScore[j].score })
+
+		// 2. reset scores (sort is done)
+		for _, s := range rootScore {
+			//game.println(fmt.Sprintf("move ordering: %d: move=%v score=%v", i, s.b.lastMove, s.score))
+			s.score = alphabetaMin
+		}
+
+		// 3. search higher scores first
+		// 4. search must update scores
+
 		children := defaultBoardPool
 		children.reset()
-		ab := alphaBetaState{showSearch: false, deadline: deadline, children: children}
+		ab := alphaBetaState{showSearch: false, deadline: deadline, children: children, rootScore: rootScore}
 
-		last := len(game.history) - 1
-		b := game.history[last]
-		score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
+		score, move, comment := rootAlphaBeta(&ab, rootBoard, depth, game.addChildren)
+
+		totalNodes += ab.nodes
+
 		if ab.cancelled {
 			game.print(fmt.Sprintf("search depth=%d: timeout - cancelled\n", depth))
 			break
@@ -391,7 +429,9 @@ LOOP:
 		}
 	}
 
-	game.println(fmt.Sprintf("search: best depth=%d score=%v move=%s elapsed=%v", bestDepth, bestScore, bestMove, time.Since(begin)))
+	speed := getSpeed(totalNodes, begin)
+
+	game.println(fmt.Sprintf("search: best depth=%d nodes=%d speed=%v knodes/s score=%v move=%s elapsed=%v", bestDepth, totalNodes, speed, bestScore, bestMove, time.Since(begin)))
 
 	if bestMove.isNull() {
 		return bestComment

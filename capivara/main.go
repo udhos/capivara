@@ -73,7 +73,7 @@ func (g gameState) show() {
 	children := defaultBoardPool
 	children.reset()
 
-	fmt.Printf("material: %v evaluation: %v\n", b.getMaterialValue(), relativeMaterial(children, b, g.addChildren))
+	fmt.Printf("material: %v evaluation: %v\n", b.getMaterialValue(), relativeMaterial(b, g.addChildren))
 	fmt.Printf("white king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[0]), b.materialValue[0], b.flags[0]&lostCastlingLeft == 0, b.flags[0]&lostCastlingRight == 0)
 	fmt.Printf("black king=%s material=%d castlingLeft=%v castlingRight=%v\n", locToStr(b.king[1]), b.materialValue[1], b.flags[1]&lostCastlingLeft == 0, b.flags[1]&lostCastlingRight == 0)
 	g.showFen()

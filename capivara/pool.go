@@ -7,7 +7,11 @@ type boardPool struct {
 var defaultBoardPool = newPool()
 
 func newPool() *boardPool {
-	return &boardPool{pool: make([]board, 0, 1000)}
+	return newPoolSize(1000)
+}
+
+func newPoolSize(size int) *boardPool {
+	return &boardPool{pool: make([]board, 0, size)}
 }
 
 func (bp *boardPool) push(b *board) {
