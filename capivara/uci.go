@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"time"
 )
@@ -15,6 +16,7 @@ var tableUci = []uciCommand{
 	{"uci", uciCmdUci},
 	{"isready", uciCmdIsReady},
 	{"position", uciCmdPosition},
+	{"quit", uciCmdQuit},
 	{"go", uciCmdGo},
 }
 
@@ -26,6 +28,11 @@ func uciCmdUci(game *gameState, tokens []string) {
 
 func uciCmdIsReady(game *gameState, tokens []string) {
 	fmt.Println("readyok")
+}
+
+func uciCmdQuit(game *gameState, tokens []string) {
+	game.println("good bye")
+	os.Exit(0)
 }
 
 func uciCmdPosition(game *gameState, tokens []string) {
@@ -106,22 +113,43 @@ func uciCmdGo(game *gameState, tokens []string) {
 		timeLabel = "btime"
 	}
 
+	var perMove bool
+
 	for i := 1; i < len(tokens)-1; i++ {
 		t := tokens[i]
+
+		if t == "movetime" {
+			// found per-move time
+			avail = parseTime(game, tokens[i+1])
+			perMove = true
+			break
+		}
+
 		if t == timeLabel {
-			tt := tokens[i+1]
-			v, errConv := strconv.Atoi(tt)
-			if errConv != nil {
-				game.println(fmt.Sprintf("error: %s %s: %v", timeLabel, tt, errConv))
-			}
-			avail = time.Duration(v) * time.Millisecond
+			// found remaining time
+			avail = parseTime(game, tokens[i+1])
 			break
 		}
 	}
 
 	game.println(fmt.Sprintf("available time: %v", avail))
 
-	bestMove := game.search(avail)
+	var bestMove string
+
+	if perMove {
+		bestMove = game.searchPerMove(avail, avail)
+	} else {
+		bestMove = game.search(avail)
+	}
 
 	fmt.Println("bestmove", bestMove)
+}
+
+func parseTime(game *gameState, t string) time.Duration {
+	v, errConv := strconv.Atoi(t)
+	if errConv != nil {
+		game.println(fmt.Sprintf("error: %s: %v", t, errConv))
+	}
+	avail := time.Duration(v) * time.Millisecond
+	return avail
 }

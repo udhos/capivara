@@ -321,6 +321,10 @@ func cmdSearch(cmds []command, game *gameState, tokens []string) {
 }
 
 func (game *gameState) search(availTime time.Duration) string {
+	return game.searchPerMove(availTime, availTime/20)
+}
+
+func (game *gameState) searchPerMove(availTime, perMove time.Duration) string {
 
 	if game.dumbBook {
 		best := game.bookLookup()
@@ -333,7 +337,7 @@ func (game *gameState) search(availTime time.Duration) string {
 	begin := time.Now()
 	var totalNodes int64
 
-	deadline := begin.Add(availTime / 20)
+	deadline := begin.Add(perMove)
 
 	var bestDepth int
 	var bestScore float32
