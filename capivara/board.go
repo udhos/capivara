@@ -463,10 +463,11 @@ func (b board) generateRelativeKing(children *boardPool, src, incRow, incCol loc
 
 func (b board) newChild(src, dst location) (board, piece) {
 	//child := b                                      // copy board
-	p := b.delPieceLoc(src)               // take piece from board
-	b.addPieceLoc(dst, p)                 // put piece on board
-	b.turn = colorInverse(b.turn)         // switch color
-	b.lastMove = move{src: src, dst: dst} // record move
+	capture := b.square[dst] != pieceNone
+	p := b.delPieceLoc(src)                                 // take piece from board
+	b.addPieceLoc(dst, p)                                   // put piece on board
+	b.turn = colorInverse(b.turn)                           // switch color
+	b.lastMove = move{src: src, dst: dst, capture: capture} // record move
 	return b, p
 }
 
@@ -506,11 +507,12 @@ func (b board) recordMoveIfValidRook(children *boardPool, src, dst location) int
 
 func (b board) recordPromotionIfValid(children *boardPool, src, dst location, p piece) int {
 	//child := b                              // copy board
+	capture := b.square[dst] != pieceNone
 	b.delPieceLoc(src)            // take pawn from board
 	b.addPieceLoc(dst, p)         // put new piece on board
 	b.turn = colorInverse(b.turn) // switch color
 	//b.lastMove = moveToStr(src, dst, p) // record move
-	b.lastMove = move{src: src, dst: dst, promotion: p} // record move
+	b.lastMove = move{src: src, dst: dst, promotion: p, capture: capture} // record move
 
 	return b.recordIfValid(children, b)
 }

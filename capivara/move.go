@@ -10,6 +10,7 @@ type move struct {
 	src       location
 	dst       location
 	promotion piece
+	capture   bool
 }
 
 func (m move) equals(n move) bool {
@@ -60,6 +61,14 @@ func newMove(s string) (move, error) {
 	}
 
 	return m, nil
+}
+
+func (m move) isQuiescent() bool {
+	return !m.capture && !m.isPromotion()
+}
+
+func (m move) isPromotion() bool {
+	return m.promotion != pieceNone
 }
 
 func (m move) isNull() bool {
