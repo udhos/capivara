@@ -14,9 +14,7 @@ type move struct {
 }
 
 func (m move) equals(n move) bool {
-	m.promotion = m.promotion.kind()
-	n.promotion = n.promotion.kind()
-	return m == n
+	return m.src == n.src && m.dst == n.dst && m.promotion.kind() == n.promotion.kind()
 }
 
 func newMove(s string) (move, error) {
