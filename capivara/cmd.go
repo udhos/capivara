@@ -354,6 +354,19 @@ func (game *gameState) searchPerMove(availTime, perMove time.Duration) string {
 		}
 	}
 
+	last := len(game.history) - 1
+	b := game.history[last]
+
+	// last: other player played
+	// last-1: i played
+	// last-2: other player played
+	// last-3: i played
+
+	var myPreviousMove move
+	if last > 2 {
+		myPreviousMove = game.history[last-3].lastMove
+	}
+
 LOOP:
 	for depth := 1; ; depth++ {
 		game.print(fmt.Sprintf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline)))
@@ -365,10 +378,8 @@ LOOP:
 
 		children := defaultBoardPool
 		children.reset()
-		ab := alphaBetaState{showSearch: false, deadline: deadline, children: children}
+		ab := alphaBetaState{showSearch: false, deadline: deadline, children: children, myPreviousMove: myPreviousMove}
 
-		last := len(game.history) - 1
-		b := game.history[last]
 		score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
 
 		totalNodes += ab.nodes

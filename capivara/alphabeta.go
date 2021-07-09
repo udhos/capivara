@@ -17,6 +17,7 @@ type alphaBetaState struct {
 	cancelled      bool
 	singleChildren bool
 	children       *boardPool
+	myPreviousMove move
 }
 
 func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (float32, move, string) {
@@ -30,6 +31,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	}
 	children := ab.children
 	countChildren := b.generateChildren(children)
+	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin, nullMove, "checkmated" // checkmated
@@ -52,9 +54,12 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	// handle first child
 	{
 		child := children.pool[firstChild]
-		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
-		score = -score
-		ab.nodes += int64(countChildren)
+		var score float32
+		if !ab.myPreviousMove.equals(child.lastMove) {
+			// if move is repetition, this block is skipped, then score is 0 (draw)
+			score = alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
+			score = -score
+		}
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
@@ -77,9 +82,12 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 				return 0, nullMove, ""
 			}
 		}
-		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
-		score = -score
-		ab.nodes += int64(countChildren)
+		var score float32
+		if !ab.myPreviousMove.equals(child.lastMove) {
+			// if move is repetition, this block is skipped, then score is 0 (draw)
+			score = alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
+			score = -score
+		}
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
@@ -106,6 +114,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 	}
 
 	countChildren := b.generateChildren(children)
+	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin // checkmated
@@ -128,7 +137,6 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 		}
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
-		ab.nodes += int64(countChildren)
 		if score >= beta {
 			children.drop(countChildren)
 			return beta
