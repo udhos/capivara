@@ -34,6 +34,9 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		}
 		return 0, nullMove, "draw"
 	}
+
+	ab.nodes += int64(countChildren)
+
 	firstChild := len(children.pool) - countChildren
 	if countChildren == 1 {
 		// in the root board, if there is a single possible move,
@@ -52,7 +55,6 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		child := children.pool[firstChild]
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
-		ab.nodes += int64(countChildren)
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
@@ -77,7 +79,6 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		}
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
-		ab.nodes += int64(countChildren)
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
@@ -109,6 +110,8 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 		return 0 // draw
 	}
 
+	ab.nodes += int64(countChildren)
+
 	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
 
@@ -124,7 +127,6 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 		}
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
-		ab.nodes += int64(countChildren)
 		if score >= beta {
 			children.drop(countChildren)
 			return beta
