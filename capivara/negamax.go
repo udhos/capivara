@@ -52,6 +52,9 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 		}
 		return 0, nullMove, "draw"
 	}
+
+	nega.nodes += int64(countChildren)
+
 	firstChild := len(children.pool) - countChildren
 	if countChildren == 1 {
 		// in the root board, if there is a single possible move,
@@ -61,10 +64,6 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 	}
 
 	var max float32 = negamaxMin
-	/*
-		var best string
-		var bestPath []string
-	*/
 
 	var negaChildren []negaChild
 
@@ -73,30 +72,13 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 	for childIndex, child := range lastChildren {
 		score := negamax(nega, child, childIndex, depth-1, addChildren)
 		score = -score
-		nega.nodes += int64(countChildren)
 		if nega.showSearch {
 			fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s\n", depth, nega.nodes, score, child.lastMove)
 		}
 		negaChildren = append(negaChildren, negaChild{b: child, score: score, nodes: countChildren})
-		/*
-			if score >= max {
-				max = score
-				best = child.lastMove
-				bestPath = childPath
-			}
-		*/
 	}
 
-	fmt.Println()
-
-	//sort.Slice(negaChildren, func(i, j int) bool { return len(negaChildren[i].path) < len(negaChildren[j].path) })
 	sort.SliceStable(negaChildren, func(i, j int) bool { return negaChildren[i].score > negaChildren[j].score })
-
-	/*
-		for _, c := range negaChildren {
-			fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s\n", depth, c.nodes, c.score, c.b.lastMove)
-		}
-	*/
 
 	if negaChildren[0].score > max {
 		max = negaChildren[0].score
@@ -129,6 +111,8 @@ func negamax(nega *negamaxState, b board, bIndex int, depth int, addChildren boo
 		return 0 // draw
 	}
 
+	nega.nodes += int64(countChildren)
+
 	var max float32 = negamaxMin
 
 	firstChild := len(children.pool) - countChildren
@@ -137,7 +121,6 @@ func negamax(nega *negamaxState, b board, bIndex int, depth int, addChildren boo
 	for childIndex, child := range lastChildren {
 		score := negamax(nega, child, childIndex, depth-1, addChildren)
 		score = -score
-		nega.nodes += int64(countChildren)
 		if score >= max {
 			max = score
 		}

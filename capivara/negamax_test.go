@@ -142,7 +142,7 @@ func TestB8(t *testing.T) {
 	children.reset()
 	nega := negamaxState{children: children}
 
-	score, m, _ := rootNegamax(&nega, b, 4, false)
+	score, m, _ := rootNegamax(&nega, b, 2, false)
 	if m.String() != "d2d3" {
 		t.Errorf("score: %v move: %s (expected: move d2d3)", score, m)
 	}
