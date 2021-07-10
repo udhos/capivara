@@ -15,7 +15,7 @@ import (
 func relativeMaterial(children *boardPool, b board, addChildren bool) float32 {
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
-		countChildren := b.generateChildren(children)
+		countChildren := b.generateChildren(-1, children)
 		relative += float32(countChildren) / 100.0
 		children.drop(countChildren)
 	}
@@ -44,7 +44,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 	}
 
 	children := nega.children
-	countChildren := b.generateChildren(children)
+	countChildren := b.generateChildren(-1, children)
 
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -70,8 +70,8 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 
 	lastChildren := children.pool[firstChild:]
 
-	for _, child := range lastChildren {
-		score := negamax(nega, child, depth-1, addChildren)
+	for childIndex, child := range lastChildren {
+		score := negamax(nega, child, childIndex, depth-1, addChildren)
 		score = -score
 		nega.nodes += int64(countChildren)
 		if nega.showSearch {
@@ -111,7 +111,7 @@ type negaChild struct {
 	nodes int
 }
 
-func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
+func negamax(nega *negamaxState, b board, bIndex int, depth int, addChildren bool) float32 {
 
 	children := nega.children
 
@@ -121,7 +121,7 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 		}
 	}
 
-	countChildren := b.generateChildren(children)
+	countChildren := b.generateChildren(bIndex, children)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin // checkmated
@@ -134,8 +134,8 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
 
-	for _, child := range lastChildren {
-		score := negamax(nega, child, depth-1, addChildren)
+	for childIndex, child := range lastChildren {
+		score := negamax(nega, child, childIndex, depth-1, addChildren)
 		score = -score
 		nega.nodes += int64(countChildren)
 		if score >= max {

@@ -30,7 +30,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		return alphabetaMax, nullMove, "checkmate"
 	}
 	children := ab.children
-	countChildren := b.generateChildren(children)
+	countChildren := b.generateChildren(-1, children)
 	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -57,7 +57,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		var score float32
 		if !ab.myPreviousMove.equals(child.lastMove) {
 			// if move is repetition, this block is skipped, then score is 0 (draw)
-			score = alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
+			score = alphaBeta(ab, child, firstChild, -beta, -alpha, depth-1, addChildren)
 			score = -score
 		}
 		if ab.showSearch {
@@ -73,7 +73,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	}
 
 	// scan remaining children
-	for _, child := range children.pool[firstChild+1:] {
+	for childIndex, child := range children.pool[firstChild+1:] {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
@@ -85,7 +85,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		var score float32
 		if !ab.myPreviousMove.equals(child.lastMove) {
 			// if move is repetition, this block is skipped, then score is 0 (draw)
-			score = alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
+			score = alphaBeta(ab, child, childIndex, -beta, -alpha, depth-1, addChildren)
 			score = -score
 		}
 		if ab.showSearch {
@@ -103,7 +103,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	return alpha, bestMove, ""
 }
 
-func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addChildren bool) float32 {
+func alphaBeta(ab *alphaBetaState, b board, bIndex int, alpha, beta float32, depth int, addChildren bool) float32 {
 
 	children := ab.children
 
@@ -113,7 +113,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 		}
 	}
 
-	countChildren := b.generateChildren(children)
+	countChildren := b.generateChildren(bIndex, children)
 	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -125,7 +125,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
 
-	for _, child := range lastChildren {
+	for childIndex, child := range lastChildren {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
@@ -135,7 +135,7 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 				return 0
 			}
 		}
-		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
+		score := alphaBeta(ab, child, childIndex, -beta, -alpha, depth-1, addChildren)
 		score = -score
 		if score >= beta {
 			children.drop(countChildren)

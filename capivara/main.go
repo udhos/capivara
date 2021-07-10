@@ -28,7 +28,7 @@ func (g *gameState) play(moveStr string) error {
 
 	children := defaultBoardPool
 	children.reset()
-	b.generateChildren(children)
+	b.generateChildren(-1, children)
 
 	m, errMove := newMove(moveStr)
 	if errMove != nil {
@@ -82,7 +82,7 @@ func (g gameState) show() {
 	fmt.Println()
 
 	children.reset()
-	countChildren := b.generateChildren(children)
+	countChildren := b.generateChildren(-1, children)
 
 	fmt.Printf("%d valid moves:", countChildren)
 	for _, c := range children.pool {
