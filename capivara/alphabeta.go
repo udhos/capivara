@@ -57,17 +57,8 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	// handle first child
 	{
 		child := children.pool[firstChild]
-<<<<<<< HEAD
-		var score float32
-		if !ab.myPreviousMove.equals(child.lastMove) {
-			// if move is repetition, this block is skipped, then score is 0 (draw)
-			score = alphaBeta(ab, child, firstChild, -beta, -alpha, depth-1, addChildren)
-			score = -score
-		}
-=======
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
->>>>>>> main
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
@@ -90,17 +81,8 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 				return 0, nullMove, ""
 			}
 		}
-<<<<<<< HEAD
-		var score float32
-		if !ab.myPreviousMove.equals(child.lastMove) {
-			// if move is repetition, this block is skipped, then score is 0 (draw)
-			score = alphaBeta(ab, child, childIndex, -beta, -alpha, depth-1, addChildren)
-			score = -score
-		}
-=======
 		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
->>>>>>> main
 		if ab.showSearch {
 			fmt.Printf("rootAlphaBeta: depth=%d nodes=%d score=%v move: %s\n", depth, ab.nodes, score, child.lastMove)
 		}
