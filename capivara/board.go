@@ -15,6 +15,7 @@ type board struct {
 	turn          pieceColor
 	materialValue [2]int16
 	lastMove      move
+	zobristValue  zobristKey
 }
 
 func (b *board) addPiece(i, j location, p piece) {
@@ -38,10 +39,19 @@ func (b *board) addPieceLoc(loc location, p piece) {
 		// record king new position
 		b.king[p.color()] = loc
 	}
+
+	b.zobristUpdatePiece(int(loc), p) // add zobrist value after adding piece
 }
 
 func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
+
+	//fmt.Printf("delPieceLoc: loc=%d\n", loc)
+
+	if p != pieceNone {
+		b.zobristUpdatePiece(int(loc), p) // remove zobrist value before removing piece
+	}
+
 	b.square[loc] = p
 	//w := positionWeight[loc] * int16(colorToSignal(p.color()))
 	value := p.materialValue(loc)
@@ -175,11 +185,18 @@ func (b board) generateCastlingLeft(children *boardPool) int {
 	b.king[b.turn] = kingDst
 
 	// disable castling
+	b.zobristUpdateCastling()
 	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
+	b.zobristUpdateCastling()
 
+	b.zobristUpdateTurn()
 	b.turn = colorInverse(b.turn) // switch color
+	b.zobristUpdateTurn()
+
 	//b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
+	b.zobristUpdateEnPassant()
 	b.lastMove = move{src: kingSrc, dst: kingDst} // record last move
+	b.zobristUpdateEnPassant()
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -208,11 +225,18 @@ func (b board) generateCastlingRight(children *boardPool) int {
 	b.king[b.turn] = kingDst
 
 	// disable castling
+	b.zobristUpdateCastling()
 	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
+	b.zobristUpdateCastling()
 
+	b.zobristUpdateTurn()
 	b.turn = colorInverse(b.turn) // switch color
+	b.zobristUpdateTurn()
+
 	//b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
+	b.zobristUpdateEnPassant()
 	b.lastMove = move{src: kingSrc, dst: kingDst} // record last move
+	b.zobristUpdateEnPassant()
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -463,10 +487,17 @@ func (b board) generateRelativeKing(children *boardPool, src, incRow, incCol loc
 
 func (b board) newChild(src, dst location) (board, piece) {
 	//child := b                                      // copy board
-	p := b.delPieceLoc(src)               // take piece from board
-	b.addPieceLoc(dst, p)                 // put piece on board
-	b.turn = colorInverse(b.turn)         // switch color
+	p := b.delPieceLoc(src) // take piece from board
+	b.addPieceLoc(dst, p)   // put piece on board
+
+	b.zobristUpdateTurn()
+	b.turn = colorInverse(b.turn) // switch color
+	b.zobristUpdateTurn()
+
+	b.zobristUpdateEnPassant()
 	b.lastMove = move{src: src, dst: dst} // record move
+	b.zobristUpdateEnPassant()
+
 	return b, p
 }
 
@@ -495,9 +526,13 @@ func (b board) recordMoveIfValidRook(children *boardPool, src, dst location) int
 		col := src % 8
 		switch col {
 		case 0: // left rook
+			b.zobristUpdateCastling()
 			child.flags[p.color()] |= lostCastlingLeft
+			b.zobristUpdateCastling()
 		case 7: // right rook
+			b.zobristUpdateCastling()
 			child.flags[p.color()] |= lostCastlingRight
+			b.zobristUpdateCastling()
 		}
 	}
 
@@ -506,11 +541,17 @@ func (b board) recordMoveIfValidRook(children *boardPool, src, dst location) int
 
 func (b board) recordPromotionIfValid(children *boardPool, src, dst location, p piece) int {
 	//child := b                              // copy board
-	b.delPieceLoc(src)            // take pawn from board
-	b.addPieceLoc(dst, p)         // put new piece on board
+	b.delPieceLoc(src)    // take pawn from board
+	b.addPieceLoc(dst, p) // put new piece on board
+
+	b.zobristUpdateTurn()
 	b.turn = colorInverse(b.turn) // switch color
+	b.zobristUpdateTurn()
+
 	//b.lastMove = moveToStr(src, dst, p) // record move
+	b.zobristUpdateEnPassant()
 	b.lastMove = move{src: src, dst: dst, promotion: p} // record move
+	b.zobristUpdateEnPassant()
 
 	return b.recordIfValid(children, b)
 }

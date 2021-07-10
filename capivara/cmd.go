@@ -412,7 +412,9 @@ LOOP:
 
 func cmdSwitch(cmds []command, game *gameState, tokens []string) {
 	b := &game.history[len(game.history)-1] // will update in place
-	b.turn = colorInverse(b.turn)           // switch color
+	b.zobristUpdateTurn()
+	b.turn = colorInverse(b.turn) // switch color
+	b.zobristUpdateTurn()
 }
 
 func cmdUci(cmds []command, game *gameState, tokens []string) {

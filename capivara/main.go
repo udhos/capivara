@@ -68,7 +68,7 @@ func (g gameState) show() {
 		fmt.Println("   -------------------------")
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
-	fmt.Printf("turn: %s check: %v\n", b.turn.name(), b.kingInCheck())
+	fmt.Printf("turn: %s check: %v zobrist: %s\n", b.turn.name(), b.kingInCheck(), b.zobristValue)
 
 	children := defaultBoardPool
 	children.reset()
@@ -119,6 +119,7 @@ func (g *gameState) loadFromFen(fen []string) {
 		fmt.Printf("loadFromFen: %v\n", errFen)
 		return
 	}
+	b.zobristInit()
 	g.history = []board{b} // replace board
 }
 
@@ -162,6 +163,7 @@ func (g *gameState) loadFromReader(input io.Reader) {
 		switch errRead {
 		case io.EOF:
 			g.println("loadFromReader: resetting board")
+			b.zobristInit()
 			g.history = []board{b} // replace board
 			return
 		case nil:
@@ -234,6 +236,8 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	loadBook(bufio.NewReader(strings.NewReader(defaultBook)))
+
+	zobristInit()
 
 	gameLoop(addChildren, dumbBook, cpuprofile)
 }
