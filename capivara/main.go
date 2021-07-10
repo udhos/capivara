@@ -210,11 +210,7 @@ func (b *board) loadPiece(row, col location, p piece) {
 	b.addPiece(row, col, p)
 }
 
-<<<<<<< HEAD
-const version = "0.6.0"
-=======
 const version = "0.7.0"
->>>>>>> main
 
 func fullVersion() string {
 	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d", version, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0))
