@@ -15,7 +15,7 @@ import (
 func relativeMaterial(children *boardPool, b board, addChildren bool) float32 {
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
-		countChildren := b.generateChildren(-1, children)
+		countChildren := b.generateChildren(children)
 		relative += float32(countChildren) / 100.0
 		children.drop(countChildren)
 	}
@@ -44,7 +44,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 	}
 
 	children := nega.children
-	countChildren := b.generateChildren(-1, children)
+	countChildren := b.generateChildren(children)
 
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -69,8 +69,8 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 
 	lastChildren := children.pool[firstChild:]
 
-	for childIndex, child := range lastChildren {
-		score := negamax(nega, child, childIndex, depth-1, addChildren)
+	for _, child := range lastChildren {
+		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
 		if nega.showSearch {
 			fmt.Printf("rootNegamax: depth=%d nodes=%d score=%v move: %s\n", depth, nega.nodes, score, child.lastMove)
@@ -93,7 +93,7 @@ type negaChild struct {
 	nodes int
 }
 
-func negamax(nega *negamaxState, b board, bIndex int, depth int, addChildren bool) float32 {
+func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 
 	children := nega.children
 
@@ -103,7 +103,7 @@ func negamax(nega *negamaxState, b board, bIndex int, depth int, addChildren boo
 		}
 	}
 
-	countChildren := b.generateChildren(bIndex, children)
+	countChildren := b.generateChildren(children)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin // checkmated
@@ -118,8 +118,8 @@ func negamax(nega *negamaxState, b board, bIndex int, depth int, addChildren boo
 	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
 
-	for childIndex, child := range lastChildren {
-		score := negamax(nega, child, childIndex, depth-1, addChildren)
+	for _, child := range lastChildren {
+		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
 		if score >= max {
 			max = score

@@ -17,7 +17,6 @@ type alphaBetaState struct {
 	cancelled      bool
 	singleChildren bool
 	children       *boardPool
-	myPreviousMove move
 }
 
 func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (float32, move, string) {
@@ -30,7 +29,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 		return alphabetaMax, nullMove, "checkmate"
 	}
 	children := ab.children
-	countChildren := b.generateChildren(-1, children)
+	countChildren := b.generateChildren(children)
 	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -72,7 +71,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	}
 
 	// scan remaining children
-	for childIndex, child := range children.pool[firstChild+1:] {
+	for _, child := range children.pool[firstChild+1:] {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
@@ -98,7 +97,7 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	return alpha, bestMove, ""
 }
 
-func alphaBeta(ab *alphaBetaState, b board, bIndex int, alpha, beta float32, depth int, addChildren bool) float32 {
+func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addChildren bool) float32 {
 
 	children := ab.children
 
@@ -108,7 +107,7 @@ func alphaBeta(ab *alphaBetaState, b board, bIndex int, alpha, beta float32, dep
 		}
 	}
 
-	countChildren := b.generateChildren(bIndex, children)
+	countChildren := b.generateChildren(children)
 	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -122,7 +121,7 @@ func alphaBeta(ab *alphaBetaState, b board, bIndex int, alpha, beta float32, dep
 	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
 
-	for childIndex, child := range lastChildren {
+	for _, child := range lastChildren {
 		if !ab.deadline.IsZero() {
 			// there is a timer
 			if ab.deadline.Before(time.Now()) {
@@ -132,7 +131,7 @@ func alphaBeta(ab *alphaBetaState, b board, bIndex int, alpha, beta float32, dep
 				return 0
 			}
 		}
-		score := alphaBeta(ab, child, childIndex, -beta, -alpha, depth-1, addChildren)
+		score := alphaBeta(ab, child, -beta, -alpha, depth-1, addChildren)
 		score = -score
 		if score >= beta {
 			children.drop(countChildren)
