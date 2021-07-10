@@ -1,5 +1,11 @@
 # capivara
 
+# Features
+
+* [UCI protocol](http://wbec-ridderkerk.nl/html/UCIProtocol.html)
+* [Alpha-beta search](https://www.chessprogramming.org/Alpha-Beta)
+* [Iterative deepening](https://www.chessprogramming.org/Iterative_Deepening)
+
 # How to build
 
     git clone https://github.com/udhos/capivara
