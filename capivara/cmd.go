@@ -35,6 +35,7 @@ var tableCmd = []command{
 	{"switch", cmdSwitch, "switch turn"},
 	{"undo", cmdUndo, "undo last played move"},
 	{"uci", cmdUci, "start UCI mode"},
+	{"version", cmdVersion, "show version"},
 }
 
 func cmdClear(cmds []command, game *gameState, tokens []string) {
@@ -426,6 +427,10 @@ func cmdUndo(cmds []command, game *gameState, tokens []string) {
 		return
 	}
 	game.undo()
+}
+
+func cmdVersion(cmds []command, game *gameState, tokens []string) {
+	showFullVersion()
 }
 
 func (game *gameState) undo() {

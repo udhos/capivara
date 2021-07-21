@@ -25,3 +25,7 @@ func fullVersion() string {
 func shortVersion() string {
 	return fmt.Sprintf("%s(%s)", version, features)
 }
+
+func showFullVersion() {
+	fmt.Printf("capivara version %s\n", fullVersion())
+}

@@ -213,7 +213,7 @@ func loadLine(count int, line string) bool {
 }
 
 func loadPosition(position string, m bookMove, count int) {
-	log.Printf("loadPosition: line=%d: position=[%s] move=%s weight=%d FIXME PREVENT DUP MOVE", count, position, m.move, m.weight)
+	//log.Printf("loadPosition: line=%d: position=[%s] move=%s weight=%d FIXME PREVENT DUP MOVE", count, position, m.move, m.weight)
 	book[position] = append(book[position], m)
 }
 
