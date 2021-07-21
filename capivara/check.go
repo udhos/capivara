@@ -249,12 +249,11 @@ func (b board) findAttackFromHV(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteRook || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteRook || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
@@ -267,12 +266,11 @@ func (b board) findAttackFromHV(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteRook || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteRook || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
@@ -285,12 +283,11 @@ func (b board) findAttackFromHV(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteRook || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteRook || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
@@ -303,12 +300,11 @@ func (b board) findAttackFromHV(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteRook || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteRook || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
