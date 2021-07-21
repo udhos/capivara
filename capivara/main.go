@@ -161,7 +161,7 @@ func (g *gameState) loadFromReader(input io.Reader) {
 		line, errRead := reader.ReadString('\n')
 		switch errRead {
 		case io.EOF:
-			g.println("loadFromReader: resetting board")
+			//g.println("loadFromReader: resetting board")
 			b.zobristInit()
 			g.history = []board{b} // replace board
 			return
@@ -213,7 +213,7 @@ func (b *board) loadPiece(row, col location, p piece) {
 
 func main() {
 
-	fmt.Printf("capivara version %s\n", fullVersion())
+	showFullVersion()
 
 	var addChildren bool
 	var cpuprofile string
