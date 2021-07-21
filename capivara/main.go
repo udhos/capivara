@@ -7,7 +7,6 @@ import (
 	"io"
 	"math/rand"
 	"os"
-	"runtime"
 	"strings"
 	"time"
 	"unicode"
@@ -210,12 +209,6 @@ func (g *gameState) loadFromReader(input io.Reader) {
 func (b *board) loadPiece(row, col location, p piece) {
 	//log.Printf("loadPiece: %c%c %s %s", col+'a', row+'1', p.color().name(), p.kindLetterLow())
 	b.addPiece(row, col, p)
-}
-
-const version = "0.7.0"
-
-func fullVersion() string {
-	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d", version, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0))
 }
 
 func main() {
