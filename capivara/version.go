@@ -15,7 +15,7 @@ const (
 	// 3fr: 3-fold repetition
 	// qs: quiescence search
 	// pvs: principal variation search
-	features = "uci ab id"
+	features = "uci ab id z"
 )
 
 func fullVersion() string {
