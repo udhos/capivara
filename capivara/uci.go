@@ -96,7 +96,7 @@ func uciCmdGo(game *gameState, tokens []string) {
 
 	// go wtime 300000 btime 300000 winc 0 binc 0
 
-	game.println(fmt.Sprintf("version %s", version))
+	game.println(fmt.Sprintf("version %s", shortVersion()))
 
 	game.println(fmt.Sprintf("go: %v", tokens))
 
