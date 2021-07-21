@@ -329,12 +329,11 @@ func (b board) findAttackFromDiagonal(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteBishop || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteBishop || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
@@ -348,12 +347,11 @@ func (b board) findAttackFromDiagonal(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteBishop || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteBishop || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
@@ -367,12 +365,11 @@ func (b board) findAttackFromDiagonal(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteBishop || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteBishop || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
@@ -386,12 +383,11 @@ func (b board) findAttackFromDiagonal(kingLoc location) bool {
 		if p == pieceNone {
 			continue
 		}
-		if p.color() == b.turn {
-			break // same color piece
-		}
-		kind := p.kind()
-		if kind == whiteBishop || kind == whiteQueen {
-			return true
+		if p.color() != b.turn {
+			// other color piece
+			if kind := p.kind(); kind == whiteBishop || kind == whiteQueen {
+				return true
+			}
 		}
 		break
 	}
