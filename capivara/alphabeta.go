@@ -30,7 +30,6 @@ func rootAlphaBeta(ab *alphaBetaState, b board, depth int, addChildren bool) (fl
 	}
 	children := ab.children
 	countChildren := b.generateChildren(children)
-	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin, nullMove, "checkmated" // checkmated
@@ -108,7 +107,6 @@ func alphaBeta(ab *alphaBetaState, b board, alpha, beta float32, depth int, addC
 	}
 
 	countChildren := b.generateChildren(children)
-	ab.nodes += int64(countChildren)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin // checkmated
