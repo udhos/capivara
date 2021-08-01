@@ -355,6 +355,9 @@ func (game *gameState) searchPerMove(availTime, perMove time.Duration) string {
 		}
 	}
 
+	last := len(game.history) - 1
+	b := game.history[last]
+
 LOOP:
 	for depth := 1; ; depth++ {
 		game.print(fmt.Sprintf("search depth=%d avail=%v remain=%v\n", depth, availTime, time.Until(deadline)))
@@ -368,8 +371,6 @@ LOOP:
 		children.reset()
 		ab := alphaBetaState{showSearch: false, deadline: deadline, children: children}
 
-		last := len(game.history) - 1
-		b := game.history[last]
 		score, move, comment := rootAlphaBeta(&ab, b, depth, game.addChildren)
 
 		totalNodes += ab.nodes
