@@ -42,12 +42,13 @@ func (b *board) addPieceLoc(loc location, p piece) {
 
 func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
-	b.square[loc] = p
-	//w := positionWeight[loc] * int16(colorToSignal(p.color()))
-	value := p.materialValue(loc)
-	b.materialValue[p.color()] -= value // piece material value leaves board
-	//log.Printf("del: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
-	b.square[loc] = pieceNone
+	if p.kind() != pieceNone {
+		//w := positionWeight[loc] * int16(colorToSignal(p.color()))
+		value := p.materialValue(loc)
+		b.materialValue[p.color()] -= value // piece material value leaves board
+		//log.Printf("del: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
+		b.square[loc] = pieceNone
+	}
 	return p
 }
 
