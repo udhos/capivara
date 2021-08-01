@@ -46,7 +46,6 @@ func (b *board) addPieceLoc(loc location, p piece) {
 func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
 	if p.kind() != pieceNone {
-		b.zobristUpdatePiece(int(loc), p) // remove zobrist value before removing piece
 		//w := positionWeight[loc] * int16(colorToSignal(p.color()))
 		value := p.materialValue(loc)
 		b.materialValue[p.color()] -= value // piece material value leaves board
