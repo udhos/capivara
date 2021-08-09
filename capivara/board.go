@@ -16,6 +16,7 @@ type board struct {
 	materialValue [2]int16
 	lastMove      move
 	zobristValue  zobristKey
+	parent        *board
 }
 
 func (b *board) addPiece(i, j location, p piece) {
@@ -64,7 +65,7 @@ func (b board) getMaterialValue() float32 {
 	return (wh + bl) / 100
 }
 
-func (b board) generatePassantCapture(attackerLoc, targetLoc location, children *boardPool) int {
+func (b *board) generatePassantCapture(attackerLoc, targetLoc location, children *boardPool) int {
 	attackerP := b.square[attackerLoc]
 	attackerColor := attackerP.color()
 	targetColor := b.square[targetLoc].color()
@@ -74,11 +75,11 @@ func (b board) generatePassantCapture(attackerLoc, targetLoc location, children 
 		attackerSignal := colorToSignal(attackerColor)
 		attackerDstLoc := targetLoc + location(8*attackerSignal)
 
-		b, _ := b.newChild(attackerLoc, attackerDstLoc)
+		c, _ := b.createChild(children, attackerLoc, attackerDstLoc)
 
-		b.delPieceLoc(targetLoc) // captured passant pawn
+		c.delPieceLoc(targetLoc) // captured passant pawn
 
-		return b.recordIfValid(children, b)
+		return dropIfInvalid(children, c)
 	}
 
 	return 0
@@ -375,6 +376,14 @@ func (b board) recordIfValid(children *boardPool, child board) int {
 	return 1
 }
 
+func dropIfInvalid(children *boardPool, child *board) int {
+	if child.otherKingInCheck() {
+		children.drop(1)
+		return 0 // drop invalid move 'child'
+	}
+	return 1 // keep
+}
+
 func (b board) generateSliding(children *boardPool, src, incRow, incCol location) int {
 	var countChildren int
 
@@ -495,6 +504,28 @@ func (b board) newChild(src, dst location) (board, piece) {
 	b.zobristUpdateEnPassant()
 
 	return b, p
+}
+
+func (b *board) createChild(children *boardPool, src, dst location) (*board, piece) {
+	child := *b // copy board
+	child.parent = b
+
+	p := child.delPieceLoc(src) // take piece from board
+	child.addPieceLoc(dst, p)   // put piece on board
+
+	child.zobristUpdateTurn()
+	child.turn = colorInverse(b.turn) // switch color
+	child.zobristUpdateTurn()
+
+	child.zobristUpdateEnPassant()
+	child.lastMove = move{src: src, dst: dst} // record move
+	child.zobristUpdateEnPassant()
+
+	children.push(&child)
+
+	c := children.last()
+
+	return c, p
 }
 
 func (b board) recordMoveIfValid(children *boardPool, src, dst location) int {

@@ -14,6 +14,10 @@ func (bp *boardPool) push(b *board) {
 	bp.pool = append(bp.pool, *b)
 }
 
+func (bp *boardPool) last() *board {
+	return &bp.pool[len(bp.pool)-1]
+}
+
 func (bp *boardPool) drop(n int) {
 	bp.pool = bp.pool[:len(bp.pool)-n]
 }
