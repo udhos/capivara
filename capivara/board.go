@@ -88,25 +88,24 @@ func (b board) generateChildren(children *boardPool) int {
 	if !lastMove.isNull() {
 		step := lastMove.rankDelta()
 		if step == 2 {
-			// moved two squares
-			//trgDstRow := int(lastMove[3]) - '1'
-			//trgDstCol := int(lastMove[2]) - 'a'
-			//trgDstLoc := location(trgDstCol + 8*trgDstRow)
 			trgDstLoc := lastMove.dst
-			trgDstCol := trgDstLoc % 8
-			trgDstRow := trgDstLoc / 8
 			trgKind := b.square[trgDstLoc].kind()
 
 			if trgKind == whitePawn {
 				// it is pawn
+
+				trgDstCol := trgDstLoc % 8
+				trgDstRow := trgDstLoc / 8
+				trgDstRow8 := 8 * trgDstRow
+
 				if trgDstCol > 0 {
 					// might be captured from left
-					attackerLoc := location(trgDstCol - 1 + 8*trgDstRow)
+					attackerLoc := location(trgDstCol - 1 + trgDstRow8)
 					countChildren += b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 				}
 				if trgDstCol < 7 {
 					// might be captured from right
-					attackerLoc := location(trgDstCol + 1 + 8*trgDstRow)
+					attackerLoc := location(trgDstCol + 1 + trgDstRow8)
 					countChildren += b.generatePassantCapture(attackerLoc, trgDstLoc, children)
 				}
 			}
