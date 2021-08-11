@@ -20,8 +20,12 @@ type board struct {
 }
 
 func (b *board) disableCastling() {
-	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
-	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+	b.disableCastlingForColor(colorWhite)
+	b.disableCastlingForColor(colorBlack)
+}
+
+func (b *board) disableCastlingForColor(color pieceColor) {
+	b.flags[color] |= lostCastlingLeft | lostCastlingRight
 }
 
 func (b *board) addPiece(i, j location, p piece) {
