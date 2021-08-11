@@ -79,7 +79,7 @@ func (b *board) generatePassantCapture(attackerLoc, targetLoc location, children
 
 		c.delPieceLoc(targetLoc) // captured passant pawn
 
-		return dropIfInvalid(children, c)
+		return keepIfValid(children, c)
 	}
 
 	return 0
@@ -376,7 +376,7 @@ func (b board) recordIfValid(children *boardPool, child board) int {
 	return 1
 }
 
-func dropIfInvalid(children *boardPool, child *board) int {
+func keepIfValid(children *boardPool, child *board) int {
 	if child.otherKingInCheck() {
 		children.drop(1)
 		return 0 // drop invalid move 'child'
@@ -507,8 +507,10 @@ func (b board) newChild(src, dst location) (board, piece) {
 }
 
 func (b *board) createChild(children *boardPool, src, dst location) (*board, piece) {
-	child := *b // copy board
-	child.parent = b
+
+	children.push(b)         // copy
+	child := children.last() // get address
+	child.parent = b         // point to parent
 
 	p := child.delPieceLoc(src) // take piece from board
 	child.addPieceLoc(dst, p)   // put piece on board
@@ -521,11 +523,7 @@ func (b *board) createChild(children *boardPool, src, dst location) (*board, pie
 	child.lastMove = move{src: src, dst: dst} // record move
 	child.zobristUpdateEnPassant()
 
-	children.push(&child)
-
-	c := children.last()
-
-	return c, p
+	return child, p
 }
 
 func (b board) recordMoveIfValid(children *boardPool, src, dst location) int {
