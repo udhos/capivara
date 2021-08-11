@@ -137,8 +137,7 @@ func fenParse(fen []string) (board, error) {
 	b := board{}
 
 	// drop castling rights
-	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
-	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+	b.disableCastling()
 
 	fields := len(fen)
 

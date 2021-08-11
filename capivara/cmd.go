@@ -45,8 +45,7 @@ func cmdClear(cmds []command, game *gameState, tokens []string) {
 func cmdCastling(cmds []command, game *gameState, tokens []string) {
 	last := len(game.history) - 1
 	b := &game.history[last]
-	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
-	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+	b.disableCastling()
 	fmt.Println("castling disabled")
 }
 

@@ -19,6 +19,11 @@ type board struct {
 	parent        *board
 }
 
+func (b *board) disableCastling() {
+	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
+	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+}
+
 func (b *board) addPiece(i, j location, p piece) {
 	loc := i*8 + j
 	b.addPieceLoc(loc, p)
@@ -161,84 +166,99 @@ func (b board) generateChildren(children *boardPool) int {
 	return countChildren
 }
 
-func (b board) generateCastlingLeft(children *boardPool) int {
+func (b *board) generateCastlingLeft(children *boardPool) int {
 
-	row := 7 * location(b.turn)
+	children.push(b)         // copy
+	child := children.last() // get address
+	child.parent = b         // point to parent
+
+	row := 7 * location(child.turn)
 	row8 := 8 * row
 	kingSrc := row8 + 4 // E
 	kingDst := row8 + 2 // C
 	rookSrc := row8     // A
 	rookDst := row8 + 3 // D
 
-	//child := b // copy board
-
 	// move
-	b.square[kingDst] = b.square[kingSrc]
-	b.square[rookDst] = b.square[rookSrc]
-	b.square[kingSrc] = pieceNone
-	b.square[rookSrc] = pieceNone
+	king := child.square[kingSrc]
+	rook := child.square[rookSrc]
+	child.zobristUpdatePiece(int(kingSrc), king)
+	child.zobristUpdatePiece(int(rookSrc), rook)
+	child.square[kingDst] = child.square[kingSrc]
+	child.square[rookDst] = child.square[rookSrc]
+	child.square[kingSrc] = pieceNone
+	child.square[rookSrc] = pieceNone
+	child.zobristUpdatePiece(int(kingDst), king)
+	child.zobristUpdatePiece(int(rookDst), rook)
 
 	// record king new position
-	b.king[b.turn] = kingDst
+	child.king[child.turn] = kingDst
 
 	// disable castling
-	b.zobristUpdateCastling()
-	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
-	b.zobristUpdateCastling()
+	child.zobristUpdateCastling()
+	child.flags[child.turn] |= lostCastlingLeft | lostCastlingRight
+	child.zobristUpdateCastling()
 
-	b.zobristUpdateTurn()
-	b.turn = colorInverse(b.turn) // switch color
-	b.zobristUpdateTurn()
+	child.zobristUpdateTurn()
+	child.turn = colorInverse(child.turn) // switch color
+	child.zobristUpdateTurn()
 
-	//b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
-	b.zobristUpdateEnPassant()
-	b.lastMove = move{src: kingSrc, dst: kingDst} // record last move
-	b.zobristUpdateEnPassant()
+	child.zobristUpdateEnPassant()
+	child.lastMove = move{src: kingSrc, dst: kingDst} // record last move
+	child.zobristUpdateEnPassant()
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
 	// previously required king target square is free from attack
-	children.push(&b)
+	//children.push(&b)
 	return 1
 }
 
-func (b board) generateCastlingRight(children *boardPool) int {
-	row := 7 * location(b.turn)
+func (b *board) generateCastlingRight(children *boardPool) int {
+
+	children.push(b)         // copy
+	child := children.last() // get address
+	child.parent = b         // point to parent
+
+	row := 7 * location(child.turn)
 	row8 := 8 * row
 	kingSrc := row8 + 4 // E
 	kingDst := row8 + 6 // G
 	rookSrc := row8 + 7 // H
 	rookDst := row8 + 5 // F
 
-	//child := b // copy board
-
 	// move
-	b.square[kingDst] = b.square[kingSrc]
-	b.square[rookDst] = b.square[rookSrc]
-	b.square[kingSrc] = pieceNone
-	b.square[rookSrc] = pieceNone
+	king := child.square[kingSrc]
+	rook := child.square[rookSrc]
+	child.zobristUpdatePiece(int(kingSrc), king)
+	child.zobristUpdatePiece(int(rookSrc), rook)
+	child.square[kingDst] = child.square[kingSrc]
+	child.square[rookDst] = child.square[rookSrc]
+	child.square[kingSrc] = pieceNone
+	child.square[rookSrc] = pieceNone
+	child.zobristUpdatePiece(int(kingDst), king)
+	child.zobristUpdatePiece(int(rookDst), rook)
 
 	// record king new position
-	b.king[b.turn] = kingDst
+	child.king[child.turn] = kingDst
 
 	// disable castling
-	b.zobristUpdateCastling()
-	b.flags[b.turn] |= lostCastlingLeft | lostCastlingRight
-	b.zobristUpdateCastling()
+	child.zobristUpdateCastling()
+	child.flags[child.turn] |= lostCastlingLeft | lostCastlingRight
+	child.zobristUpdateCastling()
 
-	b.zobristUpdateTurn()
-	b.turn = colorInverse(b.turn) // switch color
-	b.zobristUpdateTurn()
+	child.zobristUpdateTurn()
+	child.turn = colorInverse(child.turn) // switch color
+	child.zobristUpdateTurn()
 
-	//b.lastMove = moveToStr(kingSrc, kingDst, pieceNone) // record last move
-	b.zobristUpdateEnPassant()
-	b.lastMove = move{src: kingSrc, dst: kingDst} // record last move
-	b.zobristUpdateEnPassant()
+	child.zobristUpdateEnPassant()
+	child.lastMove = move{src: kingSrc, dst: kingDst} // record last move
+	child.zobristUpdateEnPassant()
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
 	// previously required king target square is free from attack
-	children.push(&b)
+	//children.push(&b)
 	return 1
 }
 

@@ -7,6 +7,7 @@ func TestB1(t *testing.T) {
 	game.loadFromString(b1)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -23,6 +24,7 @@ func TestB2(t *testing.T) {
 	game.loadFromString(b2)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -55,6 +57,7 @@ func TestB4(t *testing.T) {
 	game.loadFromString(b4)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 	b.turn = colorBlack
 
 	children := defaultBoardPool
@@ -72,6 +75,7 @@ func TestB4Depth6(t *testing.T) {
 	game.loadFromString(b4)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 	b.turn = colorBlack
 
 	children := defaultBoardPool
@@ -89,6 +93,7 @@ func TestB5(t *testing.T) {
 	game.loadFromString(b5)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -121,6 +126,7 @@ func TestB7(t *testing.T) {
 	game.loadFromString(b7)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -137,6 +143,7 @@ func TestB8(t *testing.T) {
 	game.loadFromString(b8)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -153,6 +160,7 @@ func TestB9(t *testing.T) {
 	game.loadFromString(b9)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -186,6 +194,7 @@ func TestB11(t *testing.T) {
 	game.loadFromString(b11)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
@@ -202,6 +211,7 @@ func TestB12(t *testing.T) {
 	game.loadFromString(b12)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
