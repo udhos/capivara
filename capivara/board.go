@@ -18,6 +18,11 @@ type board struct {
 	zobristValue  zobristKey
 }
 
+func (b *board) disableCastling() {
+	b.flags[colorWhite] |= lostCastlingLeft | lostCastlingRight // disable castling for white
+	b.flags[colorBlack] |= lostCastlingLeft | lostCastlingRight // disable castling for black
+}
+
 func (b *board) addPiece(i, j location, p piece) {
 	loc := i*8 + j
 	b.addPieceLoc(loc, p)
@@ -172,10 +177,16 @@ func (b board) generateCastlingLeft(children *boardPool) int {
 	//child := b // copy board
 
 	// move
+	king := b.square[kingSrc]
+	rook := b.square[rookSrc]
+	b.zobristUpdatePiece(int(kingSrc), king)
+	b.zobristUpdatePiece(int(rookSrc), rook)
 	b.square[kingDst] = b.square[kingSrc]
 	b.square[rookDst] = b.square[rookSrc]
 	b.square[kingSrc] = pieceNone
 	b.square[rookSrc] = pieceNone
+	b.zobristUpdatePiece(int(kingDst), king)
+	b.zobristUpdatePiece(int(rookDst), rook)
 
 	// record king new position
 	b.king[b.turn] = kingDst
@@ -212,10 +223,16 @@ func (b board) generateCastlingRight(children *boardPool) int {
 	//child := b // copy board
 
 	// move
+	king := b.square[kingSrc]
+	rook := b.square[rookSrc]
+	b.zobristUpdatePiece(int(kingSrc), king)
+	b.zobristUpdatePiece(int(rookSrc), rook)
 	b.square[kingDst] = b.square[kingSrc]
 	b.square[rookDst] = b.square[rookSrc]
 	b.square[kingSrc] = pieceNone
 	b.square[rookSrc] = pieceNone
+	b.zobristUpdatePiece(int(kingDst), king)
+	b.zobristUpdatePiece(int(rookDst), rook)
 
 	// record king new position
 	b.king[b.turn] = kingDst
