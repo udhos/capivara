@@ -42,8 +42,7 @@ func (b *board) addPieceLoc(loc location, p piece) {
 	b.delPieceLoc(loc)
 	b.square[loc] = p
 	//w := positionWeight[loc] * int16(colorToSignal(p.color()))
-	value := p.materialValue(loc)
-	b.materialValue[p.color()] += value // piece material value enters board
+	b.addMaterial(loc, p)
 	//log.Printf("add: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
 	if p.kind() == whiteKing {
 		// record king new position
@@ -57,8 +56,7 @@ func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
 	if p.kind() != pieceNone {
 		//w := positionWeight[loc] * int16(colorToSignal(p.color()))
-		value := p.materialValue(loc)
-		b.materialValue[p.color()] -= value // piece material value leaves board
+		b.delMaterial(loc, p)
 		//log.Printf("del: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
 
 		b.zobristUpdatePiece(int(loc), p) // remove zobrist value before removing piece
@@ -66,6 +64,14 @@ func (b *board) delPieceLoc(loc location) piece {
 		b.square[loc] = pieceNone
 	}
 	return p
+}
+
+func (b *board) addMaterial(loc location, p piece) {
+	b.materialValue[p.color()] += p.materialValue(loc) // piece material value enters board
+}
+
+func (b *board) delMaterial(loc location, p piece) {
+	b.materialValue[p.color()] -= p.materialValue(loc) // piece material value leaves board
 }
 
 func (b board) getMaterialValue() float32 {
@@ -188,8 +194,12 @@ func (b *board) generateCastlingLeft(children *boardPool) int {
 	rook := child.square[rookSrc]
 	child.zobristUpdatePiece(int(kingSrc), king)
 	child.zobristUpdatePiece(int(rookSrc), rook)
+	child.delMaterial(kingSrc, king)
+	child.delMaterial(rookSrc, rook)
 	child.square[kingDst] = child.square[kingSrc]
 	child.square[rookDst] = child.square[rookSrc]
+	child.addMaterial(kingDst, king)
+	child.addMaterial(rookDst, rook)
 	child.square[kingSrc] = pieceNone
 	child.square[rookSrc] = pieceNone
 	child.zobristUpdatePiece(int(kingDst), king)
@@ -236,8 +246,12 @@ func (b *board) generateCastlingRight(children *boardPool) int {
 	rook := child.square[rookSrc]
 	child.zobristUpdatePiece(int(kingSrc), king)
 	child.zobristUpdatePiece(int(rookSrc), rook)
+	child.delMaterial(kingSrc, king)
+	child.delMaterial(rookSrc, rook)
 	child.square[kingDst] = child.square[kingSrc]
 	child.square[rookDst] = child.square[rookSrc]
+	child.addMaterial(kingDst, king)
+	child.addMaterial(rookDst, rook)
 	child.square[kingSrc] = pieceNone
 	child.square[rookSrc] = pieceNone
 	child.zobristUpdatePiece(int(kingDst), king)
