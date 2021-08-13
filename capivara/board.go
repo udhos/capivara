@@ -31,8 +31,7 @@ func (b *board) addPieceLoc(loc location, p piece) {
 	b.delPieceLoc(loc)
 	b.square[loc] = p
 	//w := positionWeight[loc] * int16(colorToSignal(p.color()))
-	value := p.materialValue(loc)
-	b.materialValue[p.color()] += value // piece material value enters board
+	b.addMaterial(loc, p)
 	//log.Printf("add: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
 	if p.kind() == whiteKing {
 		// record king new position
@@ -44,12 +43,19 @@ func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
 	if p.kind() != pieceNone {
 		//w := positionWeight[loc] * int16(colorToSignal(p.color()))
-		value := p.materialValue(loc)
-		b.materialValue[p.color()] -= value // piece material value leaves board
+		b.delMaterial(loc, p)
 		//log.Printf("del: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
 		b.square[loc] = pieceNone
 	}
 	return p
+}
+
+func (b *board) addMaterial(loc location, p piece) {
+	b.materialValue[p.color()] += p.materialValue(loc) // piece material value enters board
+}
+
+func (b *board) delMaterial(loc location, p piece) {
+	b.materialValue[p.color()] -= p.materialValue(loc) // piece material value leaves board
 }
 
 func (b board) getMaterialValue() float32 {
@@ -166,8 +172,14 @@ func (b board) generateCastlingLeft(children *boardPool) int {
 	//child := b // copy board
 
 	// move
+	king := b.square[kingSrc]
+	rook := b.square[rookSrc]
+	b.delMaterial(kingSrc, king)
+	b.delMaterial(rookSrc, rook)
 	b.square[kingDst] = b.square[kingSrc]
 	b.square[rookDst] = b.square[rookSrc]
+	b.addMaterial(kingDst, king)
+	b.addMaterial(rookDst, rook)
 	b.square[kingSrc] = pieceNone
 	b.square[rookSrc] = pieceNone
 
@@ -199,8 +211,14 @@ func (b board) generateCastlingRight(children *boardPool) int {
 	//child := b // copy board
 
 	// move
+	king := b.square[kingSrc]
+	rook := b.square[rookSrc]
+	b.delMaterial(kingSrc, king)
+	b.delMaterial(rookSrc, rook)
 	b.square[kingDst] = b.square[kingSrc]
 	b.square[rookDst] = b.square[rookSrc]
+	b.addMaterial(kingDst, king)
+	b.addMaterial(rookDst, rook)
 	b.square[kingSrc] = pieceNone
 	b.square[rookSrc] = pieceNone
 
