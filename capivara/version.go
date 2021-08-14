@@ -11,11 +11,12 @@ const (
 	// uci: uci protocol
 	// ab: alpha-beta search
 	// id: iterative deepening
+	// pst: piece-square tables
 	// z: zobrist hashing
 	// 3fr: 3-fold repetition
 	// qs: quiescence search
 	// pvs: principal variation search
-	features = "uci ab id z"
+	features = "uci ab id pst z"
 )
 
 func fullVersion() string {
