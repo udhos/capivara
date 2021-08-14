@@ -52,7 +52,7 @@ func newGame() gameState {
 }
 
 func (g gameState) show() {
-	b := g.history[len(g.history)-1] // read-only copy
+	b := &g.history[len(g.history)-1] // read-only copy
 	fmt.Println("    a  b  c  d  e  f  g  h")
 	fmt.Println("   -------------------------")
 	for row := 7; row >= 0; row-- {

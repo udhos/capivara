@@ -159,7 +159,7 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	}
 	fmt.Printf("negamax depth=%d\n", depth)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 
 	children := defaultBoardPool
 	children.reset()
@@ -184,7 +184,7 @@ func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
 	}
 	fmt.Printf("alphabeta depth=%d\n", depth)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 
 	children := defaultBoardPool
 	children.reset()
@@ -355,7 +355,7 @@ func (game *gameState) searchPerMove(availTime, perMove time.Duration) string {
 	}
 
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 
 LOOP:
 	for depth := 1; ; depth++ {

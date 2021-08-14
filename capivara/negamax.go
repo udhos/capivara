@@ -12,7 +12,7 @@ import (
 //
 // relativeMaterial(board) converts absolute material score to relative:
 // the higher the better for the current player
-func relativeMaterial(children *boardPool, b board, addChildren bool) float32 {
+func relativeMaterial(children *boardPool, b *board, addChildren bool) float32 {
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
 		countChildren := b.generateChildren(children)
@@ -33,7 +33,7 @@ type negamaxState struct {
 	showSearch bool
 }
 
-func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (float32, move, string) {
+func rootNegamax(nega *negamaxState, b *board, depth int, addChildren bool) (float32, move, string) {
 	if depth < 1 {
 		return relativeMaterial(nega.children, b, addChildren), nullMove, "invalid-depth"
 	}
@@ -58,16 +58,17 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 		// in the root board, if there is a single possible move,
 		// we can skip calculations and immediately return the move.
 		// score is of course bogus in this case.
-		return relativeMaterial(children, children.pool[firstChild], addChildren), children.pool[firstChild].lastMove, ""
+		return relativeMaterial(children, &children.pool[firstChild], addChildren), children.pool[firstChild].lastMove, ""
 	}
 
 	var max float32 = negamaxMin
 
 	var negaChildren []negaChild
 
-	lastChildren := children.pool[firstChild:]
+	//lastChildren := children.pool[firstChild:]
 
-	for _, child := range lastChildren {
+	for i := firstChild; i < len(children.pool); i++ {
+		child := &children.pool[i]
 		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
 		if nega.showSearch {
@@ -86,12 +87,12 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 }
 
 type negaChild struct {
-	b     board
+	b     *board
 	score float32
 	nodes int
 }
 
-func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
+func negamax(nega *negamaxState, b *board, depth int, addChildren bool) float32 {
 
 	children := nega.children
 
@@ -112,9 +113,10 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 	var max float32 = negamaxMin
 
 	firstChild := len(children.pool) - countChildren
-	lastChildren := children.pool[firstChild:]
+	//lastChildren := children.pool[firstChild:]
 
-	for _, child := range lastChildren {
+	for i := firstChild; i < len(children.pool); i++ {
+		child := &children.pool[i]
 		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
 		if score >= max {

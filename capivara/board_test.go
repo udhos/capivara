@@ -7,7 +7,7 @@ var testMove move
 func BenchmarkCastling(b *testing.B) {
 	game := newGame()
 	game.loadFromString(castling)
-	brd := game.history[len(game.history)-1]
+	brd := &game.history[len(game.history)-1]
 
 	children := defaultBoardPool
 	ab := alphaBetaState{children: children}
@@ -24,7 +24,7 @@ func BenchmarkCastling(b *testing.B) {
 func BenchmarkCastlingAddChildren(b *testing.B) {
 	game := newGame()
 	game.loadFromString(castling)
-	brd := game.history[len(game.history)-1]
+	brd := &game.history[len(game.history)-1]
 
 	children := defaultBoardPool
 	ab := alphaBetaState{children: children}

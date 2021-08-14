@@ -6,7 +6,7 @@ func TestB1(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b1)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -23,7 +23,7 @@ func TestB2(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b2)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -40,7 +40,7 @@ func TestB3(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b3)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -57,7 +57,7 @@ func TestB4(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b4)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 	b.turn = colorBlack
 
@@ -75,7 +75,7 @@ func TestB4Depth6(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b4)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 	b.turn = colorBlack
 
@@ -93,7 +93,7 @@ func TestB5(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b5)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -110,7 +110,7 @@ func TestB6(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b6)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 
 	children := defaultBoardPool
 	children.reset()
@@ -126,7 +126,7 @@ func TestB7(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b7)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -143,7 +143,7 @@ func TestB8(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b8)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -160,7 +160,7 @@ func TestB9(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b9)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
@@ -177,7 +177,7 @@ func TestB10(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b10)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.turn = colorBlack
 
 	children := defaultBoardPool
@@ -194,7 +194,7 @@ func TestB11(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b11)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.setFlagsForColor(colorWhite, lostCastlingLeft)
 	b.disableCastlingForColor(colorBlack)
 
@@ -212,7 +212,7 @@ func TestB12(t *testing.T) {
 	game := newGame()
 	game.loadFromString(b12)
 	last := len(game.history) - 1
-	b := game.history[last]
+	b := &game.history[last]
 	b.disableCastling()
 
 	children := defaultBoardPool
