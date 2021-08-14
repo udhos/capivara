@@ -25,16 +25,11 @@ func (b *board) disableCastling() {
 }
 
 func (b *board) disableCastlingForColor(color pieceColor) {
-	b.flags[color] |= lostCastlingLeft | lostCastlingRight
+	b.setFlagsForColor(color, lostCastlingLeft|lostCastlingRight)
 }
 
-func (b *board) disableCastling() {
-	b.disableCastlingForColor(colorWhite)
-	b.disableCastlingForColor(colorBlack)
-}
-
-func (b *board) disableCastlingForColor(color pieceColor) {
-	b.flags[color] |= lostCastlingLeft | lostCastlingRight
+func (b *board) setFlagsForColor(color pieceColor, flags colorFlag) {
+	b.flags[color] |= flags
 }
 
 func (b *board) addPiece(i, j location, p piece) {

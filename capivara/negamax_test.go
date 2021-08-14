@@ -195,6 +195,7 @@ func TestB11(t *testing.T) {
 	game.loadFromString(b11)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.setFlagsForColor(colorWhite, lostCastlingLeft)
 	b.disableCastlingForColor(colorBlack)
 
 	children := defaultBoardPool
