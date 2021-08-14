@@ -28,6 +28,15 @@ func (b *board) disableCastlingForColor(color pieceColor) {
 	b.flags[color] |= lostCastlingLeft | lostCastlingRight
 }
 
+func (b *board) disableCastling() {
+	b.disableCastlingForColor(colorWhite)
+	b.disableCastlingForColor(colorBlack)
+}
+
+func (b *board) disableCastlingForColor(color pieceColor) {
+	b.flags[color] |= lostCastlingLeft | lostCastlingRight
+}
+
 func (b *board) addPiece(i, j location, p piece) {
 	loc := i*8 + j
 	b.addPieceLoc(loc, p)
@@ -54,7 +63,25 @@ func (b *board) addPieceLoc(loc location, p piece) {
 
 func (b *board) delPieceLoc(loc location) piece {
 	p := b.square[loc]
-	if p.kind() != pieceNone {
+	if kind := p.kind(); kind != pieceNone {
+
+		{
+			// if rook captured, disable castling
+			row := int(loc) / 8
+			color := p.color()
+			rookFirstRow := 7 * int(color) // 0=>0 1=>7
+			if row == rookFirstRow {
+				// moved to first row
+				col := loc % 8
+				switch col {
+				case 0: // moved to square rook left
+					b.flags[color] |= lostCastlingLeft
+				case 7: // moved to square rook right
+					b.flags[color] |= lostCastlingRight
+				}
+			}
+		}
+
 		//w := positionWeight[loc] * int16(colorToSignal(p.color()))
 		b.delMaterial(loc, p)
 		//log.Printf("del: loc=%d material=%d board=%d", loc, value, b.materialValue[p.color()])
@@ -154,7 +181,7 @@ func (b board) generateChildren(children *boardPool) int {
 		if b.square[colB] == pieceNone && b.square[colC] == pieceNone && b.square[colD] == pieceNone {
 			// squares are free
 			colE := firstRow8 + 4 // king
-			if !b.anyPieceAttacks(colB) && !b.anyPieceAttacks(colC) && !b.anyPieceAttacks(colD) && !b.anyPieceAttacks(colE) {
+			if !b.anyPieceAttacks(colC) && !b.anyPieceAttacks(colD) && !b.anyPieceAttacks(colE) {
 				countChildren += b.generateCastlingLeft(children)
 			}
 		}
