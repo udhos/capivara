@@ -39,6 +39,7 @@ func TestB3(t *testing.T) {
 	game.loadFromString(b3)
 	last := len(game.history) - 1
 	b := game.history[last]
+	b.disableCastling()
 
 	children := defaultBoardPool
 	children.reset()
