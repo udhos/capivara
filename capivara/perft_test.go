@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestPerft(t *testing.T) {
 
@@ -87,3 +90,55 @@ const perftBoard2 = `
    -------------------------
     a  b  c  d  e  f  g  h
 `
+
+type perftFENTest struct {
+	name          string
+	fen           string
+	expectedNodes []int64
+}
+
+// https://www.chessprogramming.org/Perft_Results
+var perftFENTestTable = []perftFENTest{
+	{"Initial Position", "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", testPerftTable},
+	{"Position 2", "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", []int64{0, 48, 2039, 97862, 4085603, 193690690, 8031647685}},
+}
+
+func TestPerftFEN(t *testing.T) {
+	testPerftFENDepth(t, 5) // deeper will take long
+}
+
+func testPerftFENDepth(t *testing.T, maxDepth int) {
+
+	for _, data := range perftFENTestTable {
+
+		game := newGame()
+		fenTokens := strings.Fields(data.fen)
+		game.loadFromFen(fenTokens)
+		b := game.history[len(game.history)-1]
+
+		buf := defaultBoardPool
+
+		var depth int
+
+		for _, depthNodes := range data.expectedNodes {
+
+			if maxDepth > 0 {
+				if depth > maxDepth {
+					break
+				}
+			}
+
+			buf.reset()
+
+			n, _ := perft(b, depth, buf)
+
+			if n != depthNodes {
+				t.Errorf("%s: perft maxDepth=%d depth %d: got %d nodes, expected %d", data.name, maxDepth, depth, n, depthNodes)
+			} else {
+				t.Logf("%s: perft maxDepth=%d depth %d: got %d nodes, expected %d: OK", data.name, maxDepth, depth, n, depthNodes)
+			}
+
+			depth++
+		}
+	}
+}
