@@ -5,6 +5,7 @@
 * [UCI protocol](http://wbec-ridderkerk.nl/html/UCIProtocol.html)
 * [Alpha-beta search](https://www.chessprogramming.org/Alpha-Beta)
 * [Iterative deepening](https://www.chessprogramming.org/Iterative_Deepening)
+* [Piece-square tables](https://www.chessprogramming.org/Piece-Square_Tables)
 * [Quiescence search](https://www.chessprogramming.org/Quiescence_Search)
 
 # How to build
