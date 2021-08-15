@@ -21,7 +21,9 @@ type alphaBetaState struct {
 
 func rootAlphaBeta(ab *alphaBetaState, b *board, depth int, addChildren bool) (float32, move, string) {
 	if depth < 1 {
-		return relativeMaterial(ab.children, b, addChildren), nullMove, "invalid-depth"
+		if b.lastMove.isQuiescent() {
+			return relativeMaterial(ab.children, b, addChildren), nullMove, "invalid-depth"
+		}
 	}
 	if b.otherKingInCheck() {
 		return alphabetaMax, nullMove, "checkmate"
@@ -100,7 +102,9 @@ func alphaBeta(ab *alphaBetaState, b *board, alpha, beta float32, depth int, add
 	children := ab.children
 
 	if depth < 1 {
-		return relativeMaterial(children, b, addChildren)
+		if b.lastMove.isQuiescent() {
+			return relativeMaterial(children, b, addChildren)
+		}
 	}
 
 	countChildren := b.generateChildren(children)

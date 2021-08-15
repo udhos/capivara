@@ -6,6 +6,7 @@
 * [Alpha-beta search](https://www.chessprogramming.org/Alpha-Beta)
 * [Iterative deepening](https://www.chessprogramming.org/Iterative_Deepening)
 * [Zobrist hashing](https://www.chessprogramming.org/Zobrist_Hashing)
+* [Quiescence search](https://www.chessprogramming.org/Quiescence_Search)
 
 # How to build
 
