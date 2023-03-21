@@ -12,8 +12,9 @@ func (k zobristKey) String() string {
 }
 
 // kind:
-//  white 1 .. 6
-//  black 9 .. 14
+//
+//	white 1 .. 6
+//	black 9 .. 14
 const pieceTypes = 14 // 0..13
 
 var zobristBoard [64][pieceTypes]zobristKey
