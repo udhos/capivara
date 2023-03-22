@@ -173,6 +173,15 @@ func (g *gameState) loadFromReader(input io.Reader) {
 
 		line = strings.TrimSpace(line)
 
+		switch line {
+		case "black":
+			b.turn = colorBlack
+			continue
+		case "nocastling":
+			b.disableCastling()
+			continue
+		}
+
 		//fmt.Printf("load: %s line=%d: [%s]\n", filename, lineCount, line)
 
 		row := -1
