@@ -61,7 +61,7 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 		return relativeMaterial(children, children.pool[firstChild], addChildren), children.pool[firstChild].lastMove, ""
 	}
 
-	var max float32 = negamaxMin
+	var maxScore float32 = negamaxMin
 
 	var negaChildren []negaChild
 
@@ -78,11 +78,11 @@ func rootNegamax(nega *negamaxState, b board, depth int, addChildren bool) (floa
 
 	sort.SliceStable(negaChildren, func(i, j int) bool { return negaChildren[i].score > negaChildren[j].score })
 
-	if negaChildren[0].score > max {
-		max = negaChildren[0].score
+	if negaChildren[0].score > maxScore {
+		maxScore = negaChildren[0].score
 	}
 
-	return max, negaChildren[0].b.lastMove, ""
+	return maxScore, negaChildren[0].b.lastMove, ""
 }
 
 type negaChild struct {
@@ -109,7 +109,7 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 
 	nega.nodes += int64(countChildren)
 
-	var max float32 = negamaxMin
+	var maxScore float32 = negamaxMin
 
 	firstChild := len(children.pool) - countChildren
 	lastChildren := children.pool[firstChild:]
@@ -117,11 +117,11 @@ func negamax(nega *negamaxState, b board, depth int, addChildren bool) float32 {
 	for _, child := range lastChildren {
 		score := negamax(nega, child, depth-1, addChildren)
 		score = -score
-		if score >= max {
-			max = score
+		if score >= maxScore {
+			maxScore = score
 		}
 	}
 
 	children.drop(countChildren)
-	return max
+	return maxScore
 }

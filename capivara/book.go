@@ -147,7 +147,7 @@ LOOP:
 const errFatal = true
 const errNonFatal = false
 
-func loadLine(count int, line string) bool {
+func loadLine(lineCount int, line string) bool {
 
 	comment := strings.SplitN(line, "#", 2)
 	uncomment := strings.TrimSpace(comment[0])
@@ -158,7 +158,7 @@ func loadLine(count int, line string) bool {
 
 	entry := strings.SplitN(uncomment, ":", 2)
 	if len(entry) < 1 {
-		log.Printf("loadLine: missing position at line=%d: %s", count, line)
+		log.Printf("loadLine: missing position at line=%d: %s", lineCount, line)
 		return errNonFatal
 	}
 	positionMoves := strings.Fields(entry[0])
@@ -170,12 +170,12 @@ func loadLine(count int, line string) bool {
 	var errTmp error
 	tmp, errTmp = tmp.validatePosition(position)
 	if errTmp != nil {
-		log.Printf("loadLine: line=%d: invalid position=[%s]: %v", count, position, errTmp)
+		log.Printf("loadLine: line=%d: invalid position=[%s]: %v", lineCount, position, errTmp)
 		return errFatal
 	}
 
 	if len(entry) == 1 {
-		return loadGame(count, positionMoves)
+		return loadGame(lineCount, positionMoves)
 	}
 
 	moves := strings.Split(strings.TrimSpace(entry[1]), ",")
@@ -190,7 +190,7 @@ func loadLine(count int, line string) bool {
 
 		tmp, errTmp = tmp.validatePosition(moveStr)
 		if errTmp != nil {
-			log.Printf("loadLine: line=%d: invalid move position=[%s]: move=%s %v", count, position, moveStr, errTmp)
+			log.Printf("loadLine: line=%d: invalid move position=[%s]: move=%s %v", lineCount, position, moveStr, errTmp)
 			return errFatal
 		}
 		tmp.undo()
@@ -198,7 +198,7 @@ func loadLine(count int, line string) bool {
 		if len(mw) > 1 {
 			value, errConv := strconv.Atoi(strings.TrimSpace(mw[1]))
 			if errConv != nil {
-				log.Printf("loadLine: bad move weight at line=%d: %s: %v", count, line, errConv)
+				log.Printf("loadLine: bad move weight at line=%d: %s: %v", lineCount, line, errConv)
 			} else {
 				w = value
 			}
@@ -206,13 +206,13 @@ func loadLine(count int, line string) bool {
 
 		//log.Printf("loadLine: line=%d: position=[%s] move=%s weight=%d", count, position, moveStr, w)
 		//book[position] = append(book[position], bookMove{move: moveStr, weight: w})
-		loadPosition(position, bookMove{move: moveStr, weight: w}, count)
+		loadPosition(position, bookMove{move: moveStr, weight: w}, lineCount)
 	}
 
 	return errNonFatal
 }
 
-func loadPosition(position string, m bookMove, count int) {
+func loadPosition(position string, m bookMove, _ /*lineCount*/ int) {
 	//log.Printf("loadPosition: line=%d: position=[%s] move=%s weight=%d FIXME PREVENT DUP MOVE", count, position, m.move, m.weight)
 	book[position] = append(book[position], m)
 }
