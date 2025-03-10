@@ -214,6 +214,7 @@ func main() {
 
 	showFullVersion()
 
+	var version bool
 	var addChildren bool
 	var cpuprofile string
 	dumbBook := true
@@ -221,8 +222,12 @@ func main() {
 	flag.BoolVar(&addChildren, "addChildren", addChildren, "compute number of children into evalution function")
 	flag.BoolVar(&dumbBook, "dumbBook", dumbBook, "dumb book")
 	flag.StringVar(&cpuprofile, "cpuprofile", "", "save cpuprofile into to file")
-
+	flag.BoolVar(&version, "version", false, "show version")
 	flag.Parse()
+
+	if version {
+		return
+	}
 
 	mirrorPieceSquareTable()
 
