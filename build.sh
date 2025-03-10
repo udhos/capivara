@@ -1,20 +1,28 @@
 #!/bin/bash
 
-build() {
-	local pkg="$1"
+go install golang.org/x/vuln/cmd/govulncheck@latest
+go install golang.org/x/tools/cmd/deadcode@latest
+go install github.com/mgechev/revive@latest
 
-	gofmt -s -w "$pkg"
-	go fix "$pkg"
-	go vet "$pkg"
+gofmt -s -w .
 
-	hash golint >/dev/null && golint "$pkg"
-	hash staticcheck >/dev/null && staticcheck "$pkg"
+revive ./...
 
-	go test -failfast "$pkg"
+go mod tidy
 
-	(cd "$pkg" && go test -run=Benchmark -bench=.)
+govulncheck ./...
 
-	go install -v "$pkg"
-}
+deadcode ./capivara
 
-build ./capivara
+#export CGO_ENABLED=1
+
+echo "***"
+echo "*** TestPerftFEN is slow (it takes about 15 seconds)"
+echo "*** but -race is disabled since it became painfully slow in go1.24.1"
+echo "***"
+#go test -race ./... ;# -race became slow for perft in go1.24.1
+go test ./...
+
+export CGO_ENABLED=0
+
+go install ./...
