@@ -11,4 +11,3 @@ build() {
 
 build main capivara
 build 3fr capivara-3fr
-build qs capivara-qs
