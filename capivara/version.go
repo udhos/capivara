@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"runtime"
 )
 
@@ -20,7 +22,9 @@ const (
 )
 
 func fullVersion() string {
-	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d", shortVersion(), runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.GOMAXPROCS(0))
+	return fmt.Sprintf("%s %s %s %s GOMAXPROCS=%d",
+		shortVersion(), runtime.Version(), runtime.GOOS, runtime.GOARCH,
+		runtime.GOMAXPROCS(0))
 }
 
 func shortVersion() string {
@@ -28,5 +32,6 @@ func shortVersion() string {
 }
 
 func showFullVersion() {
-	fmt.Printf("capivara version %s\n", fullVersion())
+	me := path.Base(os.Args[0])
+	fmt.Printf("%s version %s\n", me, fullVersion())
 }
