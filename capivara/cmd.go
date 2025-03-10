@@ -38,23 +38,23 @@ var tableCmd = []command{
 	{"version", cmdVersion, "show version"},
 }
 
-func cmdClear(cmds []command, game *gameState, tokens []string) {
+func cmdClear(_ []command, game *gameState, _ []string) {
 	*game = newGame()
 }
 
-func cmdCastling(cmds []command, game *gameState, tokens []string) {
+func cmdCastling(_ []command, game *gameState, _ []string) {
 	last := len(game.history) - 1
 	b := &game.history[last]
 	b.disableCastling()
 	fmt.Println("castling disabled")
 }
 
-func cmdDumbBook(cmds []command, game *gameState, tokens []string) {
+func cmdDumbBook(_ []command, game *gameState, _ []string) {
 	game.dumbBook = !game.dumbBook
 	fmt.Println("dumb book:", game.dumbBook)
 }
 
-func cmdFen(cmds []command, game *gameState, tokens []string) {
+func cmdFen(_ []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("usage: fen FEN-string\n")
 		return
@@ -62,14 +62,14 @@ func cmdFen(cmds []command, game *gameState, tokens []string) {
 	game.loadFromFen(tokens[1:])
 }
 
-func cmdHelp(cmds []command, game *gameState, tokens []string) {
+func cmdHelp(cmds []command, _ *gameState, _ []string) {
 	fmt.Println("available commands:")
 	for _, cmd := range cmds {
 		fmt.Printf(" %s - %s\n", cmd.name, cmd.description)
 	}
 }
 
-func cmdLoad(cmds []command, game *gameState, tokens []string) {
+func cmdLoad(_ []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("usage: load filename\n")
 		return
@@ -77,7 +77,7 @@ func cmdLoad(cmds []command, game *gameState, tokens []string) {
 	game.loadFromFile(tokens[1])
 }
 
-func cmdLoadDumbBook(cmds []command, game *gameState, tokens []string) {
+func cmdLoadDumbBook(_ []command, _ *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("book size=%d\n", len(book))
 		i := 0
@@ -95,7 +95,7 @@ func cmdLoadDumbBook(cmds []command, game *gameState, tokens []string) {
 	loadBookFromFile(tokens[1])
 }
 
-func cmdMove(cmds []command, game *gameState, tokens []string) {
+func cmdMove(_ []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("usage: move fromto\n")
 		return
@@ -149,7 +149,7 @@ func cmdMove(cmds []command, game *gameState, tokens []string) {
 	b.addPiece(location(to[1]-'1'), location(to[0]-'a'), p) // put piece on board
 }
 
-func cmdNegamax(cmds []command, game *gameState, tokens []string) {
+func cmdNegamax(_ []command, game *gameState, tokens []string) {
 	depth := 4
 	if len(tokens) > 1 {
 		d, errConv := strconv.Atoi(tokens[1])
@@ -174,7 +174,7 @@ func cmdNegamax(cmds []command, game *gameState, tokens []string) {
 	fmt.Printf("negamax: nodes=%d speed=%v knodes/s best score=%v move=%s (%s)\n", nega.nodes, speed, score, move, comment)
 }
 
-func cmdAlphaBeta(cmds []command, game *gameState, tokens []string) {
+func cmdAlphaBeta(_ []command, game *gameState, tokens []string) {
 	depth := 4
 	if len(tokens) > 1 {
 		d, errConv := strconv.Atoi(tokens[1])
@@ -208,7 +208,7 @@ func getSpeedElapsed(nodes int64, elap time.Duration) int {
 	return int(float64(nodes/1000) / elap.Seconds()) // knodes / s
 }
 
-func cmdPlay(cmds []command, game *gameState, tokens []string) {
+func cmdPlay(_ []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("usage: play fromto\n")
 		return
@@ -222,7 +222,7 @@ func cmdPlay(cmds []command, game *gameState, tokens []string) {
 	}
 }
 
-func cmdPerft(cmds []command, game *gameState, tokens []string) {
+func cmdPerft(_ []command, game *gameState, tokens []string) {
 	if len(tokens) < 2 {
 		fmt.Printf("usage: perft depth\n")
 		return
@@ -273,7 +273,7 @@ func cmdPerft(cmds []command, game *gameState, tokens []string) {
 	}
 }
 
-func cmdPst(cmds []command, game *gameState, tokens []string) {
+func cmdPst(_ []command, _ *gameState, _ []string) {
 	fmt.Printf("white:\n")
 	showPst(colorWhite)
 	fmt.Printf("black:\n")
@@ -301,11 +301,11 @@ func showPst(color pieceColor) {
 
 }
 
-func cmdReset(cmds []command, game *gameState, tokens []string) {
+func cmdReset(_ []command, game *gameState, _ []string) {
 	game.loadFromString(builtinBoard)
 }
 
-func cmdSearch(cmds []command, game *gameState, tokens []string) {
+func cmdSearch(_ []command, game *gameState, tokens []string) {
 	availTime := 5 * time.Second
 
 	if len(tokens) > 1 {
@@ -411,26 +411,26 @@ LOOP:
 	return bestMove.String()
 }
 
-func cmdSwitch(cmds []command, game *gameState, tokens []string) {
+func cmdSwitch(_ []command, game *gameState, _ []string) {
 	b := &game.history[len(game.history)-1] // will update in place
 	b.zobristUpdateTurn()
 	b.turn = colorInverse(b.turn) // switch color
 	b.zobristUpdateTurn()
 }
 
-func cmdUci(cmds []command, game *gameState, tokens []string) {
+func cmdUci(_ []command, game *gameState, tokens []string) {
 	uciCmdUci(game, tokens)
 	game.uci = true
 }
 
-func cmdUndo(cmds []command, game *gameState, tokens []string) {
+func cmdUndo(_ []command, game *gameState, _ []string) {
 	if len(game.history) < 2 {
 		return
 	}
 	game.undo()
 }
 
-func cmdVersion(cmds []command, game *gameState, tokens []string) {
+func cmdVersion(_ []command, _ *gameState, _ []string) {
 	showFullVersion()
 }
 

@@ -20,17 +20,17 @@ var tableUci = []uciCommand{
 	{"go", uciCmdGo},
 }
 
-func uciCmdUci(game *gameState, tokens []string) {
+func uciCmdUci(_ *gameState, _ []string) {
 	fmt.Println("id name Capivara", fullVersion())
 	fmt.Println("id author https://github.com/udhos/capivara")
 	fmt.Println("uciok")
 }
 
-func uciCmdIsReady(game *gameState, tokens []string) {
+func uciCmdIsReady(_ *gameState, _ []string) {
 	fmt.Println("readyok")
 }
 
-func uciCmdQuit(game *gameState, tokens []string) {
+func uciCmdQuit(game *gameState, _ []string) {
 	game.println("good bye")
 	os.Exit(0)
 }
