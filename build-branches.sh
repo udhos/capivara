@@ -11,3 +11,4 @@ build() {
 
 build main capivara
 build 3fr capivara-3fr
+build 3fr-b capivara-3fr-b
