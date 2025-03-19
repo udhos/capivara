@@ -29,7 +29,8 @@ func rootAlphaBeta(ab *alphaBetaState, b *board, depth int, addChildren bool) (f
 		return alphabetaMax, nullMove, "checkmate"
 	}
 	children := ab.children
-	countChildren := b.generateChildren(children)
+	const pruneRepetition = false
+	countChildren, _ := b.generateChildren(children, pruneRepetition)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin, nullMove, "checkmated" // checkmated
@@ -107,7 +108,11 @@ func alphaBeta(ab *alphaBetaState, b *board, alpha, beta float32, depth int, add
 		}
 	}
 
-	countChildren := b.generateChildren(children)
+	const pruneRepetition = true
+	countChildren, repetition := b.generateChildren(children, pruneRepetition)
+	if repetition {
+		return 0 // draw
+	}
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return alphabetaMin // checkmated

@@ -242,7 +242,8 @@ func cmdPerft(_ []command, game *gameState, tokens []string) {
 	//buf := []board(nil)
 	children := defaultBoardPool
 	children.reset()
-	countChildren := b.generateChildren(children)
+	const pruneRepetition = false
+	countChildren, _ := b.generateChildren(children, pruneRepetition)
 
 	fmt.Printf("perft depth=%d\n", d)
 
@@ -253,7 +254,8 @@ func cmdPerft(_ []command, game *gameState, tokens []string) {
 		n, t := perft(c, d, children)
 		elap := time.Since(begin)
 		speed := getSpeedElapsed(t, elap)
-		fmt.Printf("%s nodes=%d total_nodes=%d elapsed=%v speed=%v knodes/s\n", c.lastMove, n, t, elap, speed)
+		fmt.Printf("%s nodes=%d total_nodes=%d elapsed=%v speed=%v knodes/s\n",
+			c.lastMove, n, t, elap, speed)
 		nodes += n
 		total += t
 	}
@@ -261,7 +263,8 @@ func cmdPerft(_ []command, game *gameState, tokens []string) {
 	perftElap := time.Since(perftBegin)
 	perftSpeed := getSpeedElapsed(total, perftElap)
 
-	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d elapsed=%v speed=%v knodes/s\n", d, nodes, total, perftElap, perftSpeed)
+	fmt.Printf("perft depth=%d nodes=%d total_nodes=%d elapsed=%v speed=%v knodes/s\n",
+		d, nodes, total, perftElap, perftSpeed)
 
 	if d < len(testPerftTable) {
 		expected := testPerftTable[d+1]

@@ -15,7 +15,8 @@ import (
 func relativeMaterial(children *boardPool, b *board, addChildren bool) float32 {
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
-		countChildren := b.generateChildren(children)
+		const pruneRepetition = false
+		countChildren, _ := b.generateChildren(children, pruneRepetition)
 		relative += float32(countChildren) / 100.0
 		children.drop(countChildren)
 	}
@@ -44,7 +45,12 @@ func rootNegamax(nega *negamaxState, b *board, depth int, addChildren bool) (flo
 	}
 
 	children := nega.children
-	countChildren := b.generateChildren(children)
+	const pruneRepetition = true
+	countChildren, repetition := b.generateChildren(children, pruneRepetition)
+
+	if repetition {
+		return 0, nullMove, "draw"
+	}
 
 	if countChildren == 0 {
 		if b.kingInCheck() {
@@ -104,7 +110,11 @@ func negamax(nega *negamaxState, b *board, depth int, addChildren bool) float32 
 		}
 	}
 
-	countChildren := b.generateChildren(children)
+	const pruneRepetition = true
+	countChildren, repetition := b.generateChildren(children, pruneRepetition)
+	if repetition {
+		return 0 // draw
+	}
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin // checkmated

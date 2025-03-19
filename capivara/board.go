@@ -17,6 +17,20 @@ type board struct {
 	lastMove      move
 	zobristValue  zobristKey
 	parent        *board
+	reversible    bool
+}
+
+func (b *board) isRepetition() bool {
+	if !b.reversible {
+		return false
+	}
+	z := b.zobristValue
+	for p := b.parent; p != nil && p.reversible; p = p.parent {
+		if p.zobristValue == z {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *board) disableCastling() {
@@ -112,7 +126,8 @@ func (b *board) generatePassantCapture(attackerLoc, targetLoc location, children
 		attackerSignal := colorToSignal(attackerColor)
 		attackerDstLoc := targetLoc + location(8*attackerSignal)
 
-		c, _ := b.createChild(children, attackerLoc, attackerDstLoc)
+		const reversible = false
+		c, _ := b.createChild(children, attackerLoc, attackerDstLoc, reversible)
 
 		c.delPieceLoc(targetLoc) // captured passant pawn
 
@@ -122,9 +137,12 @@ func (b *board) generatePassantCapture(attackerLoc, targetLoc location, children
 	return 0
 }
 
-func (b *board) generateChildren(children *boardPool) int {
+func (b *board) generateChildren(children *boardPool, pruneRepetition bool) (countChildren int, repetition bool) {
 
-	var countChildren int
+	if pruneRepetition && b.isRepetition() {
+		repetition = true
+		return
+	}
 
 	// generate en passant captures
 
@@ -195,7 +213,7 @@ func (b *board) generateChildren(children *boardPool) int {
 		}
 	}
 
-	return countChildren
+	return
 }
 
 func (b *board) generateCastlingLeft(children *boardPool) int {
@@ -327,7 +345,8 @@ func (b *board) generateChildrenPiece(children *boardPool, loc location, p piece
 					countChildren += b.createPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
 					countChildren += b.createPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
-					countChildren += b.createMoveIfValid(children, loc, location(dstLoc))
+					const reversible = false
+					countChildren += b.createMoveIfValid(children, loc, location(dstLoc), reversible)
 				}
 			}
 		}
@@ -342,7 +361,8 @@ func (b *board) generateChildrenPiece(children *boardPool, loc location, p piece
 			dstP := b.square[dstRowLoc]
 			if secondP == pieceNone && dstP == pieceNone {
 				// free to move
-				countChildren += b.createMoveIfValid(children, loc, location(dstRowLoc))
+				const reversible = false
+				countChildren += b.createMoveIfValid(children, loc, location(dstRowLoc), reversible)
 			}
 		}
 
@@ -359,7 +379,8 @@ func (b *board) generateChildrenPiece(children *boardPool, loc location, p piece
 					countChildren += b.createPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
 					countChildren += b.createPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
-					countChildren += b.createMoveIfValid(children, loc, location(dstLoc))
+					const reversible = false
+					countChildren += b.createMoveIfValid(children, loc, location(dstLoc), reversible)
 				}
 			}
 		}
@@ -377,7 +398,8 @@ func (b *board) generateChildrenPiece(children *boardPool, loc location, p piece
 					countChildren += b.createPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteBishop)
 					countChildren += b.createPromotionIfValid(children, loc, location(dstLoc), piece(color<<3)+whiteKnight)
 				} else {
-					countChildren += b.createMoveIfValid(children, loc, location(dstLoc))
+					const reversible = false
+					countChildren += b.createMoveIfValid(children, loc, location(dstLoc), reversible)
 				}
 			}
 		}
@@ -451,12 +473,14 @@ func (b *board) generateSliding(children *boardPool, src, incRow, incCol locatio
 		dstP := b.square[dstLoc]
 		if dstP == pieceNone {
 			// empty square
-			countChildren += b.createMoveIfValid(children, src, dstLoc)
+			const reversible = true
+			countChildren += b.createMoveIfValid(children, src, dstLoc, reversible)
 			continue
 		}
 		if dstP.color() != b.turn {
 			// capture opponent piece
-			countChildren += b.createMoveIfValid(children, src, dstLoc)
+			const reversible = false
+			countChildren += b.createMoveIfValid(children, src, dstLoc, reversible)
 		}
 		break
 	}
@@ -479,12 +503,14 @@ func (b *board) generateSlidingRook(children *boardPool, src, incRow, incCol loc
 		dstP := b.square[dstLoc]
 		if dstP == pieceNone {
 			// empty square
-			countChildren += b.createMoveIfValidRook(children, src, dstLoc)
+			const reversible = true
+			countChildren += b.createMoveIfValidRook(children, src, dstLoc, reversible)
 			continue
 		}
 		if dstP.color() != b.turn {
 			// capture opponent piece
-			countChildren += b.createMoveIfValidRook(children, src, dstLoc)
+			const reversible = false
+			countChildren += b.createMoveIfValidRook(children, src, dstLoc, reversible)
 		}
 		break
 	}
@@ -505,11 +531,13 @@ func (b *board) generateRelative(children *boardPool, src, incRow, incCol locati
 	dstP := b.square[dstLoc]
 	if dstP == pieceNone {
 		// empty square
-		return b.createMoveIfValid(children, src, dstLoc)
+		const reversible = true
+		return b.createMoveIfValid(children, src, dstLoc, reversible)
 	}
 	if dstP.color() != b.turn {
 		// capture opponent piece
-		return b.createMoveIfValid(children, src, dstLoc)
+		const reversible = false
+		return b.createMoveIfValid(children, src, dstLoc, reversible)
 	}
 
 	// blocked by same color piece
@@ -530,11 +558,13 @@ func (b *board) generateRelativeKing(children *boardPool, src, incRow, incCol lo
 	dstP := b.square[dstLoc]
 	if dstP == pieceNone {
 		// empty square
-		return b.createMoveIfValidKing(children, src, dstLoc)
+		const reversible = true
+		return b.createMoveIfValidKing(children, src, dstLoc, reversible)
 	}
 	if dstP.color() != b.turn {
 		// capture opponent piece
-		return b.createMoveIfValidKing(children, src, dstLoc)
+		const reversible = false
+		return b.createMoveIfValidKing(children, src, dstLoc, reversible)
 	}
 
 	// blocked by same color piece
@@ -542,11 +572,13 @@ func (b *board) generateRelativeKing(children *boardPool, src, incRow, incCol lo
 	return 0
 }
 
-func (b *board) createChild(children *boardPool, src, dst location) (*board, piece) {
+func (b *board) createChild(children *boardPool, src, dst location, reversible bool) (*board, piece) {
 
 	children.push(b)         // copy
 	child := children.last() // get address
 	child.parent = b         // point to parent
+
+	child.reversible = reversible
 
 	p := child.delPieceLoc(src) // take piece from board
 	child.addPieceLoc(dst, p)   // put piece on board
@@ -562,13 +594,13 @@ func (b *board) createChild(children *boardPool, src, dst location) (*board, pie
 	return child, p
 }
 
-func (b *board) createMoveIfValid(children *boardPool, src, dst location) int {
-	child, _ := b.createChild(children, src, dst)
+func (b *board) createMoveIfValid(children *boardPool, src, dst location, reversible bool) int {
+	child, _ := b.createChild(children, src, dst, reversible)
 	return keepIfValid(children, child)
 }
 
-func (b *board) createMoveIfValidKing(children *boardPool, src, dst location) int {
-	child, p := b.createChild(children, src, dst)
+func (b *board) createMoveIfValidKing(children *boardPool, src, dst location, reversible bool) int {
+	child, p := b.createChild(children, src, dst, reversible)
 
 	// king moved, then disable castling
 	child.flags[p.color()] |= lostCastlingLeft | lostCastlingRight
@@ -576,8 +608,9 @@ func (b *board) createMoveIfValidKing(children *boardPool, src, dst location) in
 	return keepIfValid(children, child)
 }
 
-func (b *board) createMoveIfValidRook(children *boardPool, src, dst location) int {
-	child, p := b.createChild(children, src, dst)
+func (b *board) createMoveIfValidRook(children *boardPool, src, dst location, reversible bool) int {
+
+	child, p := b.createChild(children, src, dst, reversible)
 
 	// rook moved, then disable castling
 	firstRow := 7 * location(p.color()) // 0=>0 1=>7
