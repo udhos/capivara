@@ -242,8 +242,7 @@ func cmdPerft(_ []command, game *gameState, tokens []string) {
 	//buf := []board(nil)
 	children := defaultBoardPool
 	children.reset()
-	const pruneRepetition = false
-	countChildren, _ := b.generateChildren(children, pruneRepetition)
+	countChildren := b.generateChildren(children)
 
 	fmt.Printf("perft depth=%d\n", d)
 

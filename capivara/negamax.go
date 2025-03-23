@@ -15,8 +15,7 @@ import (
 func relativeMaterial(children *boardPool, b *board, addChildren bool) float32 {
 	relative := float32(colorToSignal(b.turn)) * b.getMaterialValue()
 	if addChildren {
-		const pruneRepetition = false
-		countChildren, _ := b.generateChildren(children, pruneRepetition)
+		countChildren := b.generateChildren(children)
 		relative += float32(countChildren) / 100.0
 		children.drop(countChildren)
 	}
@@ -40,18 +39,17 @@ func rootNegamax(nega *negamaxState, b *board, depth int, addChildren bool) (flo
 			return relativeMaterial(nega.children, b, addChildren), nullMove, "invalid-depth"
 		}
 	}
+
+	if b.isRepetition() {
+		return 0, nullMove, "draw"
+	}
+
 	if b.otherKingInCheck() {
 		return negamaxMax, nullMove, "checkmate"
 	}
 
 	children := nega.children
-	const pruneRepetition = true
-	countChildren, repetition := b.generateChildren(children, pruneRepetition)
-
-	if repetition {
-		return 0, nullMove, "draw"
-	}
-
+	countChildren := b.generateChildren(children)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin, nullMove, "checkmated" // checkmated
@@ -110,11 +108,11 @@ func negamax(nega *negamaxState, b *board, depth int, addChildren bool) float32 
 		}
 	}
 
-	const pruneRepetition = true
-	countChildren, repetition := b.generateChildren(children, pruneRepetition)
-	if repetition {
+	if b.isRepetition() {
 		return 0 // draw
 	}
+
+	countChildren := b.generateChildren(children)
 	if countChildren == 0 {
 		if b.kingInCheck() {
 			return negamaxMin // checkmated

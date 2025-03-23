@@ -6,8 +6,7 @@ func perft(b board, depth int, buf *boardPool) (int64, int64) {
 	if depth < 1 {
 		return 0, 0
 	}
-	const pruneRepetition = false
-	countChildren, _ := b.generateChildren(buf, pruneRepetition)
+	countChildren := b.generateChildren(buf)
 	//log.Printf("perft +++ depth=%d children=%d pool=%d", depth, countChildren, len(buf.pool))
 	moves := int64(countChildren)
 	if depth == 1 {

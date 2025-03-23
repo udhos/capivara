@@ -137,12 +137,7 @@ func (b *board) generatePassantCapture(attackerLoc, targetLoc location, children
 	return 0
 }
 
-func (b *board) generateChildren(children *boardPool, pruneRepetition bool) (countChildren int, repetition bool) {
-
-	if pruneRepetition && b.isRepetition() {
-		repetition = true
-		return
-	}
+func (b *board) generateChildren(children *boardPool) (countChildren int) {
 
 	// generate en passant captures
 
