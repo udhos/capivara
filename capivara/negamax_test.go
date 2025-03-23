@@ -84,8 +84,8 @@ func TestB4Depth6(t *testing.T) {
 	nega := negamaxState{children: children}
 
 	score, m, _ := rootNegamax(&nega, b, 6, false)
-	if m.String() != "e6e5" {
-		t.Errorf("score: %v move: %s (expected: move: e6e5)", score, m)
+	if m.String() != "e6d5" {
+		t.Errorf("score: %v move: %s (expected: move: e6d5)", score, m)
 	}
 }
 

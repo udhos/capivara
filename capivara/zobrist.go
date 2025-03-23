@@ -20,7 +20,8 @@ const pieceTypes = 14 // 0..13
 var zobristBoard [64][pieceTypes]zobristKey
 var zobristTurn [2]zobristKey
 var zobristCastling [16]zobristKey
-var zobristEnpassantCol [8]zobristKey
+
+// var zobristEnpassantCol [8]zobristKey
 var zobristRand *rand.Rand
 
 func zobristInit() {
@@ -37,9 +38,11 @@ func zobristInit() {
 	for i := 0; i < 16; i++ {
 		zobristCastling[i] = zobristRandKey()
 	}
-	for i := 0; i < 8; i++ {
-		zobristEnpassantCol[i] = zobristRandKey()
-	}
+	/*
+		for i := 0; i < 8; i++ {
+			zobristEnpassantCol[i] = zobristRandKey()
+		}
+	*/
 }
 
 func zobristRandKey() zobristKey {
@@ -51,7 +54,7 @@ func (b *board) zobristInit() {
 
 	b.zobristUpdateCastling()
 
-	b.zobristUpdateEnPassant()
+	//b.zobristUpdateEnPassant()
 
 	for s := 0; s < 64; s++ {
 		p := b.square[s]
@@ -70,9 +73,11 @@ func (b *board) zobristUpdateCastling() {
 	b.zobristValue ^= zobristCastling[0xF&(b.flags[0]|(b.flags[1]<<2))]
 }
 
+/*
 func (b *board) zobristUpdateEnPassant() {
 	b.zobristValue ^= zobristEnpassantCol[7&b.lastMove.dst]
 }
+*/
 
 func (b *board) zobristUpdatePiece(loc int, p piece) {
 
