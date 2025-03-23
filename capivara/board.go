@@ -257,9 +257,9 @@ func (b *board) generateCastlingLeft(children *boardPool) int {
 	child.turn = colorInverse(child.turn) // switch color
 	child.zobristUpdateTurn()
 
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 	child.lastMove = move{src: kingSrc, dst: kingDst} // record last move
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -309,9 +309,9 @@ func (b *board) generateCastlingRight(children *boardPool) int {
 	child.turn = colorInverse(child.turn) // switch color
 	child.zobristUpdateTurn()
 
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 	child.lastMove = move{src: kingSrc, dst: kingDst} // record last move
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 
 	//return b.recordIfValid(children, child)
 	// no need to verify king in check since castling conditions
@@ -587,9 +587,9 @@ func (b *board) createChild(children *boardPool, src, dst location, reversible b
 	child.turn = colorInverse(b.turn) // switch color
 	child.zobristUpdateTurn()
 
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 	child.lastMove = move{src: src, dst: dst} // record move
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 
 	return child, p
 }
@@ -646,9 +646,9 @@ func (b *board) createPromotionIfValid(children *boardPool, src, dst location, p
 	child.turn = colorInverse(child.turn) // switch color
 	child.zobristUpdateTurn()
 
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 	child.lastMove = move{src: src, dst: dst, promotion: p} // record move
-	child.zobristUpdateEnPassant()
+	//child.zobristUpdateEnPassant()
 
 	return keepIfValid(children, child)
 }
