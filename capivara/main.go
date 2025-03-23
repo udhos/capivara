@@ -68,7 +68,8 @@ func (g gameState) show() {
 		fmt.Println("   -------------------------")
 	}
 	fmt.Println("    a  b  c  d  e  f  g  h")
-	fmt.Printf("turn: %s check: %v zobrist: %s\n", b.turn.name(), b.kingInCheck(), b.zobristValue)
+	fmt.Printf("turn: %s check: %v zobrist: %s reversible: %t repetition: %t\n",
+		b.turn.name(), b.kingInCheck(), b.zobristValue, b.reversible, b.isRepetition())
 
 	children := defaultBoardPool
 	children.reset()
