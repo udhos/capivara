@@ -35,9 +35,9 @@ type negamaxState struct {
 
 func rootNegamax(nega *negamaxState, b *board, depth int, addChildren bool) (float32, move, string) {
 	if depth < 1 {
-		if b.lastMove.isQuiescent() {
-			return relativeMaterial(nega.children, b, addChildren), nullMove, "invalid-depth"
-		}
+		//if b.lastMove.isQuiescent() {
+		return relativeMaterial(nega.children, b, addChildren), nullMove, "invalid-depth"
+		//}
 	}
 
 	if b.isRepetition() {
@@ -103,9 +103,9 @@ func negamax(nega *negamaxState, b *board, depth int, addChildren bool) float32 
 	children := nega.children
 
 	if depth < 1 {
-		if b.lastMove.isQuiescent() {
-			return relativeMaterial(children, b, addChildren)
-		}
+		//if b.lastMove.isQuiescent() {
+		return relativeMaterial(children, b, addChildren)
+		//}
 	}
 
 	if b.isRepetition() {
